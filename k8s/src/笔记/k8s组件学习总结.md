@@ -74,7 +74,31 @@ Pod注入信息到容器的方式：
 
    5. 容忍和污点：Taints及Tolerations
 
+      1.**添加污点** 为k8s-node02添加污点，污点程度为`NoSchedule`，`type=calculate`为标签
+      
+      ```text
+      kubectl taint node k8s-node02 type=calculate:NoSchedule
+      ```
+      
+      **2.查看污点**
+      
+      ```text
+       kubectl describe nodes k8s-node02 | grep Taints
+      ```
+      
+      
+      
       https://blog.csdn.net/qq_34857250/article/details/90259693
+   
+   ### kube-scheduler 调度流程
+   
+   1. 过滤（Predicates 预选策略）
+   
+       	过滤阶段会将所有满足 Pod 调度需求的 Node 选出来。
+   
+   2. 打分（Priorities 优选策略）
+   
+      ​	在过滤阶段后调度器会为 Pod 从所有可调度节点中选取一个最合适的 Node。根据当前启用的打分规则，调度器会给每一个可调度节点进行打分
 
 ##  Deployment  
 
@@ -124,12 +148,12 @@ Pod注入信息到容器的方式：
           selector:
             app: nginx-label　　　　　　　　　　　　　#通过标签选择pod
         ```
-
-        
-3. 负载分发策略
-   1. roundRobin 轮询模式
-   2. SessionAffinity  基于客户端IP保持会话模式，如果是相同客户端的请求会被转发到同一个Pod上
-
+    
+    3. Service的访问被分发到了后端的Pod上去 负载分发策略
+    
+    4. roundRobin 轮询模式
+    5. SessionAffinity  基于客户端IP保持会话模式，如果是相同客户端的请求会被转发到同一个Pod上
+    
 4. 外部服务
    1. 先创建一个无Label Slector Service,  无法选则后端Pod
    2. 手动创建与Service同名称的Endpoint
@@ -160,12 +184,43 @@ Pod注入信息到容器的方式：
       ```
 
 8. 最佳实践
-   - 创建完成deployment之后，直接expose生成service，减少手动配置
-
+   
+- 创建完成deployment之后，直接expose生成service，减少手动配置
+   
 9. service 的三种形式
    1. ClusterIP　 **集群IP，仅供k8s内部访问(只能在pod 或node 上访问，无法外部访问)，相当于service 加了1个vip，通过vip 提供访问地址，再转发给各个Pod**
    2. NodePort　　在每个node 节点为相应Pod启动一个对外端口（默认30000起步），映射pod 内部端口。通过任意一个Pod 所在的节点ip+port 就能访问pod ，多个pod 需要在service 前面加一个LB（lvs/proxy）把每个节点的ip+port 加入，才能实现负载均衡,这样每个服务都得添加一次，增加了管理维护成本
    3. Loadblance   云服务厂商提供的，自动添加service 映射对外端口到负载上面，例如阿里云可以通过SLB为service 提供负载均衡。只有云服务厂商的k8s 才有此形式
+   
+   ## 将服务暴露给外部客户端
+
+#### 方式一：NodePort
+
+将服务的类型设置成NodePort每个集群节点都会在节点上打开 一个端口， 对于NodePort服务， 每个集群节点在节点本身（因此得名叫NodePort)上打开一个端口，并将在该端口上接收到的流量重定向到基础服务。该服务仅在内部集群 IP 和端口上才可访间， 但也可通过任意一个节点上的专用端口访问。因为nodeport 是clusterip 的拓展，所以此类型既可以通过clusterip 在集群内部访问也可以通过node-IP：port 在外部访问
+
+#### 方式二：LoadBalance
+
+将服务的类型设置成LoadBalance, NodePort类型的一 种扩展一这使得服务可以通过一个专用的负载均衡器来访问， 这是由Kubernetes中正在运行的云基础设施提供的。 负载均衡器将流量重定向到跨所有节点的节点端口。客户端通过负载均衡器的 IP 连接到服务。
+
+#### 方式三：Ingress
+
+创建一 个Ingress资源， 这是一 个完全不同的机制， 通过一 个IP地址公开多个服务——它运行在 HTTP 层（网络协议第7 层）上， 因此可以提供比工作在第4层的服务更多的功能。
+
+
+
+## service 负载功能实现原理
+
+service 负载均衡实现主要有两种方式
+
+#### iptables(早期)
+
+iptables 是一个工具它通过linux 的netfilter 来进行ip 包的过滤处理。主要通过维护一张规则表，从上到下匹配表中规则，每次变动都不是增量而是全表变动。随着表的增大效率降低。
+
+#### ipvs(k8s version:1.11以后)
+
+ipvs实际上就是lvs 的原理。采用它的轮询策略（w,rr/wrr.lc,wlc），内核级别的，效率高。
+
+
 
 # CoreDns
 
@@ -177,7 +232,10 @@ Pod注入信息到容器的方式：
 
  用于将不同的URL 访问转发到后端不同的Service，解决的是外部客户端访问一组服务的问题。
 
+ngress相当于一个7层的负载均衡器，是Kubernetes对反向代理的一个抽象，它的工作原理类似于Nginx，可以理解成在Ingress里建立诸多映射规则，Ingress Controller通过监听这些配置规则并转化成Nginx的反向代理配置 , 然后对外部提供服务。在这里有两个核心概念：
 
+Ingress：Kubernetes中的一个对象，作用是定义请求如何转发到Service的规则
+Ingress Controller：具体实现反向代理及负载均衡的程序，对Ingress定义的规则进行解析，根据配置的规则来实现请求转发，实现方式有很多，比如Nginx、Haproxy 
 
 ​	1.使用Ingress ,需要创建Ingress controller，backend服务，Ingress 策略。创建Ingress 需要保证后端的服务已经创建完成否则会报错。
 
