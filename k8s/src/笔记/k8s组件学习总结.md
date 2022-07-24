@@ -89,16 +89,37 @@ Pod注入信息到容器的方式：
       
       
       https://blog.csdn.net/qq_34857250/article/details/90259693
-   
+
    ### kube-scheduler 调度流程
+
+   ​	![](images/20201223103750490.png)
+
    
+
    1. 过滤（Predicates 预选策略）
-   
+
        	过滤阶段会将所有满足 Pod 调度需求的 Node 选出来。
-   
+
    2. 打分（Priorities 优选策略）
-   
+
       ​	在过滤阶段后调度器会为 Pod 从所有可调度节点中选取一个最合适的 Node。根据当前启用的打分规则，调度器会给每一个可调度节点进行打分
+
+   1. 用户提交pod请求：用户提交创建Pod的请求，可以通过API Server的REST API ，也可用Kubectl命令行工具，支持Json和Yaml两种格式；
+
+   2. API Server 处理请求：API Server 处理用户请求，存储Pod数据到Etcd；
+
+   3. Schedule调度pod：Schedule通过和 API Server的watch机制，查看到新的pod，按照预定的调度策略将Pod调度到相应的Node节点上；
+
+                        1）过滤主机：调度器用一组规则过滤掉不符合要求的主机，比如Pod指定了所需要的资源，那么就要过滤掉资源不够的主机；
+
+                       2）主机打分：对第一步筛选出的符合要求的主机进行打分，在主机打分阶段，调度器会考虑一些整体优化策略，比如把一个Replication Controller的副本分布到不同的主机上，使用最低负载的主机等；
+
+                       3）选择主机：选择打分最高的主机，进行binding操作，结果存储到Etcd中；
+
+   4. kubelet创建pod:  kubelet根据Schedule调度结果执行Pod创建操作: 调度成功后，会启动container, docker run, scheduler会调用API Server的API在etcd中创建一个bound pod对象，描述在一个工作节点上绑定运行的所有pod信息。运行在每个工作节点上的kubelet也会定期与etcd同步bound pod信息，一旦发现应该在该工作节点上运行的bound pod对象没有更新，则调用Docker API创建并启动pod内的容器。
+
+
+    
 
 # Pod升级回退
 
@@ -129,6 +150,20 @@ Pod如果是通过Deployment 创建的，则升级回退就是要使用Deploymen
       1.不支持查看和管理Daemonset的更新历史记录
 
       2.不能直接通过 使用kubectl rollback来实现，需要提供旧版本的配置文件
+
+   ### StatefuleSet
+
+   - 创建StorageClass，用于StatefulSet自动为各个应用申请PVC
+   - 创建一个Headlesse Service用户维护Mongo DB的集群状态
+   - 创建一个StatefulSet
+
+
+
+
+
+
+
+
 
 ##  service 
 解决的是容器负载的问题。解决的是：
@@ -279,6 +314,14 @@ Ingress Controller：具体实现反向代理及负载均衡的程序，对Ingre
       1. 默认开启https，需要修改INgress annotation，关闭默认转发
       2. 
 
+# 集群安全机制
+
+
+
+
+
+
+
 
 
 # 1. 安装的两种方式
@@ -301,6 +344,10 @@ kubelet --> cri plugin (在 containerd进程中)--> containerd
 区别：
 1、containerd不需要经过dockershim，所以调用链更短，组件更少，更稳定，占用节点资源更少，docker需要经过所以调用链更长；
 2、docker调用cni是“docker-shim”，containerd调用cni是“containerd-cri”。
+
+## 2.1 Docker相关操作
+
+ 	
 
 # 3. 容器 service, Inress, 微服务负载均衡怎么做
 
