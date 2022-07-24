@@ -345,6 +345,14 @@ kubelet --> cri plugin (在 containerd进程中)--> containerd
 1、containerd不需要经过dockershim，所以调用链更短，组件更少，更稳定，占用节点资源更少，docker需要经过所以调用链更长；
 2、docker调用cni是“docker-shim”，containerd调用cni是“containerd-cri”。
 
+| docker | containerd |      |
+| ------ | ---------- | ---- |
+|        |            |      |
+|        |            |      |
+|        |            |      |
+
+containerd 其实就是用来替换Docker的
+
 ## 2.1 Docker相关操作
 
  	
