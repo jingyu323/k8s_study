@@ -127,7 +127,7 @@ kubeadm init \
 
 如果执行失败， 先 kubeadm reset 再次执行    kubeadm init
 
- 
+
 kubeadm init \
   --apiserver-advertise-address=192.168.109.134 \
   --image-repository registry.aliyuncs.com/google_containers \
@@ -136,15 +136,15 @@ kubeadm init \
   --pod-network-cidr=10.244.0.0/16 \
   --ignore-preflight-errors=all \
   --v=5 
- 
 
- 
+
+
 
 
 [ERROR CRI]: container runtime is not running: output: E0712 01:49:47.179156   
  3917 remote_runtime.go:925] "Status from runtime service failed" err="rpc error: code = Unimplemented desc = unknown service runtime.v1alpha2.RuntimeService"
- 
- 
+
+
  解决办法
 [root@master:~] rm -rf /etc/containerd/config.toml
 [root@master:~] systemctl restart containerd
@@ -176,11 +176,11 @@ cd /etc/sysconfig/network-scripts
 ONBOOT=yes
 重启网卡
  nmcli c reload
+
  
- 
- 
+
  原因：未配置endpoints
- 
+
  crictl config runtime-endpoint unix:///run/containerd/containerd.sock
 crictl config image-endpoint unix:///run/containerd/containerd.sock
 
@@ -269,12 +269,12 @@ Alternatively, if you are the root user, you can run:
 
   export KUBECONFIG=/etc/kubernetes/admin.conf
 
-				
-				
+
+​				
 kubeadm join 192.168.109.134:6443 --token voyqtd.dn5fr6wm9oomycfk \
-	--discovery-token-ca-cert-hash sha256:1482bd7c078a97b2dd3c4655542a5809821ce474240f5303aa2789fc1da54947 
-	
-	
+​	--discovery-token-ca-cert-hash sha256:1482bd7c078a97b2dd3c4655542a5809821ce474240f5303aa2789fc1da54947 
+​	
+​	
 #如果超过2小时忘记了令牌，可以这样做
 
 $ kubeadm token create --print-join-command #新令牌
@@ -387,3 +387,6 @@ namespace "mysapce" deleted
 查看不同namespace下的Pod
 
 kubectl get pods --all-namespace
+
+kubectl get pod --all-namespaces -o wide
+如下，查看所有Pod信息，加上-o wide参数，能看到每个Pod的ip和k8s节点等信息，看的多了
