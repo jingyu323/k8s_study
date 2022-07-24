@@ -100,9 +100,35 @@ Pod注入信息到容器的方式：
    
       ​	在过滤阶段后调度器会为 Pod 从所有可调度节点中选取一个最合适的 Node。根据当前启用的打分规则，调度器会给每一个可调度节点进行打分
 
+# Pod升级回退
+
+Pod如果是通过Deployment 创建的，则升级回退就是要使用Deployment的升级回退策略
+
 ##  Deployment  
 
 1. 只能管理无状态应用
+
+   ### Deployment更新方式
+
+   1. kubectl set image
+   2. kubectl edit deployment 直接修改镜像
+
+   ### Deployment更新策略
+
+   1. Recreate
+   2. RollingUpdate：滚动更新，为默认方式
+
+   ### DaemonSet更新策略
+
+   1. OnDelete：新的Daemonset配置创建之后并不立即创建新的Pod，只有在手动删除旧的之后才创建
+
+   2. RollingUpdate：
+
+      注意：
+
+      1.不支持查看和管理Daemonset的更新历史记录
+
+      2.不能直接通过 使用kubectl rollback来实现，需要提供旧版本的配置文件
 
 ##  service 
 解决的是容器负载的问题。解决的是：
@@ -285,3 +311,5 @@ kubelet --> cri plugin (在 containerd进程中)--> containerd
 # 7. 微服务场景应用
 # 8. k8s 容量，多少节点可以提供多少服务能力
 ## 8.2 一个集群能管理多少节点
+
+# 9.RS 和Deployment的区别
