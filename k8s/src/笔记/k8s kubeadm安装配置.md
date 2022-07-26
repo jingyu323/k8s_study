@@ -438,18 +438,64 @@ HTTP Token的认证是用一个很长的特殊编码方式的并且难以被模�
 
 3、HTTP Base：
 常见的客户端账号登录程序，这种认证方式是把“用户名+冒号+密码”用BASE64算法进行编码后的字符串放在HTTP REQUEST中的Header Authorization域里发送给服务端，服务端收到后进行解码，获取用户名及密码，然后进行用户身份的鉴权过程。
- 
 
 
 
 ## APIServer 授权
 
-授权就是授予不同用户不同的访问权限，APIServer 目前支持以下几种授权策略：
 
-- AlwaysDeny：表示拒绝所有的请求，该配置一般用于测试
-- AlwaysAllow：表示接收所有请求，如果集群不需要授权，则可以采取这个策略
-- ABAC：基于属性的访问控制，表示基于配置的授权规则去匹配用户请求，判断是否有权限。Beta 版本
-- [RBAC](https://www.kubernetes.org.cn/1838.html)：基于角色的访问控制，允许管理员通过 api 动态配置授权策略。Beta 版本
+
+对合法用户进行授权（Authorization）并且随后在用户访问时进行鉴权，是权限与安全系统的重要一环。授权就是授予不同用户不同访问权限：
+
+API Server 目前支持以下几种授权策略 (通过 API Server 的启动参数 --authorization-mode 设置)
+
+- AlwaysDeny：标识拒绝所有的请求，一般用于测试
+
+
+- AlwaysAllow：允许接受所有请求，如果集群不需要授权流程，则可以采用该策略
+
+
+- ABAC：（Attribute-Base Access Control）基于属性的访问控制，表示使用用户配置的授权规则对用户请求进行匹配和控制，淘汰
+
+
+- Webbook：通过调用外部 REST 服务对用户进行授权
+
+
+- RBAC：基于角色的访问控制，现行默认规则，常用
+
+
+
+ABAC授权模式：
+为了简化授权的复杂度，对于ABAC模式的授权策略，Kubernetes仅有下面四个基本属性：
+
+用户名（代表一个已经被认证的用户的字符型用户名）
+是否是只读请求（REST的GET操作是只读的）
+被访问的是哪一类资源，例如Pod资源/api/v1/namespaces/default/pods
+被访问对象所属的Namespace
+当API Server启用ABAC模式时，需要指定授权文件的路径和名字（--authorization_policy_file=SOME_FILENAME）,授权策略文件里的每一行都是一个Map类型的JOSN对象，被称为访问策略对象，我们可以通过设置“访问策略对象”中的如下属性来确定具体的授权行为：
+
+user：字符串类型，来源于Token文件或基本认证文件中的用户名字段的值；
+readonly：true时表示该策略允许GET请求通过；
+resource：来自于URL的资源，例如“Pod”；
+namespace：表明该策略允许访问某个namespace的资源；
+eg：
+
+{"user":"alice"}
+{"user":"kubelet","resource":"Pods","readonly":true}
+{"user":"kubelet","resource":"events"}
+{"user":"bob","resource":"Pods","readonly":true,"ns":"myNamespace"}
+RBAC 授权模式
+ RBAC 基于角色的访问控制，在 kubernetes1.5 中引入，现行版本成为默认标准。相对其他访问控制方式，拥有以下优势：
+
+对集群中的资源和非资源拥有完整的覆盖
+整个 RBAC 完全由几个API 对象完成。同其他 API 对象一样，可以用 kubectl 或 API 进行操作。
+可以在运行时进行调整，无需重启 API Server。
+RBAC 的 API 资源对象说明
+ RBAC 引入了 4个新的顶级资源对象：Role、ClusterRole、RoleBinding、ClusterRoleBinding、4种对象类型均可以通过 kubectl 与 API 操作。
+
+Role：普通角色 | ClusterRole：集群角色
+
+Rolebinding：普通角色绑定 ClusterRoleBinding：集群角色绑定 
 
 ## Admission Control 准入控制
 
@@ -457,9 +503,35 @@ HTTP Token的认证是用一个很长的特殊编码方式的并且难以被模�
 
 当前可配置的准入控制器主要有：
 
-- AlwaysAdmit：允许所有请求
-- AlwaysDeny：拒绝所有请求
-- AlwaysPullImages：在启动容器之前总是去下载镜像
-- ServiceAccount：将 secret 信息挂载到 pod 中，比如 service account token，registry key 等
-- ResourceQuota 和 LimitRanger：实现配额控制
-- SecurityContextDeny：禁止创建设置了 Security Context 的 pod
+- 在认证和授权之外，Admission Controller也可以对Kubernetes API Server的访问控制，任何请求在访问API Server时需要经过一系列的验证，任何一环拒绝了请求，则会返回错误。
+  实际上Admission Controller是作为Kubernetes API Serve的一部分，并以插件代码的形式存在，在API Server启动的时候，可以配置需要哪些Admission Controller，以及它们的顺序，如：
+
+  --admission_control=NamespaceLifecycle,NamespaceExists,LimitRanger,SecurityContextDeny,ServiceAccount,ResourceQuota
+
+  Admission Controller支持的插件如下：
+  AlwaysAdmit：允许所有请求；
+  AlwaysPullmages：在启动容器之前总去下载镜像，相当于在每个容器的配置项imagePullPolicy=Always
+  AlwaysDeny：禁止所有请求，一般用于测试；
+  DenyExecOnPrivileged：它会拦截所有想在Privileged Container上执行命令的请求，如果你的集群支持Privileged Container，你又希望限制用户在这些Privileged Container上执行命令，强烈推荐你使用它；
+  Service Account：这个plug-in将ServiceAccount实现了自动化，默认启用，如果你想使用ServiceAccount对象，那么强烈你推荐使用它；
+  SecurityContextDeny：这个插件将使用SecurityContext的Pod中的定义全部失效。SecurityContext在Container中定义了操作系统级别的安全设定（uid，gid，capabilityes，SELinux等）
+  ResourceQuota：用于配额管理目的，作用于namespace上，它会观察所有请求，确保在namespace上的配额不会超标。推荐在Admission Control参数列表中这个插件排最后一个；
+  LimitRanger：用于配额管理，作用于Pod与Container，确保Pod与Container上的配额不会超标；
+  NamespaceExists（已过时）：对所有请求校验namespace是否已存在，如果不存在则拒绝请求，已合并至NamespaceLifecycle。
+   NamespaceAutoProvision（已过时）：对所有请求校验namespace，如果不存在则自动创建该namespace，推荐使用NamespaceLifecycle。
+  NamespaceLifecycle：如果尝试在一个不存在的namespace中创建资源对象，则该创建请求将被拒绝。当删除一个namespace时，系统将会删除该namespace中所有对象，保存Pod，Service等。
+  在API Server上设置--admission-control参数，即可定制我们需要的准入控制链，如果启用多种准入控制选项，则建议的设置如下：
+
+  --admission-control=NamespaceLifecycle，LimitRanger，SecurityContextDeny，ServiceAccount，ResourceQuota
+  下面着重介绍三个准入控制器：
+
+  SecurityContextDeny
+  Security Context时运用于容器的操作系统安全设置（uid、gid、capabilities、SELinux role等），Admission Control的SecurityContextDeny插件的作用是，禁止创建设置了Security Context的Pod，例如包含以下配置项的Pod：
+
+  spec.containers.securityContext.seLinuxOptions
+  spec.containers.securityContext.runAsUser
+  ResourceQuota
+  ResourceQuota不仅能够限制某个Namespace中创建资源的数量，而且能够限制某个namespace中被Pod所请求的资源总量。该准入控制器和资源对象ResourceQuota一起实现了资源的配额管理；
+
+  LimitRanger
+  准入控制器LimitRanger的作用类似于上面的ResourceQuota控制器，这对Namespace资源的每个个体的资源配额。该插件和资源对象LimitRange一起实现资源限制管理 
