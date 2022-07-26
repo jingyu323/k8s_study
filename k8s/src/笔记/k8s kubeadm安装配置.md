@@ -390,3 +390,38 @@ kubectl get pods --all-namespace
 
 kubectl get pod --all-namespaces -o wide
 如下，查看所有Pod信息，加上-o wide参数，能看到每个Pod的ip和k8s节点等信息，看的多了
+
+
+
+# Kubernetes 的安全机制 APIServer 认证、授权、准入控制
+
+ kubenetes 默认在两个端口提供服务：一个是基于 https 安全端口 6443，另一个是基于 http 的非安全端口 8080。其中非安全端口 8080 限制只能本机访问，即绑定的是 localhost。
+
+对于安全端口来讲，一个 API 请求到达 6443 端口后，主要经过以下几步处理：
+
+- 认证
+- 授权
+- 准入控制
+- 实际的 API 请求
+
+## APIServer 授权
+
+授权就是授予不同用户不同的访问权限，APIServer 目前支持以下几种授权策略：
+
+- AlwaysDeny：表示拒绝所有的请求，该配置一般用于测试
+- AlwaysAllow：表示接收所有请求，如果集群不需要授权，则可以采取这个策略
+- ABAC：基于属性的访问控制，表示基于配置的授权规则去匹配用户请求，判断是否有权限。Beta 版本
+- [RBAC](https://www.kubernetes.org.cn/1838.html)：基于角色的访问控制，允许管理员通过 api 动态配置授权策略。Beta 版本
+
+## Admission Control 准入控制
+
+通过了前面的认证和授权之后，还需要经过准入控制处理通过之后，apiserver 才会处理这个请求。Admission Control 有一个准入控制列表，我们可以通过命令行设置选择执行哪几个准入控制器。只有所有的准入控制器都检查通过之后，apiserver 才执行该请求，否则返回拒绝。
+
+当前可配置的准入控制器主要有：
+
+- AlwaysAdmit：允许所有请求
+- AlwaysDeny：拒绝所有请求
+- AlwaysPullImages：在启动容器之前总是去下载镜像
+- ServiceAccount：将 secret 信息挂载到 pod 中，比如 service account token，registry key 等
+- ResourceQuota 和 LimitRanger：实现配额控制
+- SecurityContextDeny：禁止创建设置了 Security Context 的 pod
