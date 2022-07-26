@@ -535,3 +535,36 @@ Rolebinding：普通角色绑定 ClusterRoleBinding：集群角色绑定
 
   LimitRanger
   准入控制器LimitRanger的作用类似于上面的ResourceQuota控制器，这对Namespace资源的每个个体的资源配额。该插件和资源对象LimitRange一起实现资源限制管理 
+
+  # Secrets
+
+  Kubernetes提供了Secret来处理敏感信息，目前Secret的类型有3种：
+
+  Opaque(default): 任意字符串
+  kubernetes.io/service-account-token: 作用于ServiceAccount
+  kubernetes.io/dockercfg: 作用于Docker registry
+
+#    ServiceAccount
+
+什么是service account? 顾名思义，相对于user account（比如：kubectl访问APIServer时用的就是user account），service account就是Pod中的Process用于访问Kubernetes API的account，它为Pod中的Process提供了一种身份标识。相比于user account的全局性权限，service account更适合一些轻量级的task，更聚焦于授权给某些特定Pod中的Process所使用。
+
+ 
+
+Service Account概念的引入是基于这样的使用场景：运行在pod里的进程需要调用Kubernetes API以及非Kubernetes API的其它服务（如image repository/被mount到pod上的NFS volumes中的file等）。我们使用Service Account来为pod提供id。
+Service Account和User account可能会带来一定程度上的混淆，User account可以认为是与Kubernetes交互的个体，通常可以认为是human, 目前并不作为一个代码中的类型单独出现，比如第一节中配置的用户，它们的区别如下。
+
+Kubernetes有User Account和Service Account两套独立的账号系统：
+1.User Account是给人用的，Service Account 是给Pod 里的进程使用的，面向的对象不同。
+2.User Account是全局性的，即跨namespace使用。 Service Account 是属于某个具体的Namespace，即仅在所属的namespace下使用。
+3.User Account是与后端的用户数据库同步的。创建一个新的user account通常需要较高的特权并且需要经过比较复杂的business process（即对于集群的访问权限的创建），而service account则不然。
+
+ 
+
+如果kubernetes开启了ServiceAccount（–admission_control=…,ServiceAccount,… ）那么会在每个namespace下面都会创建一个默认的default的ServiceAccount。即service account作为一种resource存在于Kubernetes cluster中，我们可以通过kubectl获取
+
+1、当前cluster中的service acount列表：
+
+kubectl get serviceaccount --all-namespaces
+
+
+
