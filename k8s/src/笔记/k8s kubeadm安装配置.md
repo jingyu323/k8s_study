@@ -92,7 +92,6 @@ yum install kubelet kubeadm kubectl -y
   "exec-opts": ["native.cgroupdriver=systemd"]
 }
 
-
 cat > /etc/docker/daemon.json << EOF
 {
   "exec-opts": ["native.cgroupdriver=systemd"]
@@ -395,14 +394,25 @@ kubectl get pod --all-namespaces -o wide
 
 # Kubernetes 的安全机制 APIServer 认证、授权、准入控制
 
- kubenetes 默认在两个端口提供服务：一个是基于 https 安全端口 6443，另一个是基于 http 的非安全端口 8080。其中非安全端口 8080 限制只能本机访问，即绑定的是 localhost。
+Kubernetes安全
+安全永远是一个重大的话题，特别是云计算平台，更需要设计出一套完善的安全方案，以应对复杂的场景。 Kubernetes主要使用Docker作为应用承载环境，Kubernetes首先设计出一套API和敏感信息处理方案，当然也基于Docker提供容器安全控制。以下是Kubernetes的安全设计原则：
 
-对于安全端口来讲，一个 API 请求到达 6443 端口后，主要经过以下几步处理：
+1. 保证容器与其运行的宿主机之间有明确的隔离
+2. 限制容器对基础设施或者其它容器造成不良影响的能力
+3. 最小特权原则——限定每个组件只被赋予了执行操作所必需的最小特权，由此确保可能产生的损失达到最小
+4. 允许系统用户明确区别于管理员
+5. 允许赋予管理权限给用户
+6. 允许应用能够从公开数据中提取敏感信息（keys, certs, passwords）
+ 
 
-- 认证
-- 授权
-- 准入控制
-- 实际的 API 请求
+kubenetes 默认在两个端口提供服务：一个是基于 https 安全端口 6443，另一个是基于 http 的非安全端口 8080。其中非安全端口 8080 限制只能本机访问，即绑定的是 localhost。
+
+**对于安全端口来讲，一个 API 请求到达 6443 端口后，主要经过以下几步处理：**
+
+- **认证**
+- **授权**
+- **准入控制**
+- **实际的 API 请求**
 
 ## APIServer 授权
 
