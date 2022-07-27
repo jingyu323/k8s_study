@@ -529,26 +529,26 @@ kubectl replace --force -f recommended.yaml
 
 替换为新的IP
 
-newIP=
+newIP=192.168.93.53
 
-oldIP=
+oldIP=192.168.99.176
 
-find . -type f | xargs sed -i "s/192.168.99.115/192.168.99.176/"
+find . -type f | xargs sed -i "s/$oldIP/$newIP/"
 
 查看修改结果
 
-find . -type f | xargs grep 192.168.99.176
+find . -type f | xargs grep $newIP
 
 二，生成新的config文件
 
 /etc/kubernetes# mv admin.conf admin.conf.bak
-/etc/kubernetes# kubeadm init phase kubeconfig admin --apiserver-advertise-address <新的ip>
+/etc/kubernetes# kubeadm init phase kubeconfig admin --apiserver-advertise-address $newIP
 三，删除老证书，生成新证书
 
 /etc/kubernetes# cd pki
  /etc/kubernetes/pki# mv apiserver.key apiserver.key.bak
 /etc/kubernetes/pki# mv apiserver.crt apiserver.crt.bak
- /etc/kubernetes/pki# kubeadm init phase certs apiserver  --apiserver-advertise-address <新的ip>
+ /etc/kubernetes/pki# kubeadm init phase certs apiserver  --apiserver-advertise-address  $newIP
 四，重启docker
 
 /etc/kubernetes# cd ..
@@ -560,5 +560,69 @@ find . -type f | xargs grep 192.168.99.176
 
 六，将kubeconfig默认配置文件替换为admin.conf，这样就可以直接使用kubectl get nodes
 
-/etc/kubernetes# mv admin.conf ~/.kube/config
+/etc/kubernetes# cp -f admin.conf  ~/.kube/config
+
+ 
+
+# k8s删除Terminating状态的命名空间
+
+查看[命名空间](https://so.csdn.net/so/search?q=命名空间&spm=1001.2101.3001.7020)
+
+```
+# kubectl  get ns 
+NAME                   STATUS        AGE
+default                Active        31h
+kube-node-lease        Active        31h
+kube-public            Active        31h
+kube-system            Active        31h
+kubernetes-dashboard   Terminating   3h16m
+```
+
+**解决方法**
+查看kubesphere-system的namespace描述
+
+```
+kubectl get ns  kubernetes-dashboard   -o json > kubernetes-dashboard.json
+```
+
+编辑json文件，删除spec字段的内存，因为k8s集群时需要认证的。
+
+vi kubernetes-dashboard.json
+将
+
+"spec": {
+        "finalizers": [
+            "kubernetes"
+        ]
+    },
+更改为：
+
+"spec": {
+    
+  },
+
+
+
+新开一个窗口运行kubectl proxy跑一个API代理在本地的8081端口
+
+```
+# kubectl proxy --port=8081
+Starting to serve on 127.0.0.1:8081
+```
+
+```
+curl -k -H "Content-Type:application/json" -X PUT --data-binary @kubernetes-dashboard.json http://127.0.0.1:8081/api/v1/namespaces/kubernetes-dashboard/finalize 
+注意：命令中的kubernetes-dashboard就是命名空间。
+
+再次查看命名空间
+
+# kubectl get ns
+	NAME              STATUS   AGE
+default           Active   31h
+kube-node-lease   Active   31h
+kube-public       Active   31h
+kube-system       Active   31h
+```
+
+
 

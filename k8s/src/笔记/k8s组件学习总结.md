@@ -502,11 +502,16 @@ kubectl get serviceaccount --all-namespaces
 
 
 
+# ETCD
 
 
 
+# Namespace
 
+命名空间主要有两个方面的作用:
 
+**资源隔离：**可为不同的团队/用户（或项目）提供虚拟的集群空间，共享同一个Kubernetes集群的资源。比如可以为团队A创建一个Namespace ns-a，团队A的项目都部署运行在 ns-a 中，团队B创建另一个Namespace ns-b，其项目都部署运行在 ns-b 中，或者为开发、测试、生产环境创建不同的Namespace，以做到彼此之间相互隔离，互不影响。我们可以使用 ResourceQuota 与 Resource LimitRange 来指定与限制 各个namesapce的资源分配与使用
+**权限控制：**可以指定某个namespace哪些用户可以访问，哪些用户不能访问 
 
 # 1. 安装的两种方式
 
