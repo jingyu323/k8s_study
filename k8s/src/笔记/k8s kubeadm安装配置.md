@@ -520,7 +520,18 @@ kubectl replace --force -f recommended.yaml
 
 # k8s的更换ip
 
+
+
+切换到/etc/kubernetes/manifests， 将etcd.yaml kube-apiserver.yaml里的ip地址替换为新的ip
+
+/etc/kubernetes/manifests # vim etcd.yaml
+/etc/kubernetes/manifests # vim kube-apiserver.yaml
+
 替换为新的IP
+
+newIP=
+
+oldIP=
 
 find . -type f | xargs sed -i "s/192.168.99.115/192.168.99.176/"
 
@@ -528,10 +539,6 @@ find . -type f | xargs sed -i "s/192.168.99.115/192.168.99.176/"
 
 find . -type f | xargs grep 192.168.99.176
 
-切换到/etc/kubernetes/manifests， 将etcd.yaml kube-apiserver.yaml里的ip地址替换为新的ip
-
-/etc/kubernetes/manifests # vim etcd.yaml
-/etc/kubernetes/manifests # vim kube-apiserver.yaml
 二，生成新的config文件
 
 /etc/kubernetes# mv admin.conf admin.conf.bak
