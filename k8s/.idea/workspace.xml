@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
   <component name="ChangeListManager">
-    <list default="true" id="6a1ab520-e234-40bf-88f9-10bbd3cec743" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/src/笔记/安装.md" beforeDir="false" afterPath="$PROJECT_DIR$/src/笔记/安装.md" afterDir="false" />
-    </list>
+    <list default="true" id="6a1ab520-e234-40bf-88f9-10bbd3cec743" name="Default Changelist" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -23,7 +24,9 @@
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
   </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="SvnConfiguration">
     <configuration />
   </component>
@@ -37,6 +40,7 @@
       <workItem from="1658413347194" duration="2241000" />
       <workItem from="1658547276705" duration="1687000" />
       <workItem from="1658561537203" duration="3428000" />
+      <workItem from="1658885350093" duration="1341000" />
     </task>
     <task id="LOCAL-00001" summary="初始安装笔记">
       <created>1658413407917</created>
@@ -84,16 +88,21 @@
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
-    <option name="version" value="2" />
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="初始安装笔记" />
     <option name="LAST_COMMIT_MESSAGE" value="初始安装笔记" />
-  </component>
-  <component name="WindowStateProjectService">
-    <state x="519" y="104" key="CommitChangelistDialog2" timestamp="1658564839682">
-      <screen x="0" y="0" width="1842" height="1080" />
-    </state>
-    <state x="519" y="104" key="CommitChangelistDialog2/0.0.1842.1080@0.0.1842.1080" timestamp="1658564839682" />
   </component>
 </project>
