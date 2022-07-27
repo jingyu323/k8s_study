@@ -4,6 +4,10 @@
 
 http://blog.itpub.net/70003733/viewspace-2888774/
 
+# 二进制安装Kubernetes（k8s） v1.24.0 IPv4/IPv6双栈 （三主俩从）
+
+https://blog.csdn.net/qq_33921750/article/details/124958403
+
 
 
 hostnamectl set-hostname master
