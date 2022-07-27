@@ -496,10 +496,6 @@ kubectl get serviceaccount --all-namespaces
 
 
 
-# istio
-
-
-
 
 
 # ETCD

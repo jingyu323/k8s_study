@@ -504,7 +504,140 @@ kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.6.0/a
 kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.6.0/aio/deploy/recommended.yaml
 ```
 
+查看服务：
 
+```
+kubectl get po,svc -n kubernetes-dashboard
+NAME                                TYPE        CLUSTER-IP    EXTERNAL-IP   PORT(S)         AGE
+service/dashboard-metrics-scraper   ClusterIP   10.1.26.91    <none>        8000/TCP        99s
+service/kubernetes-dashboard        NodePort    10.1.240.79   <none>        443:30001/TCP   99s
+部署成功
+
+
+```
+
+kubernetes-dashbaord 安装完成后，kubernetes-dashbaord 默认 service 的类型为 ClusterIP，为了能从外部访问控制面板，需要修改为 NodePort 类型
+
+```
+kubectl edit services -n kubernetes-dashboard kubernetes-dashboard
+# Please edit the object below. Lines beginning with a '#' will be ignored,
+# and an empty file will abort the edit. If an error occurs while saving this file will be
+# reopened with the relevant failures.
+#
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"v1","kind":"Service","metadata":{"annotations":{},"labels":{"k8s-app":"kubernetes-dashboard"},"name":"kubernetes-dashboard","namespace":"kubernetes-dashboard"},"spec":{"ports":[{"port":443,"targetPort":8443}],"selector":{"k8s-app":"kubernetes-dashboard"}}}
+  creationTimestamp: "2021-04-11T10:18:54Z"
+  labels:
+    k8s-app: kubernetes-dashboard
+  name: kubernetes-dashboard
+  namespace: kubernetes-dashboard
+  resourceVersion: "33097"
+  selfLink: /api/v1/namespaces/kubernetes-dashboard/services/kubernetes-dashboard
+  uid: 38jsd1sd-4045-448b-b70f-mia218mda8s
+spec:
+  clusterIP: 10.102.198.114
+  ports:
+  - port: 443
+    protocol: TCP
+    targetPort: 8443
+    # 添加固定端口
+    nodePort: 30000
+  selector:
+    k8s-app: kubernetes-dashboard
+  sessionAffinity: None
+  # 修改
+  type: NodePort
+status:
+  loadBalancer: {}
+```
+
+想要访问dashboard服务，就要有访问权限，创建kubernetes-dashboard管理员角色，以下两种方式创建用户都是可以的
+
+```
+vim dashboard-svc-account.yaml
+ 
+# 结果
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: dashboard-admin
+  namespace: kubernetes-dashboard
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: dashboard-admin
+subjects:
+  - kind: ServiceAccount
+    name: dashboard-admin
+    namespace: kubernetes-dashboard
+roleRef:
+  kind: ClusterRole
+  name: cluster-admin
+  apiGroup: rbac.authorization.k8s.io
+
+
+ 
+# 执行
+kubectl apply -f dashboard-svc-account.yaml
+```
+
+```
+vim create-admin.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: admin-user
+  namespace: kubernetes-dashboard
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: admin-user
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+- kind: ServiceAccount
+  name: admin-user
+  namespace: kubernetes-dashboard
+  
+  
+ kubectl apply -f  create-admin.yaml
+```
+
+
+
+查看Pod，没有找到相关的Pod
+
+```
+kubectl  get pod -A -o wide
+NAMESPACE     NAME                                       READY   STATUS    RESTARTS       AGE   IP               NODE     NOMINATED NODE   READINESS GATES
+kube-system   calico-kube-controllers-555bc4b957-9q49b   1/1     Running   0              30h   10.244.166.131   node1    <none>           <none>
+kube-system   calico-node-cxzq5                          1/1     Running   1 (30h ago)    31h   192.168.99.116   node2    <none>           <none>
+kube-system   calico-node-kzbn9                          1/1     Running   0              31h   192.168.99.115   master   <none>           <none>
+kube-system   calico-node-tkgmn                          1/1     Running   1 (31h ago)    31h   192.168.99.153   node1    <none>           <none>
+kube-system   coredns-74586cf9b6-8n8qx                   1/1     Running   0              30h   10.244.219.65    master   <none>           <none>
+kube-system   coredns-74586cf9b6-mbhpz                   1/1     Running   0              30h   10.244.166.130   node1    <none>           <none>
+kube-system   etcd-master                                1/1     Running   1              31h   192.168.99.115   master   <none>           <none>
+kube-system   kube-apiserver-master                      1/1     Running   1              31h   192.168.99.115   master   <none>           <none>
+kube-system   kube-controller-manager-master             1/1     Running   13 (26h ago)   31h   192.168.99.115   master   <none>           <none>
+kube-system   kube-proxy-4pq9b                           1/1     Running   1 (30h ago)    31h   192.168.99.116   node2    <none>           <none>
+kube-system   kube-proxy-8lcjq                           1/1     Running   0              31h   192.168.99.115   master   <none>           <none>
+kube-system   kube-proxy-j6sch                           1/1     Running   1 (31h ago)    31h   192.168.99.153   node1    <none>           <none>
+kube-system   kube-scheduler-master                      1/1     Running   12 (26h ago)   31h   192.168.99.115   master   <none>           <none>
+
+```
+
+
+
+# istio
 
 查看Pod 状态
 
