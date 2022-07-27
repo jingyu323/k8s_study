@@ -635,6 +635,83 @@ kube-system   kube-scheduler-master                      1/1     Running   12 (2
 
 ```
 
+获取token
+
+```
+kubectl -n kubernetes-dashboard create token admin-user
+
+eyJhbGciOiJSUzI1NiIsImtpZCI6IktaMm9Gd1h5azJReGNnbWt3dGhHZUNTaXBqM2VmVW1IcEExaUVKMG5MQ28ifQ.eyJhdWQiOlsiaHR0cHM6Ly9rdWJlcm5ldGVzLmRlZmF1bHQuc3ZjLmNsdXN0ZXIubG9jYWwiXSwiZXhwIjoxNjU4OTM2MTU1LCJpYXQiOjE2NTg5MzI1NTUsImlzcyI6Imh0dHBzOi8va3ViZXJuZXRlcy5kZWZhdWx0LnN2Yy5jbHVzdGVyLmxvY2FsIiwia3ViZXJuZXRlcy5pbyI6eyJuYW1lc3BhY2UiOiJrdWJlcm5ldGVzLWRhc2hib2FyZCIsInNlcnZpY2VhY2NvdW50Ijp7Im5hbWUiOiJhZG1pbi11c2VyIiwidWlkIjoiMGJiODc2MzAtYWRiZS00YzU0LTkwN2YtZjYxM2E4ZjhiODBhIn19LCJuYmYiOjE2NTg5MzI1NTUsInN1YiI6InN5c3RlbTpzZXJ2aWNlYWNjb3VudDprdWJlcm5ldGVzLWRhc2hib2FyZDphZG1pbi11c2VyIn0.ncrjzGsZhPZhqg7zJ4IEH4CkTOhqDcUebzmRl7URLn05t7c_tXDreaBzczeGqYO8pQfUJ3oCsl_7WUdzlBDNNBmZBKI1JU356DNVBG8o7_thqfY-RtUf6BC76vuN3LV_l6-tzk-haxblOd5YnPqdwF_83ky62A3YGFN6eVLgyUQFFFQKWtde5wXXsxatLPeJdICF5U28n6Uu82_aW2tnjwQ3TsWjfunlFxSXJ4uxx2lotfzAGhvU4rSzUCwakFbeqDiLOTkmw374iCdN7d5MVcYWiAd_jcpMcxBLdkzUxlWGSUZv9oHI3IOSK-OdK2fIF1KBXfUQWyCMh4G0GMzgqw
+```
+
+删除用户
+
+```
+kubectl -n kubernetes-dashboard delete serviceaccount admin-user
+kubectl -n kubernetes-dashboard delete clusterrolebinding admin-user
+```
+
+kubectl get secret -n kubernetes-dashboard
+
+# k8s删除Terminating状态的命名空间
+
+查看[命名空间](https://so.csdn.net/so/search?q=命名空间&spm=1001.2101.3001.7020)
+
+```
+# kubectl  get ns 
+NAME                   STATUS        AGE
+default                Active        31h
+kube-node-lease        Active        31h
+kube-public            Active        31h
+kube-system            Active        31h
+kubernetes-dashboard   Terminating   3h16m
+```
+
+**解决方法**
+查看kubesphere-system的namespace描述
+
+```
+kubectl get ns  kubernetes-dashboard   -o json > kubernetes-dashboard.json
+```
+
+编辑json文件，删除spec字段的内存，因为k8s集群时需要认证的。
+
+vi kubernetes-dashboard.json
+将
+
+"spec": {
+        "finalizers": [
+            "kubernetes"
+        ]
+    },
+更改为：
+
+"spec": {
+    
+  },
+
+
+
+新开一个窗口运行kubectl proxy跑一个API代理在本地的8081端口
+
+```
+# kubectl proxy --port=8081
+Starting to serve on 127.0.0.1:8081
+```
+
+```
+curl -k -H "Content-Type:application/json" -X PUT --data-binary @kubernetes-dashboard.json http://127.0.0.1:8081/api/v1/namespaces/kubernetes-dashboard/finalize 
+注意：命令中的kubernetes-dashboard就是命名空间。
+
+再次查看命名空间
+
+# kubectl get ns
+	NAME              STATUS   AGE
+default           Active   31h
+kube-node-lease   Active   31h
+kube-public       Active   31h
+kube-system       Active   31h
+```
+
 
 
 # istio
@@ -696,66 +773,6 @@ find . -type f | xargs grep $newIP
 /etc/kubernetes# cp -f admin.conf  ~/.kube/config
 
  
-
-# k8s删除Terminating状态的命名空间
-
-查看[命名空间](https://so.csdn.net/so/search?q=命名空间&spm=1001.2101.3001.7020)
-
-```
-# kubectl  get ns 
-NAME                   STATUS        AGE
-default                Active        31h
-kube-node-lease        Active        31h
-kube-public            Active        31h
-kube-system            Active        31h
-kubernetes-dashboard   Terminating   3h16m
-```
-
-**解决方法**
-查看kubesphere-system的namespace描述
-
-```
-kubectl get ns  kubernetes-dashboard   -o json > kubernetes-dashboard.json
-```
-
-编辑json文件，删除spec字段的内存，因为k8s集群时需要认证的。
-
-vi kubernetes-dashboard.json
-将
-
-"spec": {
-        "finalizers": [
-            "kubernetes"
-        ]
-    },
-更改为：
-
-"spec": {
-    
-  },
-
-
-
-新开一个窗口运行kubectl proxy跑一个API代理在本地的8081端口
-
-```
-# kubectl proxy --port=8081
-Starting to serve on 127.0.0.1:8081
-```
-
-```
-curl -k -H "Content-Type:application/json" -X PUT --data-binary @kubernetes-dashboard.json http://127.0.0.1:8081/api/v1/namespaces/kubernetes-dashboard/finalize 
-注意：命令中的kubernetes-dashboard就是命名空间。
-
-再次查看命名空间
-
-# kubectl get ns
-	NAME              STATUS   AGE
-default           Active   31h
-kube-node-lease   Active   31h
-kube-public       Active   31h
-kube-system       Active   31h
-```
 
 
 
