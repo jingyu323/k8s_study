@@ -1,5 +1,11 @@
 
 
+安装详细步骤
+
+http://blog.itpub.net/70003733/viewspace-2888774/
+
+
+
 hostnamectl set-hostname master
 hostnamectl set-hostname node1
 hostnamectl set-hostname node2
@@ -9,14 +15,16 @@ cat  >  /etc/hosts << EOF
 
 127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
 ::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
-192.168.109.134 master
-192.168.109.135 node1
-192.168.109.133 node2
+192.168.99.115 master
+192.168.99.153  node1
+192.168.99.116 node2
 
 EOF
 
 
 cat  /etc/hosts
+
+
 
 
 
@@ -26,10 +34,48 @@ systemctl enable chronyd
 systemctl stop firewalld
 systemctl disable firewalld
 
+yum makecache      //更新yum软件包索引
+
+yum -y install yum-utils
+
+
+
+安装containerd
+
+浏览器打开链接https://download.docker.com/linux/centos/7/x86_64/stable/Packages/
+查看containerd.io最新版本（一般是最后一个）
+
+wget https://download.docker.com/linux/centos/7/x86_64/stable/Packages/containerd.io-1.6.6-3.1.el7.x86_64.rpm
+
+yum install  containerd.io-1.6.6-3.1.el7.x86_64.rpm
+
+
+
+## 配置containerd
+
+cat > /etc/yum.repos.d/k8s.repo <<EOF
+[k8s]
+ name=k8s
+ baseurl=https://mirrors.tuna.tsinghua.edu.cn/kubernetes/yum/repos/kubernetes-el7-x86_64/
+ gpgcheck=0
+ enabled=1
+
+[kubernetes]
+name=Kubernetes
+baseurl=https://mirrors.aliyun.com/kubernetes/yum/repos/kubernetes-el7-x86_64/
+enabled=1
+gpgcheck=1
+repo_gpgcheck=1
+gpgkey=https://mirrors.aliyun.com/kubernetes/ yum/doc/yum-key.gpg
+       https://mirrors.aliyun.com/kubernetes/yum/doc/rpm-package-key.gpg
+
+EOF
+
+
+
 # 2 关闭iptables服务
 systemctl stop iptables
 systemctl disable iptables
-
 
 
 
@@ -53,12 +99,20 @@ EOF
 
 
 
-yum -y install docker-ce --allowerasing
+
 
 
 # 设置开机启动
 $ systemctl enable docker
 # 启动docker
+### 替换阿里云`docker`仓库
+
+yum-config-manager --add-repo http://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
+
+### 安装`docker`引擎
+
+yum install --allowerasing docker-ce -y
+
 $ systemctl start docker
 
 cat > /etc/yum.repos.d/kubernetes.repo << EOF
@@ -71,16 +125,13 @@ repo_gpgcheck=0
 gpgkey=https://mirrors.aliyun.com/kubernetes/yum/doc/yum-key.gpg https://mirrors.aliyun.com/kubernetes/yum/doc/rpm-package-key.gpg
 EOF
 
-
 查看版本，最新版
 yum list kubeadm --showduplicates
-
 
 yum list | grep kube	
 指定版本安装
 
-yum install -y  kubelet-1.24.3-0 kubeadm-1.24.3-0 kubectl-1.24.3-0
-
+yum install -y  kubelet-1.24.1-0 kubeadm-1.24.1-0 kubectl-1.24.1-0
 
 安装最新版本
 yum install kubelet kubeadm kubectl -y
@@ -92,7 +143,6 @@ yum install kubelet kubeadm kubectl -y
   "exec-opts": ["native.cgroupdriver=systemd"]
 }
 
-
 cat > /etc/docker/daemon.json << EOF
 {
   "exec-opts": ["native.cgroupdriver=systemd"]
@@ -102,8 +152,18 @@ EOF
 重启docker
  systemctl restart docker
 
+systemctl enable docker.service 
 
+systemctl enable kubelet.service 
 
+安装 kubelet kubeadm kubectl 之后再配置crictl ， 安装的同时会安装依赖cri-tools等这样才能配置
+
+crictl config runtime-endpoint unix:///run/containerd/containerd.sock
+
+ 原因：未配置endpoints
+
+ crictl config runtime-endpoint unix:///run/containerd/containerd.sock
+crictl config image-endpoint unix:///run/containerd/containerd.sock
 
 mkdir -p /etc/docker
 echo -e "{
@@ -117,9 +177,9 @@ cd /etc/yum.repos.d/ && wget -c https://mirrors.tuna.tsinghua.edu.cn/docker-ce/l
 
 
 kubeadm init \
---apiserver-advertise-address=192.168.109.130 \
+--apiserver-advertise-address=192.168.99.115 \
 --image-repository registry.aliyuncs.com/google_containers \
---kubernetes-version v1.24.3  \
+--kubernetes-version v1.24.1  \
 --service-cidr=10.1.0.0/16 \
 --pod-network-cidr=10.244.0.0/16 \
 
@@ -127,11 +187,10 @@ kubeadm init \
 
 如果执行失败， 先 kubeadm reset 再次执行    kubeadm init
 
-
 kubeadm init \
-  --apiserver-advertise-address=192.168.109.134 \
+  --apiserver-advertise-address=192.168.99.115 \
   --image-repository registry.aliyuncs.com/google_containers \
-  --kubernetes-version v1.24.3 \
+  --kubernetes-version v1.24.1 \
   --service-cidr=10.1.0.0/16 \
   --pod-network-cidr=10.244.0.0/16 \
   --ignore-preflight-errors=all \
@@ -144,15 +203,22 @@ kubeadm init \
 [ERROR CRI]: container runtime is not running: output: E0712 01:49:47.179156   
  3917 remote_runtime.go:925] "Status from runtime service failed" err="rpc error: code = Unimplemented desc = unknown service runtime.v1alpha2.RuntimeService"
 
-
  解决办法
 [root@master:~] rm -rf /etc/containerd/config.toml
 [root@master:~] systemctl restart containerd
 
 
 
-netstat -antpl  |grep kubelet
 
+
+kubeadm join 192.168.99.115:6443 --token 7wv2z1.h70wgh710h1woobs \
+> config.toml --discovery-token-ca-cert-hash sha256:44bb791d1f393a96db0d224f247b8b2c4fb18f2db59346c6658b9f19f80aea0a
+> accepts at most 1 arg(s), received 2
+> To see the stack trace of this error execute with --v=5 or higher
+
+解决办法：重新建立一个空目录，切换到空目录，再执行join命令
+
+netstat -antpl  |grep kubelet
 
 将桥接的 IPv4 的流量传递到 iptables的链
 cat > /etc/sysctl.d/k8s.conf << EOF
@@ -179,10 +245,7 @@ ONBOOT=yes
 
  
 
- 原因：未配置endpoints
 
- crictl config runtime-endpoint unix:///run/containerd/containerd.sock
-crictl config image-endpoint unix:///run/containerd/containerd.sock
 
 拉镜像
 ctr -n k8s.io images import <your tar file>
@@ -190,9 +253,7 @@ ctr -n k8s.io images import <your tar file>
 查看镜像：
 crictl img
 
-tee /etc/sysconfig/kubelet << EOF
-KUBELET_EXTRA_ARGS="--pod-infra-container-image=registry.aliyuncs.com/google_containers/pause:3.7"
-EOF
+ 
 
 
 journalctl -f -u kubelet.service
@@ -226,7 +287,6 @@ docker tag registry.cn-hangzhou.aliyuncs.com/google_containers/pause:3.6 k8s.gcr
 Unknown desc = failed to get sandbox image "k8s.gcr.io/pause:3.6": failed to pull image "k8s.gcr.io/piled to pull and unpack image "k8s.gcr.io/pause:3.6": failed to resolve reference "k8s.gcr.io/pause:3request: Head "https://k8s.gcr.io/v2/pause/manifests/3.6": dial tcp 74.125.203.82:443: connect: conne
   Warning  FailedCreatePodSandBox  4m51s (x12 over 18m)  kubelet            Failed to create pod sandde = Unknown desc = failed to get sandbox image "k8s.gcr.io/pause:3.6": failed to pull image "k8s.gcriled to pull and unpack image "k8s.gcr.io/pause:3.6": failed to resolve reference "k8s.gcr.io/pause:3request: Head "https://k8s.gcr.io/v2/pause/manifests/3.6": dial tcp 142.250.157.82:443: connect: conn
   Warning  FailedCreatePodSandBox  3m7s (x8 over 16m)    kubelet            Failed to create pod sandde = Unknown desc = failed to get sandbox image "k8s.gcr.io/pause:3.6": failed to pull image "k8s.gcriled to pull and unpack image "k8s.gcr.io/pause:3.6": failed to resolve reference "k8s.gcr.io/pause:3request: Head "https://k8s.gcr.io/v2/pause/manifests/3.6": dial tcp 64.233.189.82:443: 
-
 
 [root@localhost ~]#mkdir -p /etc/containerd
 [root@localhost ~]#containerd config default > /etc/containerd/config.toml
@@ -314,6 +374,8 @@ $ wget https://docs.projectcalico.org/manifests/calico.yaml --no-check-certifica
 
 value: "10.244.0.0/16"
 
+​	搜索Always ，再附近添加
+
 
 - name: IP_AUTODETECTION_METHOD
   value: "interface=ens.*"  # ens 根据实际网卡开头配置
@@ -390,3 +452,46 @@ kubectl get pods --all-namespace
 
 kubectl get pod --all-namespaces -o wide
 如下，查看所有Pod信息，加上-o wide参数，能看到每个Pod的ip和k8s节点等信息，看的多了
+
+# 配置其他节点能使用kubectl
+
+1. 把主节点/etc/kubernetes/admin.conf 复制到其他节点对应的目录
+2. export KUBECONFIG=/etc/kubernetes/admin.conf 目的是设置环境变量
+3. kubectl  get node
+
+第二种方法：
+
+1、先进入master节点
+
+cd 到/root.kube文件
+cd /root/.kube
+复制./kube文件下的config文件
+2、到工作节点下
+
+cd 到/root/目录下
+mkdir .kube 创建.kube文件
+cd .kube
+
+# 添加worknode
+
+
+
+# 安装配置**calicoctl** 
+
+官方路径，使用命令下载比较慢
+
+https://projectcalico.docs.tigera.io/maintenance/clis/calicoctl/install#install-calicoctl-as-a-binary-on-a-single-host
+
+
+
+# 安装配置Dashboard
+
+https://github.com/kubernetes/dashboard
+
+
+
+curl -o kubernetes-dashboard.yaml  https://raw.githubusercontent.com/kubernetes/dashboard/master/aio/deploy/recommended/kubernetes-dashboard.yaml
+
+
+
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.6.0/aio/deploy/recommended.yaml
