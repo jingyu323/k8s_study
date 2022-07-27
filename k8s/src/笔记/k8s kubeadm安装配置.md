@@ -210,7 +210,9 @@ kubeadm init \
 
 
 
+systemctl enable kubelet && systemctl start kubelet 
 
+ systemctl status kubelet
 
 kubeadm join 192.168.99.115:6443 --token 7wv2z1.h70wgh710h1woobs \
 > config.toml --discovery-token-ca-cert-hash sha256:44bb791d1f393a96db0d224f247b8b2c4fb18f2db59346c6658b9f19f80aea0a
@@ -511,7 +513,7 @@ Kubernetes安全
 4. 允许系统用户明确区别于管理员
 5. 允许赋予管理权限给用户
 6. 允许应用能够从公开数据中提取敏感信息（keys, certs, passwords）
- 
+
 
 kubenetes 默认在两个端口提供服务：一个是基于 https 安全端口 6443，另一个是基于 http 的非安全端口 8080。其中非安全端口 8080 限制只能本机访问，即绑定的是 localhost。
 
