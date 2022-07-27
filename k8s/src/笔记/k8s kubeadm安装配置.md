@@ -500,7 +500,19 @@ curl -o kubernetes-dashboard.yaml  https://raw.githubusercontent.com/kubernetes/
 
 kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.6.0/aio/deploy/recommended.yaml
 
+```
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.6.0/aio/deploy/recommended.yaml
+```
 
+
+
+查看Pod 状态
+
+ kubectl get po,svc -n kubernetes-dashboard
+
+删除服务
+
+kubectl replace --force -f recommended.yaml
 
 # Kubernetes 的安全机制 APIServer 认证、授权、准入控制
 
@@ -678,3 +690,40 @@ kubectl get serviceaccount --all-namespaces
 
 
 
+# k8s的更换ip
+
+替换为新的IP
+
+find . -type f | xargs sed -i "s/192.168.99.115/192.168.99.176/"
+
+查看修改结果
+
+find . -type f | xargs grep 192.168.99.176
+
+切换到/etc/kubernetes/manifests， 将etcd.yaml kube-apiserver.yaml里的ip地址替换为新的ip
+
+/etc/kubernetes/manifests # vim etcd.yaml
+/etc/kubernetes/manifests # vim kube-apiserver.yaml
+二，生成新的config文件
+
+/etc/kubernetes# mv admin.conf admin.conf.bak
+/etc/kubernetes# kubeadm init phase kubeconfig admin --apiserver-advertise-address <新的ip>
+三，删除老证书，生成新证书
+
+/etc/kubernetes# cd pki
+ /etc/kubernetes/pki# mv apiserver.key apiserver.key.bak
+/etc/kubernetes/pki# mv apiserver.crt apiserver.crt.bak
+ /etc/kubernetes/pki# kubeadm init phase certs apiserver  --apiserver-advertise-address <新的ip>
+四，重启docker
+
+/etc/kubernetes# cd ..
+/etc/kubernetes# service docker restart
+/etc/kubernetes# service kubelet restart
+
+五，将配置文件config输出
+/etc/kubernetes#kubectl get nodes --kubeconfig=admin.conf # 此时已经是通信成功了
+
+六，将kubeconfig默认配置文件替换为admin.conf，这样就可以直接使用kubectl get nodes
+
+/etc/kubernetes# mv admin.conf ~/.kube/config
+ 
