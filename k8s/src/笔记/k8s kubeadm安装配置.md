@@ -4,6 +4,11 @@
 
 http://blog.itpub.net/70003733/viewspace-2888774/
 
+# 二进制安装Kubernetes（k8s） v1.24.0 IPv4/IPv6双栈 （三主俩从）
+
+https://blog.csdn.net/qq_33921750/article/details/124958403
+
+
 1.设置hostname
 
 hostnamectl set-hostname master
@@ -23,11 +28,12 @@ cat  >  /etc/hosts << EOF
 
 EOF
 
+
 cat  /etc/hosts
 
-3.安装chronyd 并开启时间同步
 
-yum -y install chronyd
+
+
 
 systemctl start chronyd
 systemctl enable chronyd
@@ -478,7 +484,217 @@ kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.6.0/a
 kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.6.0/aio/deploy/recommended.yaml
 ```
 
+查看服务：
 
+```
+kubectl get po,svc -n kubernetes-dashboard
+NAME                                TYPE        CLUSTER-IP    EXTERNAL-IP   PORT(S)         AGE
+service/dashboard-metrics-scraper   ClusterIP   10.1.26.91    <none>        8000/TCP        99s
+service/kubernetes-dashboard        NodePort    10.1.240.79   <none>        443:30001/TCP   99s
+部署成功
+
+
+```
+
+kubernetes-dashbaord 安装完成后，kubernetes-dashbaord 默认 service 的类型为 ClusterIP，为了能从外部访问控制面板，需要修改为 NodePort 类型
+
+```
+kubectl edit services -n kubernetes-dashboard kubernetes-dashboard
+# Please edit the object below. Lines beginning with a '#' will be ignored,
+# and an empty file will abort the edit. If an error occurs while saving this file will be
+# reopened with the relevant failures.
+#
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"v1","kind":"Service","metadata":{"annotations":{},"labels":{"k8s-app":"kubernetes-dashboard"},"name":"kubernetes-dashboard","namespace":"kubernetes-dashboard"},"spec":{"ports":[{"port":443,"targetPort":8443}],"selector":{"k8s-app":"kubernetes-dashboard"}}}
+  creationTimestamp: "2021-04-11T10:18:54Z"
+  labels:
+    k8s-app: kubernetes-dashboard
+  name: kubernetes-dashboard
+  namespace: kubernetes-dashboard
+  resourceVersion: "33097"
+  selfLink: /api/v1/namespaces/kubernetes-dashboard/services/kubernetes-dashboard
+  uid: 38jsd1sd-4045-448b-b70f-mia218mda8s
+spec:
+  clusterIP: 10.102.198.114
+  ports:
+  - port: 443
+    protocol: TCP
+    targetPort: 8443
+    # 添加固定端口
+    nodePort: 30000
+  selector:
+    k8s-app: kubernetes-dashboard
+  sessionAffinity: None
+  # 修改
+  type: NodePort
+status:
+  loadBalancer: {}
+```
+
+想要访问dashboard服务，就要有访问权限，创建kubernetes-dashboard管理员角色，以下两种方式创建用户都是可以的
+
+```
+vim dashboard-svc-account.yaml
+ 
+# 结果
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: dashboard-admin
+  namespace: kubernetes-dashboard
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: dashboard-admin
+subjects:
+  - kind: ServiceAccount
+    name: dashboard-admin
+    namespace: kubernetes-dashboard
+roleRef:
+  kind: ClusterRole
+  name: cluster-admin
+  apiGroup: rbac.authorization.k8s.io
+
+
+ 
+# 执行
+kubectl apply -f dashboard-svc-account.yaml
+```
+
+```
+vim create-admin.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: admin-user
+  namespace: kubernetes-dashboard
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: admin-user
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+- kind: ServiceAccount
+  name: admin-user
+  namespace: kubernetes-dashboard
+  
+  
+ kubectl apply -f  create-admin.yaml
+```
+
+
+
+查看Pod，没有找到相关的Pod
+
+```
+kubectl  get pod -A -o wide
+NAMESPACE     NAME                                       READY   STATUS    RESTARTS       AGE   IP               NODE     NOMINATED NODE   READINESS GATES
+kube-system   calico-kube-controllers-555bc4b957-9q49b   1/1     Running   0              30h   10.244.166.131   node1    <none>           <none>
+kube-system   calico-node-cxzq5                          1/1     Running   1 (30h ago)    31h   192.168.99.116   node2    <none>           <none>
+kube-system   calico-node-kzbn9                          1/1     Running   0              31h   192.168.99.115   master   <none>           <none>
+kube-system   calico-node-tkgmn                          1/1     Running   1 (31h ago)    31h   192.168.99.153   node1    <none>           <none>
+kube-system   coredns-74586cf9b6-8n8qx                   1/1     Running   0              30h   10.244.219.65    master   <none>           <none>
+kube-system   coredns-74586cf9b6-mbhpz                   1/1     Running   0              30h   10.244.166.130   node1    <none>           <none>
+kube-system   etcd-master                                1/1     Running   1              31h   192.168.99.115   master   <none>           <none>
+kube-system   kube-apiserver-master                      1/1     Running   1              31h   192.168.99.115   master   <none>           <none>
+kube-system   kube-controller-manager-master             1/1     Running   13 (26h ago)   31h   192.168.99.115   master   <none>           <none>
+kube-system   kube-proxy-4pq9b                           1/1     Running   1 (30h ago)    31h   192.168.99.116   node2    <none>           <none>
+kube-system   kube-proxy-8lcjq                           1/1     Running   0              31h   192.168.99.115   master   <none>           <none>
+kube-system   kube-proxy-j6sch                           1/1     Running   1 (31h ago)    31h   192.168.99.153   node1    <none>           <none>
+kube-system   kube-scheduler-master                      1/1     Running   12 (26h ago)   31h   192.168.99.115   master   <none>           <none>
+
+```
+
+获取token
+
+```
+kubectl -n kubernetes-dashboard create token admin-user
+
+eyJhbGciOiJSUzI1NiIsImtpZCI6IktaMm9Gd1h5azJReGNnbWt3dGhHZUNTaXBqM2VmVW1IcEExaUVKMG5MQ28ifQ.eyJhdWQiOlsiaHR0cHM6Ly9rdWJlcm5ldGVzLmRlZmF1bHQuc3ZjLmNsdXN0ZXIubG9jYWwiXSwiZXhwIjoxNjU4OTM2MTU1LCJpYXQiOjE2NTg5MzI1NTUsImlzcyI6Imh0dHBzOi8va3ViZXJuZXRlcy5kZWZhdWx0LnN2Yy5jbHVzdGVyLmxvY2FsIiwia3ViZXJuZXRlcy5pbyI6eyJuYW1lc3BhY2UiOiJrdWJlcm5ldGVzLWRhc2hib2FyZCIsInNlcnZpY2VhY2NvdW50Ijp7Im5hbWUiOiJhZG1pbi11c2VyIiwidWlkIjoiMGJiODc2MzAtYWRiZS00YzU0LTkwN2YtZjYxM2E4ZjhiODBhIn19LCJuYmYiOjE2NTg5MzI1NTUsInN1YiI6InN5c3RlbTpzZXJ2aWNlYWNjb3VudDprdWJlcm5ldGVzLWRhc2hib2FyZDphZG1pbi11c2VyIn0.ncrjzGsZhPZhqg7zJ4IEH4CkTOhqDcUebzmRl7URLn05t7c_tXDreaBzczeGqYO8pQfUJ3oCsl_7WUdzlBDNNBmZBKI1JU356DNVBG8o7_thqfY-RtUf6BC76vuN3LV_l6-tzk-haxblOd5YnPqdwF_83ky62A3YGFN6eVLgyUQFFFQKWtde5wXXsxatLPeJdICF5U28n6Uu82_aW2tnjwQ3TsWjfunlFxSXJ4uxx2lotfzAGhvU4rSzUCwakFbeqDiLOTkmw374iCdN7d5MVcYWiAd_jcpMcxBLdkzUxlWGSUZv9oHI3IOSK-OdK2fIF1KBXfUQWyCMh4G0GMzgqw
+```
+
+删除用户
+
+```
+kubectl -n kubernetes-dashboard delete serviceaccount admin-user
+kubectl -n kubernetes-dashboard delete clusterrolebinding admin-user
+```
+
+kubectl get secret -n kubernetes-dashboard
+
+# k8s删除Terminating状态的命名空间
+
+查看[命名空间](https://so.csdn.net/so/search?q=命名空间&spm=1001.2101.3001.7020)
+
+```
+# kubectl  get ns 
+NAME                   STATUS        AGE
+default                Active        31h
+kube-node-lease        Active        31h
+kube-public            Active        31h
+kube-system            Active        31h
+kubernetes-dashboard   Terminating   3h16m
+```
+
+**解决方法**
+查看kubesphere-system的namespace描述
+
+```
+kubectl get ns  kubernetes-dashboard   -o json > kubernetes-dashboard.json
+```
+
+编辑json文件，删除spec字段的内存，因为k8s集群时需要认证的。
+
+vi kubernetes-dashboard.json
+将
+
+"spec": {
+        "finalizers": [
+            "kubernetes"
+        ]
+    },
+更改为：
+
+"spec": {
+    
+  },
+
+
+
+新开一个窗口运行kubectl proxy跑一个API代理在本地的8081端口
+
+```
+# kubectl proxy --port=8081
+Starting to serve on 127.0.0.1:8081
+```
+
+```
+curl -k -H "Content-Type:application/json" -X PUT --data-binary @kubernetes-dashboard.json http://127.0.0.1:8081/api/v1/namespaces/kubernetes-dashboard/finalize 
+注意：命令中的kubernetes-dashboard就是命名空间。
+
+再次查看命名空间
+
+# kubectl get ns
+	NAME              STATUS   AGE
+default           Active   31h
+kube-node-lease   Active   31h
+kube-public       Active   31h
+kube-system       Active   31h
+```
+
+
+
+# istio
 
 查看Pod 状态
 
@@ -488,179 +704,7 @@ kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.6.0/a
 
 kubectl replace --force -f recommended.yaml
 
-# Kubernetes 的安全机制 APIServer 认证、授权、准入控制
 
-Kubernetes安全
-安全永远是一个重大的话题，特别是云计算平台，更需要设计出一套完善的安全方案，以应对复杂的场景。 Kubernetes主要使用Docker作为应用承载环境，Kubernetes首先设计出一套API和敏感信息处理方案，当然也基于Docker提供容器安全控制。以下是Kubernetes的安全设计原则：
-
-1. 保证容器与其运行的宿主机之间有明确的隔离
-2. 限制容器对基础设施或者其它容器造成不良影响的能力
-3. 最小特权原则——限定每个组件只被赋予了执行操作所必需的最小特权，由此确保可能产生的损失达到最小
-4. 允许系统用户明确区别于管理员
-5. 允许赋予管理权限给用户
-6. 允许应用能够从公开数据中提取敏感信息（keys, certs, passwords）
-
-
-kubenetes 默认在两个端口提供服务：一个是基于 https 安全端口 6443，另一个是基于 http 的非安全端口 8080。其中非安全端口 8080 限制只能本机访问，即绑定的是 localhost。
-
-**对于安全端口来讲，一个 API 请求到达 6443 端口后，主要经过以下几步处理：**
-
-- **认证**
-- **授权**
-- **准入控制**
-- **实际的 API 请求**
-
-# API Server**的** 认证Authentication
-
-API Server认证 Authentication提供管理三种级别的客户端身份认证方式：
-
-最严格的HTTPS证书认证：基于CA根证书签名的双向数字证书认证方式；
-HTTP Token认证：通过一个Token来识别合法用户；
-HTTP Base认证：通过用户名+密码的方式认证；
-1、HTTPS证书认证：
-HTTPS通信双方的务器端向CA机构申请证书，CA机构是可信的第三方机构，它可以是一个公认的权威的企业，也可以是企业自身。企业内部系统一般都使用企业自身的认证系统。CA机构下发根证书、服务端证书及私钥给申请者；
-HTTPS通信双方的客户端向CA机构申请证书，CA机构下发根证书、客户端证书及私钥个申请者；
-客户端向服务器端发起请求，服务端下发服务端证书给客户端。客户端接收到证书后，通过私钥解密证书，并利用服务器端证书中的公钥认证证书信息比较证书里的消息，例如域名和公钥与服务器刚刚发送的相关消息是否一致，如果一致，则客户端认为这个服务器的合法身份；
-客户端发送客户端证书给服务器端，服务端接收到证书后，通过私钥解密证书，获得客户端的证书公钥，并用该公钥认证证书信息，确认客户端是否合法；
-客户端通过随机秘钥加密信息，并发送加密后的信息给服务端。服务器端和客户端协商好加密方案后，客户端会产生一个随机的秘钥，客户端通过协商好的加密方案，加密该随机秘钥，并发送该随机秘钥到服务器端。服务器端接收这个秘钥后，双方通信的所有内容都都通过该随机秘钥加密；
- ![im](images\caauthor.png)
-
-上述是双向SSL协议的具体通信过程，这种情况要求服务器和用户双方都有证书。单向认证SSL协议不需要客户拥有CA证书，对应上面的步骤，只需将服务器端验证客户端证书的过程去掉，以及在协商对称密码方案和对称通话秘钥时，服务器端发送给客户端的是没有加过密的（这并不影响SSL过程的安全性）密码方案。
-
-
-
-2、HTTP Token原理：
-HTTP Token的认证是用一个很长的特殊编码方式的并且难以被模仿的字符串——Token来表明客户身份的一种方式。在通常情况下，Token是一个复杂的字符串，比如我们用私钥签名一个字符串的数据就可以作为一个Token，此外每个Token对应一个用户名，存储在API Server能访问的一个文件中。当客户端发起API调用请求时，需要在HTTP Header里放入Token，这样一来API Server就能够识别合法用户和非法用户了。
-
-3、HTTP Base：
-常见的客户端账号登录程序，这种认证方式是把“用户名+冒号+密码”用BASE64算法进行编码后的字符串放在HTTP REQUEST中的Header Authorization域里发送给服务端，服务端收到后进行解码，获取用户名及密码，然后进行用户身份的鉴权过程。
-
-
-
-## APIServer 授权
-
-
-
-对合法用户进行授权（Authorization）并且随后在用户访问时进行鉴权，是权限与安全系统的重要一环。授权就是授予不同用户不同访问权限：
-
-API Server 目前支持以下几种授权策略 (通过 API Server 的启动参数 --authorization-mode 设置)
-
-- AlwaysDeny：标识拒绝所有的请求，一般用于测试
-
-
-- AlwaysAllow：允许接受所有请求，如果集群不需要授权流程，则可以采用该策略
-
-
-- ABAC：（Attribute-Base Access Control）基于属性的访问控制，表示使用用户配置的授权规则对用户请求进行匹配和控制，淘汰
-
-
-- Webbook：通过调用外部 REST 服务对用户进行授权
-
-
-- RBAC：基于角色的访问控制，现行默认规则，常用
-
-
-
-ABAC授权模式：
-为了简化授权的复杂度，对于ABAC模式的授权策略，Kubernetes仅有下面四个基本属性：
-
-用户名（代表一个已经被认证的用户的字符型用户名）
-是否是只读请求（REST的GET操作是只读的）
-被访问的是哪一类资源，例如Pod资源/api/v1/namespaces/default/pods
-被访问对象所属的Namespace
-当API Server启用ABAC模式时，需要指定授权文件的路径和名字（--authorization_policy_file=SOME_FILENAME）,授权策略文件里的每一行都是一个Map类型的JOSN对象，被称为访问策略对象，我们可以通过设置“访问策略对象”中的如下属性来确定具体的授权行为：
-
-user：字符串类型，来源于Token文件或基本认证文件中的用户名字段的值；
-readonly：true时表示该策略允许GET请求通过；
-resource：来自于URL的资源，例如“Pod”；
-namespace：表明该策略允许访问某个namespace的资源；
-eg：
-
-{"user":"alice"}
-{"user":"kubelet","resource":"Pods","readonly":true}
-{"user":"kubelet","resource":"events"}
-{"user":"bob","resource":"Pods","readonly":true,"ns":"myNamespace"}
-RBAC 授权模式
- RBAC 基于角色的访问控制，在 kubernetes1.5 中引入，现行版本成为默认标准。相对其他访问控制方式，拥有以下优势：
-
-对集群中的资源和非资源拥有完整的覆盖
-整个 RBAC 完全由几个API 对象完成。同其他 API 对象一样，可以用 kubectl 或 API 进行操作。
-可以在运行时进行调整，无需重启 API Server。
-RBAC 的 API 资源对象说明
- RBAC 引入了 4个新的顶级资源对象：Role、ClusterRole、RoleBinding、ClusterRoleBinding、4种对象类型均可以通过 kubectl 与 API 操作。
-
-Role：普通角色 | ClusterRole：集群角色
-
-Rolebinding：普通角色绑定 ClusterRoleBinding：集群角色绑定 
-
-## Admission Control 准入控制
-
-通过了前面的认证和授权之后，还需要经过准入控制处理通过之后，apiserver 才会处理这个请求。Admission Control 有一个准入控制列表，我们可以通过命令行设置选择执行哪几个准入控制器。只有所有的准入控制器都检查通过之后，apiserver 才执行该请求，否则返回拒绝。
-
-当前可配置的准入控制器主要有：
-
-- 在认证和授权之外，Admission Controller也可以对Kubernetes API Server的访问控制，任何请求在访问API Server时需要经过一系列的验证，任何一环拒绝了请求，则会返回错误。
-  实际上Admission Controller是作为Kubernetes API Serve的一部分，并以插件代码的形式存在，在API Server启动的时候，可以配置需要哪些Admission Controller，以及它们的顺序，如：
-
-  --admission_control=NamespaceLifecycle,NamespaceExists,LimitRanger,SecurityContextDeny,ServiceAccount,ResourceQuota
-
-  Admission Controller支持的插件如下：
-  AlwaysAdmit：允许所有请求；
-  AlwaysPullmages：在启动容器之前总去下载镜像，相当于在每个容器的配置项imagePullPolicy=Always
-  AlwaysDeny：禁止所有请求，一般用于测试；
-  DenyExecOnPrivileged：它会拦截所有想在Privileged Container上执行命令的请求，如果你的集群支持Privileged Container，你又希望限制用户在这些Privileged Container上执行命令，强烈推荐你使用它；
-  Service Account：这个plug-in将ServiceAccount实现了自动化，默认启用，如果你想使用ServiceAccount对象，那么强烈你推荐使用它；
-  SecurityContextDeny：这个插件将使用SecurityContext的Pod中的定义全部失效。SecurityContext在Container中定义了操作系统级别的安全设定（uid，gid，capabilityes，SELinux等）
-  ResourceQuota：用于配额管理目的，作用于namespace上，它会观察所有请求，确保在namespace上的配额不会超标。推荐在Admission Control参数列表中这个插件排最后一个；
-  LimitRanger：用于配额管理，作用于Pod与Container，确保Pod与Container上的配额不会超标；
-  NamespaceExists（已过时）：对所有请求校验namespace是否已存在，如果不存在则拒绝请求，已合并至NamespaceLifecycle。
-   NamespaceAutoProvision（已过时）：对所有请求校验namespace，如果不存在则自动创建该namespace，推荐使用NamespaceLifecycle。
-  NamespaceLifecycle：如果尝试在一个不存在的namespace中创建资源对象，则该创建请求将被拒绝。当删除一个namespace时，系统将会删除该namespace中所有对象，保存Pod，Service等。
-  在API Server上设置--admission-control参数，即可定制我们需要的准入控制链，如果启用多种准入控制选项，则建议的设置如下：
-
-  --admission-control=NamespaceLifecycle，LimitRanger，SecurityContextDeny，ServiceAccount，ResourceQuota
-  下面着重介绍三个准入控制器：
-
-  SecurityContextDeny
-  Security Context时运用于容器的操作系统安全设置（uid、gid、capabilities、SELinux role等），Admission Control的SecurityContextDeny插件的作用是，禁止创建设置了Security Context的Pod，例如包含以下配置项的Pod：
-
-  spec.containers.securityContext.seLinuxOptions
-  spec.containers.securityContext.runAsUser
-  ResourceQuota
-  ResourceQuota不仅能够限制某个Namespace中创建资源的数量，而且能够限制某个namespace中被Pod所请求的资源总量。该准入控制器和资源对象ResourceQuota一起实现了资源的配额管理；
-
-  LimitRanger
-  准入控制器LimitRanger的作用类似于上面的ResourceQuota控制器，这对Namespace资源的每个个体的资源配额。该插件和资源对象LimitRange一起实现资源限制管理 
-
-  # Secrets
-
-  Kubernetes提供了Secret来处理敏感信息，目前Secret的类型有3种：
-
-  Opaque(default): 任意字符串
-  kubernetes.io/service-account-token: 作用于ServiceAccount
-  kubernetes.io/dockercfg: 作用于Docker registry
-
-#    ServiceAccount
-
-什么是service account? 顾名思义，相对于user account（比如：kubectl访问APIServer时用的就是user account），service account就是Pod中的Process用于访问Kubernetes API的account，它为Pod中的Process提供了一种身份标识。相比于user account的全局性权限，service account更适合一些轻量级的task，更聚焦于授权给某些特定Pod中的Process所使用。
-
- 
-
-Service Account概念的引入是基于这样的使用场景：运行在pod里的进程需要调用Kubernetes API以及非Kubernetes API的其它服务（如image repository/被mount到pod上的NFS volumes中的file等）。我们使用Service Account来为pod提供id。
-Service Account和User account可能会带来一定程度上的混淆，User account可以认为是与Kubernetes交互的个体，通常可以认为是human, 目前并不作为一个代码中的类型单独出现，比如第一节中配置的用户，它们的区别如下。
-
-Kubernetes有User Account和Service Account两套独立的账号系统：
-1.User Account是给人用的，Service Account 是给Pod 里的进程使用的，面向的对象不同。
-2.User Account是全局性的，即跨namespace使用。 Service Account 是属于某个具体的Namespace，即仅在所属的namespace下使用。
-3.User Account是与后端的用户数据库同步的。创建一个新的user account通常需要较高的特权并且需要经过比较复杂的business process（即对于集群的访问权限的创建），而service account则不然。
-
- 
-
-如果kubernetes开启了ServiceAccount（–admission_control=…,ServiceAccount,… ）那么会在每个namespace下面都会创建一个默认的default的ServiceAccount。即service account作为一种resource存在于Kubernetes cluster中，我们可以通过kubectl获取
-
-1、当前cluster中的service acount列表：
-
-kubectl get serviceaccount --all-namespaces
 
 
 
@@ -682,16 +726,29 @@ find . -type f | xargs grep 192.168.99.176
 
 /etc/kubernetes/manifests # vim etcd.yaml
 /etc/kubernetes/manifests # vim kube-apiserver.yaml
+
+替换为新的IP
+
+newIP=192.168.93.53
+
+oldIP=192.168.99.176
+
+find . -type f | xargs sed -i "s/$oldIP/$newIP/"
+
+查看修改结果
+
+find . -type f | xargs grep $newIP
+
 二，生成新的config文件
 
 /etc/kubernetes# mv admin.conf admin.conf.bak
-/etc/kubernetes# kubeadm init phase kubeconfig admin --apiserver-advertise-address <新的ip>
+/etc/kubernetes# kubeadm init phase kubeconfig admin --apiserver-advertise-address $newIP
 三，删除老证书，生成新证书
 
 /etc/kubernetes# cd pki
  /etc/kubernetes/pki# mv apiserver.key apiserver.key.bak
 /etc/kubernetes/pki# mv apiserver.crt apiserver.crt.bak
- /etc/kubernetes/pki# kubeadm init phase certs apiserver  --apiserver-advertise-address <新的ip>
+ /etc/kubernetes/pki# kubeadm init phase certs apiserver  --apiserver-advertise-address  $newIP
 四，重启docker
 
 /etc/kubernetes# cd ..
@@ -703,5 +760,9 @@ find . -type f | xargs grep 192.168.99.176
 
 六，将kubeconfig默认配置文件替换为admin.conf，这样就可以直接使用kubectl get nodes
 
-/etc/kubernetes# mv admin.conf ~/.kube/config
+/etc/kubernetes# cp -f admin.conf  ~/.kube/config
+
  
+
+
+

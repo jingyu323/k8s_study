@@ -119,7 +119,7 @@ Pod注入信息到容器的方式：
    4. kubelet创建pod:  kubelet根据Schedule调度结果执行Pod创建操作: 调度成功后，会启动container, docker run, scheduler会调用API Server的API在etcd中创建一个bound pod对象，描述在一个工作节点上绑定运行的所有pod信息。运行在每个工作节点上的kubelet也会定期与etcd同步bound pod信息，一旦发现应该在该工作节点上运行的bound pod对象没有更新，则调用Docker API创建并启动pod内的容器。
 
 
-    
+​    
 
 # Pod升级回退
 
@@ -247,7 +247,7 @@ Pod如果是通过Deployment 创建的，则升级回退就是要使用Deploymen
 8. 最佳实践
    
 - 创建完成deployment之后，直接expose生成service，减少手动配置
-   
+  
 9. service 的三种形式
    1. ClusterIP　 **集群IP，仅供k8s内部访问(只能在pod 或node 上访问，无法外部访问)，相当于service 加了1个vip，通过vip 提供访问地址，再转发给各个Pod**
    2. NodePort　　在每个node 节点为相应Pod启动一个对外端口（默认30000起步），映射pod 内部端口。通过任意一个Pod 所在的节点ip+port 就能访问pod ，多个pod 需要在service 前面加一个LB（lvs/proxy）把每个节点的ip+port 加入，才能实现负载均衡,这样每个服务都得添加一次，增加了管理维护成本
@@ -318,17 +318,196 @@ Ingress Controller：具体实现反向代理及负载均衡的程序，对Ingre
 
 
 
-# istio
+
+
+# Kubernetes 的安全机制 APIServer 认证、授权、准入控制
+
+Kubernetes安全
+安全永远是一个重大的话题，特别是云计算平台，更需要设计出一套完善的安全方案，以应对复杂的场景。 Kubernetes主要使用Docker作为应用承载环境，Kubernetes首先设计出一套API和敏感信息处理方案，当然也基于Docker提供容器安全控制。以下是Kubernetes的安全设计原则：
+
+1. 保证容器与其运行的宿主机之间有明确的隔离
+2. 限制容器对基础设施或者其它容器造成不良影响的能力
+3. 最小特权原则——限定每个组件只被赋予了执行操作所必需的最小特权，由此确保可能产生的损失达到最小
+4. 允许系统用户明确区别于管理员
+5. 允许赋予管理权限给用户
+6. 允许应用能够从公开数据中提取敏感信息（keys, certs, passwords）
+
+
+kubenetes 默认在两个端口提供服务：一个是基于 https 安全端口 6443，另一个是基于 http 的非安全端口 8080。其中非安全端口 8080 限制只能本机访问，即绑定的是 localhost。
+
+**对于安全端口来讲，一个 API 请求到达 6443 端口后，主要经过以下几步处理：**
+
+- **认证**
+- **授权**
+- **准入控制**
+- **实际的 API 请求**
+
+# API Server**的** 认证Authentication
+
+API Server认证 Authentication提供管理三种级别的客户端身份认证方式：
+
+最严格的HTTPS证书认证：基于CA根证书签名的双向数字证书认证方式；
+HTTP Token认证：通过一个Token来识别合法用户；
+HTTP Base认证：通过用户名+密码的方式认证；
+1、HTTPS证书认证：
+HTTPS通信双方的务器端向CA机构申请证书，CA机构是可信的第三方机构，它可以是一个公认的权威的企业，也可以是企业自身。企业内部系统一般都使用企业自身的认证系统。CA机构下发根证书、服务端证书及私钥给申请者；
+HTTPS通信双方的客户端向CA机构申请证书，CA机构下发根证书、客户端证书及私钥个申请者；
+客户端向服务器端发起请求，服务端下发服务端证书给客户端。客户端接收到证书后，通过私钥解密证书，并利用服务器端证书中的公钥认证证书信息比较证书里的消息，例如域名和公钥与服务器刚刚发送的相关消息是否一致，如果一致，则客户端认为这个服务器的合法身份；
+客户端发送客户端证书给服务器端，服务端接收到证书后，通过私钥解密证书，获得客户端的证书公钥，并用该公钥认证证书信息，确认客户端是否合法；
+客户端通过随机秘钥加密信息，并发送加密后的信息给服务端。服务器端和客户端协商好加密方案后，客户端会产生一个随机的秘钥，客户端通过协商好的加密方案，加密该随机秘钥，并发送该随机秘钥到服务器端。服务器端接收这个秘钥后，双方通信的所有内容都都通过该随机秘钥加密；
+ ![im](E:/git_project/k8s_study/k8s/src/笔记/images/caauthor.png)
+
+上述是双向SSL协议的具体通信过程，这种情况要求服务器和用户双方都有证书。单向认证SSL协议不需要客户拥有CA证书，对应上面的步骤，只需将服务器端验证客户端证书的过程去掉，以及在协商对称密码方案和对称通话秘钥时，服务器端发送给客户端的是没有加过密的（这并不影响SSL过程的安全性）密码方案。
+
+
+
+2、HTTP Token原理：
+HTTP Token的认证是用一个很长的特殊编码方式的并且难以被模仿的字符串——Token来表明客户身份的一种方式。在通常情况下，Token是一个复杂的字符串，比如我们用私钥签名一个字符串的数据就可以作为一个Token，此外每个Token对应一个用户名，存储在API Server能访问的一个文件中。当客户端发起API调用请求时，需要在HTTP Header里放入Token，这样一来API Server就能够识别合法用户和非法用户了。
+
+3、HTTP Base：
+常见的客户端账号登录程序，这种认证方式是把“用户名+冒号+密码”用BASE64算法进行编码后的字符串放在HTTP REQUEST中的Header Authorization域里发送给服务端，服务端收到后进行解码，获取用户名及密码，然后进行用户身份的鉴权过程。
+
+
+
+## APIServer 授权
+
+
+
+对合法用户进行授权（Authorization）并且随后在用户访问时进行鉴权，是权限与安全系统的重要一环。授权就是授予不同用户不同访问权限：
+
+API Server 目前支持以下几种授权策略 (通过 API Server 的启动参数 --authorization-mode 设置)
+
+- AlwaysDeny：标识拒绝所有的请求，一般用于测试
+
+
+- AlwaysAllow：允许接受所有请求，如果集群不需要授权流程，则可以采用该策略
+
+
+- ABAC：（Attribute-Base Access Control）基于属性的访问控制，表示使用用户配置的授权规则对用户请求进行匹配和控制，淘汰
+
+
+- Webbook：通过调用外部 REST 服务对用户进行授权
+
+
+- RBAC：基于角色的访问控制，现行默认规则，常用
+
+
+
+ABAC授权模式：
+为了简化授权的复杂度，对于ABAC模式的授权策略，Kubernetes仅有下面四个基本属性：
+
+用户名（代表一个已经被认证的用户的字符型用户名）
+是否是只读请求（REST的GET操作是只读的）
+被访问的是哪一类资源，例如Pod资源/api/v1/namespaces/default/pods
+被访问对象所属的Namespace
+当API Server启用ABAC模式时，需要指定授权文件的路径和名字（--authorization_policy_file=SOME_FILENAME）,授权策略文件里的每一行都是一个Map类型的JOSN对象，被称为访问策略对象，我们可以通过设置“访问策略对象”中的如下属性来确定具体的授权行为：
+
+user：字符串类型，来源于Token文件或基本认证文件中的用户名字段的值；
+readonly：true时表示该策略允许GET请求通过；
+resource：来自于URL的资源，例如“Pod”；
+namespace：表明该策略允许访问某个namespace的资源；
+eg：
+
+{"user":"alice"}
+{"user":"kubelet","resource":"Pods","readonly":true}
+{"user":"kubelet","resource":"events"}
+{"user":"bob","resource":"Pods","readonly":true,"ns":"myNamespace"}
+RBAC 授权模式
+ RBAC 基于角色的访问控制，在 kubernetes1.5 中引入，现行版本成为默认标准。相对其他访问控制方式，拥有以下优势：
+
+对集群中的资源和非资源拥有完整的覆盖
+整个 RBAC 完全由几个API 对象完成。同其他 API 对象一样，可以用 kubectl 或 API 进行操作。
+可以在运行时进行调整，无需重启 API Server。
+RBAC 的 API 资源对象说明
+ RBAC 引入了 4个新的顶级资源对象：Role、ClusterRole、RoleBinding、ClusterRoleBinding、4种对象类型均可以通过 kubectl 与 API 操作。
+
+Role：普通角色 | ClusterRole：集群角色
+
+Rolebinding：普通角色绑定 ClusterRoleBinding：集群角色绑定 
+
+## Admission Control 准入控制
+
+通过了前面的认证和授权之后，还需要经过准入控制处理通过之后，apiserver 才会处理这个请求。Admission Control 有一个准入控制列表，我们可以通过命令行设置选择执行哪几个准入控制器。只有所有的准入控制器都检查通过之后，apiserver 才执行该请求，否则返回拒绝。
+
+当前可配置的准入控制器主要有：
+
+- 在认证和授权之外，Admission Controller也可以对Kubernetes API Server的访问控制，任何请求在访问API Server时需要经过一系列的验证，任何一环拒绝了请求，则会返回错误。
+  实际上Admission Controller是作为Kubernetes API Serve的一部分，并以插件代码的形式存在，在API Server启动的时候，可以配置需要哪些Admission Controller，以及它们的顺序，如：
+
+  --admission_control=NamespaceLifecycle,NamespaceExists,LimitRanger,SecurityContextDeny,ServiceAccount,ResourceQuota
+
+  Admission Controller支持的插件如下：
+  AlwaysAdmit：允许所有请求；
+  AlwaysPullmages：在启动容器之前总去下载镜像，相当于在每个容器的配置项imagePullPolicy=Always
+  AlwaysDeny：禁止所有请求，一般用于测试；
+  DenyExecOnPrivileged：它会拦截所有想在Privileged Container上执行命令的请求，如果你的集群支持Privileged Container，你又希望限制用户在这些Privileged Container上执行命令，强烈推荐你使用它；
+  Service Account：这个plug-in将ServiceAccount实现了自动化，默认启用，如果你想使用ServiceAccount对象，那么强烈你推荐使用它；
+  SecurityContextDeny：这个插件将使用SecurityContext的Pod中的定义全部失效。SecurityContext在Container中定义了操作系统级别的安全设定（uid，gid，capabilityes，SELinux等）
+  ResourceQuota：用于配额管理目的，作用于namespace上，它会观察所有请求，确保在namespace上的配额不会超标。推荐在Admission Control参数列表中这个插件排最后一个；
+  LimitRanger：用于配额管理，作用于Pod与Container，确保Pod与Container上的配额不会超标；
+  NamespaceExists（已过时）：对所有请求校验namespace是否已存在，如果不存在则拒绝请求，已合并至NamespaceLifecycle。
+   NamespaceAutoProvision（已过时）：对所有请求校验namespace，如果不存在则自动创建该namespace，推荐使用NamespaceLifecycle。
+  NamespaceLifecycle：如果尝试在一个不存在的namespace中创建资源对象，则该创建请求将被拒绝。当删除一个namespace时，系统将会删除该namespace中所有对象，保存Pod，Service等。
+  在API Server上设置--admission-control参数，即可定制我们需要的准入控制链，如果启用多种准入控制选项，则建议的设置如下：
+
+  --admission-control=NamespaceLifecycle，LimitRanger，SecurityContextDeny，ServiceAccount，ResourceQuota
+  下面着重介绍三个准入控制器：
+
+  SecurityContextDeny
+  Security Context时运用于容器的操作系统安全设置（uid、gid、capabilities、SELinux role等），Admission Control的SecurityContextDeny插件的作用是，禁止创建设置了Security Context的Pod，例如包含以下配置项的Pod：
+
+  spec.containers.securityContext.seLinuxOptions
+  spec.containers.securityContext.runAsUser
+  ResourceQuota
+  ResourceQuota不仅能够限制某个Namespace中创建资源的数量，而且能够限制某个namespace中被Pod所请求的资源总量。该准入控制器和资源对象ResourceQuota一起实现了资源的配额管理；
+
+  LimitRanger
+  准入控制器LimitRanger的作用类似于上面的ResourceQuota控制器，这对Namespace资源的每个个体的资源配额。该插件和资源对象LimitRange一起实现资源限制管理 
+
+  # Secrets
+
+  Kubernetes提供了Secret来处理敏感信息，目前Secret的类型有3种：
+
+  Opaque(default): 任意字符串
+  kubernetes.io/service-account-token: 作用于ServiceAccount
+  kubernetes.io/dockercfg: 作用于Docker registry
+
+#    ServiceAccount
+
+什么是service account? 顾名思义，相对于user account（比如：kubectl访问APIServer时用的就是user account），service account就是Pod中的Process用于访问Kubernetes API的account，它为Pod中的Process提供了一种身份标识。相比于user account的全局性权限，service account更适合一些轻量级的task，更聚焦于授权给某些特定Pod中的Process所使用。
+
+ 
+
+Service Account概念的引入是基于这样的使用场景：运行在pod里的进程需要调用Kubernetes API以及非Kubernetes API的其它服务（如image repository/被mount到pod上的NFS volumes中的file等）。我们使用Service Account来为pod提供id。
+Service Account和User account可能会带来一定程度上的混淆，User account可以认为是与Kubernetes交互的个体，通常可以认为是human, 目前并不作为一个代码中的类型单独出现，比如第一节中配置的用户，它们的区别如下。
+
+Kubernetes有User Account和Service Account两套独立的账号系统：
+1.User Account是给人用的，Service Account 是给Pod 里的进程使用的，面向的对象不同。
+2.User Account是全局性的，即跨namespace使用。 Service Account 是属于某个具体的Namespace，即仅在所属的namespace下使用。
+3.User Account是与后端的用户数据库同步的。创建一个新的user account通常需要较高的特权并且需要经过比较复杂的business process（即对于集群的访问权限的创建），而service account则不然。
+
+ 
+
+如果kubernetes开启了ServiceAccount（–admission_control=…,ServiceAccount,… ）那么会在每个namespace下面都会创建一个默认的default的ServiceAccount。即service account作为一种resource存在于Kubernetes cluster中，我们可以通过kubectl获取
+
+1、当前cluster中的service acount列表：
+
+kubectl get serviceaccount --all-namespaces
 
 
 
 
 
+# ETCD
 
 
 
+# Namespace
 
+命名空间主要有两个方面的作用:
 
+**资源隔离：**可为不同的团队/用户（或项目）提供虚拟的集群空间，共享同一个Kubernetes集群的资源。比如可以为团队A创建一个Namespace ns-a，团队A的项目都部署运行在 ns-a 中，团队B创建另一个Namespace ns-b，其项目都部署运行在 ns-b 中，或者为开发、测试、生产环境创建不同的Namespace，以做到彼此之间相互隔离，互不影响。我们可以使用 ResourceQuota 与 Resource LimitRange 来指定与限制 各个namesapce的资源分配与使用
+**权限控制：**可以指定某个namespace哪些用户可以访问，哪些用户不能访问 
 
 # 1. 安装的两种方式
 
@@ -370,6 +549,9 @@ RunC
 # 3. 容器 service, Inress, 微服务负载均衡怎么做
 
 # 4. 镜像怎么打包、发布
+
+## 4.1 搭建私有镜像仓库
+
 # 5. 容器网络,网络插件优缺点使用场景 
 # 6. ks8集群 升级 回退，扩缩容
 ## 6.1 集群的集群怎么做
