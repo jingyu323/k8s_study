@@ -4,11 +4,13 @@
 
 http://blog.itpub.net/70003733/viewspace-2888774/
 
-
+1.设置hostname
 
 hostnamectl set-hostname master
 hostnamectl set-hostname node1
 hostnamectl set-hostname node2
+
+2.配置 /etc/hosts
 
 
 cat  >  /etc/hosts << EOF
@@ -21,15 +23,16 @@ cat  >  /etc/hosts << EOF
 
 EOF
 
-
 cat  /etc/hosts
 
+3.安装chronyd 并开启时间同步
 
-
-
+yum -y install chronyd
 
 systemctl start chronyd
 systemctl enable chronyd
+
+4.关闭防火墙
 
 systemctl stop firewalld
 systemctl disable firewalld
@@ -70,35 +73,6 @@ gpgkey=https://mirrors.aliyun.com/kubernetes/ yum/doc/yum-key.gpg
        https://mirrors.aliyun.com/kubernetes/yum/doc/rpm-package-key.gpg
 
 EOF
-
-
-
-# 2 关闭iptables服务
-systemctl stop iptables
-systemctl disable iptables
-
-
-
-
-cat > /etc/sysctl.d/k8s.conf << EOF
-net.bridge.bridge-nf-call-ip6tables = 1
-net.bridge.bridge-nf-call-iptables = 1
-net.bridge.bridge-nf-call-iptables=1
-net.bridge.bridge-nf-call-ip6tables=1
-net.ipv4.ip_forward=1
-net.ipv4.tcp_tw_recycle=0
-vm.swappiness=0
-vm.overcommit_memory=1
-vm.panic_on_oom=0
-fs.inotify.max_user_instances=8192
-fs.inotify.max_user_watches=1048576
-fs.file-max=52706963
-fs.nr_open=52706963
-net.ipv6.conf.all.disable_ipv6=1
-net.netfilter.nf_conntrack_max=2310720         
-EOF
-
-
 
 
 
@@ -687,6 +661,10 @@ Kubernetes有User Account和Service Account两套独立的账号系统：
 1、当前cluster中的service acount列表：
 
 kubectl get serviceaccount --all-namespaces
+
+
+
+*kubectl get pods -A -o wide*
 
 
 
