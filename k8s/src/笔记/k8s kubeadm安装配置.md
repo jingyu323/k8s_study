@@ -9,6 +9,7 @@ http://blog.itpub.net/70003733/viewspace-2888774/
 https://blog.csdn.net/qq_33921750/article/details/124958403
 
 
+
 1.设置hostname
 
 hostnamectl set-hostname master
@@ -33,7 +34,7 @@ cat  /etc/hosts
 
 
 
-
+yum -y install  chronyd
 
 systemctl start chronyd
 systemctl enable chronyd
