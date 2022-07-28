@@ -41,6 +41,7 @@
       <workItem from="1658547276705" duration="1687000" />
       <workItem from="1658561537203" duration="3428000" />
       <workItem from="1658885350093" duration="2066000" />
+      <workItem from="1659005863151" duration="367000" />
     </task>
     <task id="LOCAL-00001" summary="初始安装笔记">
       <created>1658413407917</created>
@@ -100,6 +101,7 @@
         </entry>
       </map>
     </option>
+    <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="初始安装笔记" />
