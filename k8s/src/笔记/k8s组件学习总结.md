@@ -138,6 +138,8 @@ Pod如果是通过Deployment 创建的，则升级回退就是要使用Deploymen
    ```
 
    2. kubectl edit deployment 直接修改镜像
+   3. \# 扩容    kubectl scale deployment nginx-deployment --replicas=5
+   4.   kubectl scale --current-replicas=5 --replicas=3 deployment nginx-deployment
 
    ### Deployment更新策略
 
