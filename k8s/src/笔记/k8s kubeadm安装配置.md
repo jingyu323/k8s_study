@@ -711,10 +711,6 @@ kube-public       Active   31h
 kube-system       Active   31h
 ```
 
-
-
-# istio
-
 查看Pod 状态
 
  kubectl get po,svc -n kubernetes-dashboard
@@ -728,6 +724,22 @@ kubectl replace --force -f recommended.yaml
 查看所有命名空间的Pod
 
 *kubectl get pods -A -o wide*
+
+# istio
+
+https://blog.csdn.net/aa18855953229/article/details/109281007
+
+
+
+# Harbor创建私有镜像
+
+https://github.com/goharbor/harbor
+
+**On a Linux host:** docker 17.06.0-ce+ and docker-compose 1.18.0+ .
+
+
+
+# 制作镜像
 
 
 
