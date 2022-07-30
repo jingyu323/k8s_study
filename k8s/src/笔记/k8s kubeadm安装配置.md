@@ -475,6 +475,10 @@ https://github.com/kubernetes/dashboard
 
 
 
+
+
+
+
 curl -o kubernetes-dashboard.yaml  https://raw.githubusercontent.com/kubernetes/dashboard/master/aio/deploy/recommended/kubernetes-dashboard.yaml
 
 
@@ -632,6 +636,20 @@ kubectl -n kubernetes-dashboard delete clusterrolebinding admin-user
 ```
 
 kubectl get secret -n kubernetes-dashboard
+
+
+
+## 端口映射
+
+可以通过service的nodePort模式，kubectl proxy,kubectl-port，ingress等各种方式进行访问。
+
+
+
+本例通过port-forwad将service映射到主机上
+
+```shell
+nohup kubectl port-forward -n kubernetes-dashboard service/kubernetes-dashboard 8080:443 --address='172.20.58.83' &
+```
 
 # k8s删除Terminating状态的命名空间
 
