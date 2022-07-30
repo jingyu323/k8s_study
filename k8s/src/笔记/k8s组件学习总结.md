@@ -138,8 +138,20 @@ Pod如果是通过Deployment 创建的，则升级回退就是要使用Deploymen
    ```
 
    2. kubectl edit deployment 直接修改镜像
+
    3. \# 扩容    kubectl scale deployment nginx-deployment --replicas=5
-   4.   kubectl scale --current-replicas=5 --replicas=3 deployment nginx-deployment
+
+   4.   缩容   kubectl scale --current-replicas=5 --replicas=3 deployment nginx-deployment
+
+   5.   \# 删除deployment资源(基于yaml)    kubectl delete -f nginx.yml
+
+   6. ```
+      查看历史deployment
+      kubectl rollout history deployment nginx-deployment   
+       kubectl rollout status deployment nginx-deployment
+      ```
+
+   7.  \# 通过--to-revision指定回滚到特定的修订如：--to-revision=2    kubectl rollout undo deployment nginx-deployment
 
    ### Deployment更新策略
 
@@ -175,7 +187,7 @@ Pod如果是通过Deployment 创建的，则升级回退就是要使用Deploymen
 
 
 ##  service 
-解决的是容器负载的问题。解决的是：
+解决的是容器负载的问题。service的引入旨在保证pod的动态变化对访问端透明，访问端只需要知道service的地址，由service来提供代理**解决的是**： 
 
  服务发现（防止pod 失联）防止Pod失联；定义一组Pod的访问策略
 
@@ -261,6 +273,17 @@ Pod如果是通过Deployment 创建的，则升级回退就是要使用Deploymen
    1. ClusterIP　 **集群IP，仅供k8s内部访问(只能在pod 或node 上访问，无法外部访问)，相当于service 加了1个vip，通过vip 提供访问地址，再转发给各个Pod**
    2. NodePort　　在每个node 节点为相应Pod启动一个对外端口（默认30000起步），映射pod 内部端口。通过任意一个Pod 所在的节点ip+port 就能访问pod ，多个pod 需要在service 前面加一个LB（lvs/proxy）把每个节点的ip+port 加入，才能实现负载均衡,这样每个服务都得添加一次，增加了管理维护成本
    3. Loadblance   云服务厂商提供的，自动添加service 映射对外端口到负载上面，例如阿里云可以通过SLB为service 提供负载均衡。只有云服务厂商的k8s 才有此形式
+   
+   
+   
+   #### EndPoint
+   
+   Endpoint是可被访问的服务端点，即一个状态为running的pod，它是service访问的落点，只有service关联的pod才可能成为endpoint。
+   Endpoint、service和pod的关系：
+   
+   ![](images\endpoint.png)
+   
+   
    
    ## 将服务暴露给外部客户端
 

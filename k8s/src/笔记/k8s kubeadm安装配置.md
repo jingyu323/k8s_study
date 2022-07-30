@@ -707,7 +707,7 @@ kubectl replace --force -f recommended.yaml
 
 
 
-
+查看所有命名空间的Pod
 
 *kubectl get pods -A -o wide*
 
