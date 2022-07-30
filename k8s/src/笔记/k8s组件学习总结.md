@@ -127,17 +127,24 @@ Pod如果是通过Deployment 创建的，则升级回退就是要使用Deploymen
 
 ##  Deployment  
 
-1. 只能管理无状态应用
+1. 只能管理无状态应用, 总结k8s中的Pod、ReplicaSet、Deployment之间的管理关系，自顶到下为：Deployment=>ReplicaSet=>Pod。
 
    ### Deployment更新方式
 
    1. kubectl set image
+
+   ```
+   kubectl set image deployment/nginx-deployment nginx=nginx:1.16.1 --record
+   ```
+
    2. kubectl edit deployment 直接修改镜像
 
    ### Deployment更新策略
 
    1. Recreate
    2. RollingUpdate：滚动更新，为默认方式
+
+   
 
    ### DaemonSet更新策略
 
