@@ -1,6 +1,6 @@
 
 
-安装详细步骤
+
 
 http://blog.itpub.net/70003733/viewspace-2888774/
 
@@ -8,7 +8,11 @@ http://blog.itpub.net/70003733/viewspace-2888774/
 
 https://blog.csdn.net/qq_33921750/article/details/124958403
 
+# 安装集群的方式：
 
+
+
+安装单master集群
 
 1.设置hostname
 
@@ -302,7 +306,7 @@ systemctl restart containerd
 				
 				
 				
-				
+节点init完成	
 
 To start using your cluster, you need to run the following as a regular user:
 
@@ -314,13 +318,13 @@ Alternatively, if you are the root user, you can run:
 
   export KUBECONFIG=/etc/kubernetes/admin.conf
 
-添加worknode
+### 添加worknode
 
 kubeadm join 192.168.109.134:6443 --token voyqtd.dn5fr6wm9oomycfk \
 ​	--discovery-token-ca-cert-hash sha256:1482bd7c078a97b2dd3c4655542a5809821ce474240f5303aa2789fc1da54947 
 ​
 
-添加master
+### 添加master
 
 kubeadm join 192.168.109.134:6443 --token voyqtd.dn5fr6wm9oomycfk \
 	--discovery-token-ca-cert-hash sha256:1482bd7c078a97b2dd3c4655542a5809821ce474240f5303aa2789fc1da54947  \
