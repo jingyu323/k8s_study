@@ -314,12 +314,22 @@ Alternatively, if you are the root user, you can run:
 
   export KUBECONFIG=/etc/kubernetes/admin.conf
 
+添加worknode
 
-​				
 kubeadm join 192.168.109.134:6443 --token voyqtd.dn5fr6wm9oomycfk \
 ​	--discovery-token-ca-cert-hash sha256:1482bd7c078a97b2dd3c4655542a5809821ce474240f5303aa2789fc1da54947 
-​	
-​	
+​
+
+添加master
+
+kubeadm join 192.168.109.134:6443 --token voyqtd.dn5fr6wm9oomycfk \
+	--discovery-token-ca-cert-hash sha256:1482bd7c078a97b2dd3c4655542a5809821ce474240f5303aa2789fc1da54947  \
+
+--control-plane
+
+ 
+
+
 #如果超过2小时忘记了令牌，可以这样做
 
 $ kubeadm token create --print-join-command #新令牌

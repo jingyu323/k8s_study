@@ -329,9 +329,73 @@ ipvs实际上就是lvs 的原理。采用它的轮询策略（w,rr/wrr.lc,wlc）
 
 # CoreDns
 
-1.作用 集群内部需要通过服务名称对服务进行访问，就需要一个域名和IP的解析
+### 1.作用 集群内部需要通过服务名称对服务进行访问，就需要一个域名和IP的解析
 
+### 2.Pod 如何知道 DNS服务器地址
 
+kubelet会将DNS Server 的 IP地址写到容器的/etc/resolv.conf文件中
+
+具体来说
+
+集群内 DNS 服务启动后，会获得 Cluster IP (就是Service 的IP，但只能在集群内使用)
+系统（安装程序）会给kubelet配置 --cluster-dns=<dns service ip>
+该 DNS IP 则会在容器启动时传递，写入到每个容器的 /etc/resolv.conf文件中 
+
+### DNS域名解析原理
+
+对于 Service，K8s DNS服务器会生成三类 DNS 记录，分别是 A 记录、 SRV 记录、 CNAME 记录
+
+#### A记录
+
+- 用于将域或子域指向某个IP地址，是DNS记录的最基本类型
+- 记录包含域名，解析它的IP地址和以秒为单位的TTL，TTL代表生存时间，是此记录的到期时间
+- 普通Service的A记录的映射关系
+  - {service name}.{service namespace}.svc.{domin} --> Cluster IP
+- headless Service 的 A 记录映射关系：
+  - {service name}.{service namespace}.svc.{domin} --> 后端Pod IP 列表
+- 如果 Pod Spec 指定 hostname 和 subdomin，那么会额外生成 Pod 的 A 记录
+  - 
+    如果 Pod Spec 指定 hostname 和 subdomin，那么会额外生成 Pod 的 A 记录
+    {hostname}.{subdomain}.{pod namespace}.pod.cluster.local --> Pod IP
+
+#### SRV 记录
+
+通过描述某些服务协议和地址促进服务发现
+定义一个符号名称和作为域名一部分的传输协议，并定义给定服务的优先级、权重、端口和目标
+_sip._tcp.example.com.   3600 IN   SRV 10   70   5060 srvrecord.example.com
+_sip._tcp.example.com.   3600 IN   SRV 10   20   5060 srvrecord2.ex
+
+_sip 是服务的符号名称
+_tcp 是服务使用的传输协议
+两个记录都定义了10的优先级
+第一个指定权重70，第二个指定权重20
+最后两值定义了要连接的端口和主机名，以便与服务通信
+
+ ```
+_sip._tcp.example.com.   3600 IN   SRV 10   70   5060 srvrecord.example.com
+_sip._tcp.example.com.   3600 IN   SRV 10   20   5060 srvrecord2.ex
+
+_sip 是服务的符号名称
+_tcp 是服务使用的传输协议
+两个记录都定义了10的优先级
+第一个指定权重70，第二个指定权重20
+最后两值定义了要连接的端口和主机名，以便与服务通信
+ ```
+
+- k8s DNS 的 SRV 记录按照一个约定出城的规定实现了对服务端口的查询
+  _{port name}._{port protocol}.{service name}.{service namespace}.svc.cluster.local --> Service Port
+  SRV 记录是为 普通 或 headless 服务的部分指定端口创建的
+  普通服务
+  被解析的端口号和域名是 my-svc.my-namespace.svc.cluster.local
+  Headless 服务
+  此 name 解析为多个 answer，每个 answer 都支持服务
+  每个 answer 都包含 auto-generated-name.my-svc.my-namespace.svc.cluster.local 表单的 Pod 端口号和域名
+
+#### CNAME 记录
+
+别名
+用于将域或子域指向另一个主机名
+可用于联合服务的跨集群服务发现 
 
 # Ingress
 
@@ -604,3 +668,28 @@ RunC
 ## 8.2 一个集群能管理多少节点
 
 # 9.RS 和Deployment的区别
+
+# 10.监控和日志
+
+# 11.haproxy+keepalived
+
+### haproxy 是一个开源的，高性能的，负载均衡软件，借助haproxy可以快速，可靠的构建一个负载均衡群集。
+
+优点如下：
+
+可靠性和稳定性非常好，可以和硬件级的负载均衡设备F5相媲美。
+
+最高可同时维护40000-50000个并发连接，单位时间内处理的最大请求数为20000个。
+
+#### keepalived keepalived基于vrrp协议，两台主机之间生成一个虚拟的ip，我们称漂移ip，漂移ip由主服务器承担，一但主服务器宕机，备份服务器就会抢占漂移ip，继续工作，有效的解决了群集中的单点故障。两者相结合，挺好的。
+
+让haproxy监听keepalived的漂移ip工作，一但haproxy宕机，备份抢占漂移ip继续承担着代理的工作。
+
+keepalived：就是对haproxy集群代理的单点IP做个虚拟IP保证可靠性，提高系统可用性。
+
+# 12 K8s的服务发现
+
+### 12.1集群内部服务访问
+
+### 12.2集群内部服务访问
+
