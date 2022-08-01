@@ -799,6 +799,13 @@ cd /etc/kubernetes
 
 /etc/kubernetes# cp  -f admin.conf  ~/.kube/config
 
+
+
+# 问题定位：
+
+1. 查看一下kubelet启动日志  *journalctl -f -u kubelet*
+2.  *systemctl status  kubelet*  查看状态
+
  
 
 
