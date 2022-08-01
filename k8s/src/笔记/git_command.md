@@ -1,7 +1,7 @@
-1. 未使用git add 缓存代码
+ 未使用git add 缓存代码
 使用git checkout – filename，注意中间有–
 git checkout -- filename
-1.
+
 放弃所有文件修改 git checkout .
 git checkout .
 
