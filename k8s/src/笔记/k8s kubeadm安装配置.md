@@ -805,5 +805,67 @@ cd /etc/kubernetes
 
  
 
+## keepalive配置
+
+vim /etc/keepalived/keepalived.conf
+
+```
+global_defs { 
+ notification_email { 
+ acassen@firewall.loc 
+ failover@firewall.loc 
+ sysadmin@firewall.loc 
+ } 
+ notification_email_from Alexandre.Cassen@firewall.loc 
+ smtp_server 127.0.0.1 
+ smtp_connect_timeout 30 
+ router_id NGINX_MASTER 
+} 
+ 
+vrrp_script check_nginx { 
+ script "/etc/keepalived/check_nginx.sh" 
+}
+
+vrrp_instance VI_1 { 
+ state MASTER 
+ interface ens33 # 修改为实际网卡名 
+ virtual_router_id 51 # VRRP 路由 ID 实例，每个实例是唯一的 
+ priority 100 # 优先级，备服务器设置 90 
+ advert_int 1 # 指定 VRRP 心跳包通告间隔时间，默认 1 秒 
+ authentication { 
+ auth_type PASS 
+ auth_pass 1111 
+ } 
+ # 虚拟 IP 
+ virtual_ipaddress { 
+ 192.168.48.199/24 
+ } 
+ track_script { 
+ check_nginx 
+ } 
+}
+#vrrp_script：指定检查 nginx 工作状态脚本（根据 nginx 状态判断是否故障转移） 
+#virtual_ipaddress：虚拟 IP（VIP） 
+```
+
+
+
+编写脚本/etc/keepalived/check_nginx.
+
+```shell
+#!/bin/bash 
+count=$(ps -ef |grep nginx | grep sbin | egrep -cv "grep|$$") 
+if [ "$count" -eq 0 ];then 
+ systemctl stop keepalived 
+fi 
+```
+
+启动nginx
+systemctl daemon-reload && yum install nginx-mod-stream -y && systemctl start nginx
+启动keepalived
+systemctl start keepalived && systemctl enable nginx keepalived && systemctl status keepalived
+注意:keepalived无法启动的时候，查看keepalived.conf配置权限
+chmod 644 keepalived.conf
+
 
 
