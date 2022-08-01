@@ -23,9 +23,9 @@ cat  >  /etc/hosts << EOF
 
 127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
 ::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
-192.168.99.115 master
-192.168.99.153  node1
-192.168.99.116 node2
+192.168.99.110  master
+192.168.99.178  node1
+192.168.99.142 node2
 
 EOF
 
@@ -797,7 +797,7 @@ cd /etc/kubernetes
 
 六，将kubeconfig默认配置文件替换为admin.conf，这样就可以直接使用kubectl get nodes
 
-/etc/kubernetes# mv -f admin.conf  ~/.kube/config
+/etc/kubernetes# cp  -f admin.conf  ~/.kube/config
 
  
 
