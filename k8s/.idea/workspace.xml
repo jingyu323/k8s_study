@@ -10,6 +10,9 @@
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
+  <component name="Git.Merge.Settings">
+    <option name="BRANCH" value="origin/main" />
+  </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
   </component>
@@ -42,6 +45,7 @@
       <workItem from="1658561537203" duration="3428000" />
       <workItem from="1658885350093" duration="2066000" />
       <workItem from="1659005863151" duration="367000" />
+      <workItem from="1659319749252" duration="392000" />
     </task>
     <task id="LOCAL-00001" summary="初始安装笔记">
       <created>1658413407917</created>
