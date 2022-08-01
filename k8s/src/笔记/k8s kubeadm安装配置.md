@@ -27,9 +27,9 @@ cat  >  /etc/hosts << EOF
 
 127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
 ::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
-192.168.99.115 master
-192.168.99.153  node1
-192.168.99.116 node2
+192.168.99.110  master
+192.168.99.178  node1
+192.168.99.142 node2
 
 EOF
 
@@ -759,13 +759,7 @@ https://github.com/goharbor/harbor
 
 # k8s的更换ip
 
-替换为新的IP
 
-find . -type f | xargs sed -i "s/192.168.99.115/192.168.99.176/"
-
-查看修改结果
-
-find . -type f | xargs grep 192.168.99.176
 
 切换到/etc/kubernetes/manifests， 将etcd.yaml kube-apiserver.yaml里的ip地址替换为新的ip
 
@@ -774,9 +768,9 @@ find . -type f | xargs grep 192.168.99.176
 
 替换为新的IP
 
-newIP=192.168.93.53
+newIP=192.168.99.110
 
-oldIP=192.168.99.176
+oldIP=192.168.99.175
 
 find . -type f | xargs sed -i "s/$oldIP/$newIP/"
 
@@ -785,6 +779,8 @@ find . -type f | xargs sed -i "s/$oldIP/$newIP/"
 find . -type f | xargs grep $newIP
 
 二，生成新的config文件
+
+cd /etc/kubernetes
 
 /etc/kubernetes# mv admin.conf admin.conf.bak
 /etc/kubernetes# kubeadm init phase kubeconfig admin --apiserver-advertise-address $newIP
@@ -805,7 +801,7 @@ find . -type f | xargs grep $newIP
 
 六，将kubeconfig默认配置文件替换为admin.conf，这样就可以直接使用kubectl get nodes
 
-/etc/kubernetes# cp -f admin.conf  ~/.kube/config
+/etc/kubernetes# cp  -f admin.conf  ~/.kube/config
 
  
 
