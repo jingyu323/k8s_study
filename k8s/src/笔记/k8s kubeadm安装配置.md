@@ -8,6 +8,10 @@ http://blog.itpub.net/70003733/viewspace-2888774/
 
 https://blog.csdn.net/qq_33921750/article/details/124958403
 
+# 3台Master+3台Node
+
+https://blog.csdn.net/jasonhe2018/article/details/112749146
+
 # 安装集群的方式：
 
 
