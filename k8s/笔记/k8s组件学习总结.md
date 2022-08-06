@@ -32,10 +32,6 @@ Docker Engine：Docker引擎，负责本机的容器创建和管理工作
 
 
 
-
-
-
-
 ##  Pod
 
 Pod可以有一个或者多个容器
@@ -127,19 +123,13 @@ Pod注入信息到容器的方式：
       
       https://blog.csdn.net/qq_34857250/article/details/90259693
 
-   ### kube-scheduler 调度流程
+   ### kube-scheduler 创建流程
 
    ​	![](images/20201223103750490.png)
 
    
 
-   1. 过滤（Predicates 预选策略）
-
-       	过滤阶段会将所有满足 Pod 调度需求的 Node 选出来。
-
-   2. 打分（Priorities 优选策略）
-
-      ​	在过滤阶段后调度器会为 Pod 从所有可调度节点中选取一个最合适的 Node。根据当前启用的打分规则，调度器会给每一个可调度节点进行打分
+   
 
    1. 用户提交pod请求：用户提交创建Pod的请求，可以通过API Server的REST API ，也可用Kubectl命令行工具，支持Json和Yaml两种格式；
 
@@ -154,6 +144,16 @@ Pod注入信息到容器的方式：
                        3）选择主机：选择打分最高的主机，进行binding操作，结果存储到Etcd中；
 
    4. kubelet创建pod:  kubelet根据Schedule调度结果执行Pod创建操作: 调度成功后，会启动container, docker run, scheduler会调用API Server的API在etcd中创建一个bound pod对象，描述在一个工作节点上绑定运行的所有pod信息。运行在每个工作节点上的kubelet也会定期与etcd同步bound pod信息，一旦发现应该在该工作节点上运行的bound pod对象没有更新，则调用Docker API创建并启动pod内的容器。
+
+   #### 选择node机制
+
+   1. 过滤（Predicates 预选策略）
+
+      	过滤阶段会将所有满足 Pod 调度需求的 Node 选出来。
+
+   2. 打分（Priorities 优选策略）
+
+      ​	在过滤阶段后调度器会为 Pod 从所有可调度节点中选取一个最合适的 Node。根据当前启用的打分规则，调度器会给每一个可调度节点进行打分
 
 
 ​    
