@@ -8,6 +8,10 @@ http://blog.itpub.net/70003733/viewspace-2888774/
 
 https://blog.csdn.net/qq_33921750/article/details/124958403
 
+# 3台Master+3台Node
+
+https://blog.csdn.net/jasonhe2018/article/details/112749146
+
 # 安装集群的方式：
 
 
@@ -802,6 +806,13 @@ cd /etc/kubernetes
 六，将kubeconfig默认配置文件替换为admin.conf，这样就可以直接使用kubectl get nodes
 
 /etc/kubernetes# cp  -f admin.conf  ~/.kube/config
+
+
+
+# 问题定位：
+
+1. 查看一下kubelet启动日志  *journalctl -f -u kubelet*
+2.  *systemctl status  kubelet*  查看状态
 
  
 
