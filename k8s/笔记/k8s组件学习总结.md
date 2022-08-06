@@ -323,9 +323,47 @@ service 负载均衡实现主要有两种方式
 
 iptables 是一个工具它通过linux 的netfilter 来进行ip 包的过滤处理。主要通过维护一张规则表，从上到下匹配表中规则，每次变动都不是增量而是全表变动。随着表的增大效率降低。
 
+#### 缺点：
+
+宿主机上有大量 Pod 的时候，成百上千条 iptables 规则不断地被刷新，会大量占用该宿主机的 CPU 资源，甚至会让宿主机“卡”在这个过程中。所以说，一直以来，基于 iptables 的 Service 实现，都是制约 Kubernetes 项目承载更多量级的 Pod 的主要障碍 
+
 #### ipvs(k8s version:1.11以后)
 
 ipvs实际上就是lvs 的原理。采用它的轮询策略（w,rr/wrr.lc,wlc），内核级别的，效率高。
+
+原理：
+
+IPVS 模式的工作原理，其实跟 iptables 模式类似。当我们创建了前面的 Service 之后，kube-proxy 首先会在宿主机上创建一个虚拟网卡（叫作：kube-ipvs0），并为它分配 Service VIP 作为 IP 地址，如下所示：
+
+```
+# ip addr
+  ...
+  73：kube-ipvs0：<BROADCAST,NOARP>  mtu 1500 qdisc noop state DOWN qlen 1000
+  link/ether  1a:ce:f5:5f:c1:4d brd ff:ff:ff:ff:ff:ff
+  inet 10.0.1.175/32  scope global kube-ipvs0
+  valid_lft forever  preferred_lft forever
+```
+
+而接下来，kube-proxy 就会通过 Linux 的 IPVS 模块，为这个 IP 地址设置三个 IPVS 虚拟主机，并设置这三个虚拟主机之间使用轮询模式 (rr) 来作为负载均衡策略。我们可以通过 ipvsadm 查看到这个设置，如下所示
+
+```
+# ipvsadm -ln
+ IP Virtual Server version 1.2.1 (size=4096)
+  Prot LocalAddress:Port Scheduler Flags
+    ->  RemoteAddress:Port           Forward  Weight ActiveConn InActConn     
+  TCP  10.102.128.4:80 rr
+    ->  10.244.3.6:9376    Masq    1       0          0         
+    ->  10.244.1.7:9376    Masq    1       0          0
+    ->  10.244.2.3:9376    Masq    1       0          0
+```
+
+这三个 IPVS 虚拟主机的 IP 地址和端口，对应的正是三个被代理的 Pod。
+
+这时候，任何发往 10.102.128.4:80 的请求，就都会被 IPVS 模块转发到某一个后端 Pod 上了。
+
+而相比于 iptables，IPVS 在内核中的实现其实也是基于 Netfilter 的 NAT 模式，所以在转发这一层上，理论上 IPVS 并没有显著的性能提升。但是，IPVS 并不需要在宿主机上为每个 Pod 设置 iptables 规则，而是把对这些“规则”的处理放到了内核态，从而极大地降低了维护这些规则的代价。这也正印证了我在前面提到过的，“将重要操作放入内核态”是提高性能的重要手段。
+
+不过需要注意的是，IPVS 模块只负责上述的负载均衡和代理功能。而一个完整的 Service 流程正常工作所需要的包过滤、SNAT 等操作，还是要靠 iptables 来实现。只不过，这些辅助性的 iptables 规则数量有限，也不会随着 Pod 数量的增加而增加。 
 
 
 
@@ -425,13 +463,13 @@ Ingress Controller：具体实现反向代理及负载均衡的程序，对Ingre
       1. 默认开启https，需要修改INgress annotation，关闭默认转发
    
    总结各方式利弊
-   hostPort和hostNetwork直接使用节点网络，部署时节点需固定，访问ip也固定(也可以用host)，端口为正常端口
+   hostPort和hostNetwork直接使用节点网络**，部署时节点需固定**，访问ip也固定(也可以用host)，端口为正常端口
    
    nodeport方式部署时不要求固定节点，可通过集群内任一ip进行访问，就是端口为30000以上，很多时候由于公司安全策略导致不能访问。
    
-   LoadBalancer依赖于云服务商提供的LoadBalancer的实现机制。
+   LoadBalancer依赖于**云服务商提供的LoadBalancer**的实现机制。
    
-   ingress需要额外安装ingress模块，配置路由规则，且仅能通过所配置域名访问，配置好域名后，可以直接对外提供服务，和传统的nginx作用类似
+   ingress需要额外安装**ingress模块**，配置路由规则，且仅能通过所配置域名访问，配置好域名后，可以直接对外提供服务，和传统的nginx作用类似
 
 # 集群安全机制
 
@@ -614,6 +652,10 @@ Kubernetes有User Account和Service Account两套独立的账号系统：
 kubectl get serviceaccount --all-namespaces
 
 
+
+
+
+# iptables
 
 
 
