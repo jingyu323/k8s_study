@@ -245,8 +245,10 @@ Pod如果是通过Deployment 创建的，则升级回退就是要使用Deploymen
     
     3. Service的访问被分发到了后端的Pod上去 负载分发策略
     
-    4. roundRobin 轮询模式
-    5. SessionAffinity  基于客户端IP保持会话模式，如果是相同客户端的请求会被转发到同一个Pod上
+    4. **负载分发策略：**
+    
+        4. roundRobin 轮询模式
+        2.  SessionAffinity  基于客户端IP保持会话模式，如果是相同客户端的请求会被转发到同一个Pod上
     
 4. 外部服务
    1. 先创建一个无Label Slector Service,  无法选则后端Pod
@@ -414,13 +416,22 @@ Ingress Controller：具体实现反向代理及负载均衡的程序，对Ingre
 - 第三步：定义转发策略
 
 2. Ingress Controller 基于Ingress 转发规则将客户端 直接转发到service对应的后端Endpoint上，会跳过kube-proxy的转发功能，导致kube-proxy不再起作用。
+
 3. Ingress 转发策略
    1. 单个后端服务
    2. 同一域名不同Url转发到不同的服务上
    3. 不同域名的服务转发到不同的服务上
    4. 不使用域名转发规则，用于一个网站不使用域名直接提供服务的场景。
       1. 默认开启https，需要修改INgress annotation，关闭默认转发
-      2. 
+   
+   总结各方式利弊
+   hostPort和hostNetwork直接使用节点网络，部署时节点需固定，访问ip也固定(也可以用host)，端口为正常端口
+   
+   nodeport方式部署时不要求固定节点，可通过集群内任一ip进行访问，就是端口为30000以上，很多时候由于公司安全策略导致不能访问。
+   
+   LoadBalancer依赖于云服务商提供的LoadBalancer的实现机制。
+   
+   ingress需要额外安装ingress模块，配置路由规则，且仅能通过所配置域名访问，配置好域名后，可以直接对外提供服务，和传统的nginx作用类似
 
 # 集群安全机制
 
