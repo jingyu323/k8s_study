@@ -89,6 +89,18 @@ gpgkey=https://mirrors.aliyun.com/kubernetes/ yum/doc/yum-key.gpg
 
 EOF
 
+
+
+产生config.toml
+
+containerd config default > /etc/containerd/config.toml
+
+替换镜像，不然镜像下载不下来
+
+grep sandbox_image  /etc/containerd/config.toml
+sed -i "s#k8s.gcr.io/pause#registry.aliyuncs.com/google_containers/pause#g"       /etc/containerd/config.toml
+grep sandbox_image  /etc/containerd/config.toml
+
 ## 集群高可用配置
 
 
@@ -589,6 +601,13 @@ roleRef:
 kubectl apply -f dashboard-svc-account.yaml
 ```
 
+
+
+ kubectl -n kubernetes-dashboard create token admin-user
+error: failed to create token: serviceaccounts "admin-user" not found
+
+
+
 ```
 vim create-admin.yaml
 apiVersion: v1
@@ -614,6 +633,10 @@ subjects:
   
  kubectl apply -f  create-admin.yaml
 ```
+
+
+
+ 
 
 
 
@@ -989,3 +1012,191 @@ ctr ns ls
 指定命名空间引入镜像
 
 ctr -n k8s.io  image import kubernetesui.tar
+
+
+
+ctr 命令使用
+Container命令ctr,crictl的用法
+版本：ctr containerd.io 1.4.3
+containerd 相比于docker , 多了namespace概念, 每个image和container 都会在各自的namespace下可见, 目前k8s会使用k8s.io 作为命名空间~~
+
+1.1、查看ctr image可用操作
+ctr image list, ctr i list , ctr i ls
+COPY
+1.2、镜像标记tag
+ctr -n k8s.io i tag registry.cn-hangzhou.aliyuncs.com/google_containers/pause:3.2 k8s.gcr.io/pause:3.2
+注意: 若新镜像reference 已存在, 需要先删除新reference, 或者如下方式强制替换
+ctr -n k8s.io i tag --force registry.cn-hangzhou.aliyuncs.com/google_containers/pause:3.2 k8s.gcr.io/pause:3.2
+COPY
+1.3、删除镜像
+ctr -n k8s.io i rm k8s.gcr.io/pause:3.2
+COPY
+1.4、拉取镜像
+ctr -n k8s.io i pull -k k8s.gcr.io/pause:3.2
+COPY
+1.5、推送镜像
+ctr -n k8s.io i push -k k8s.gcr.io/pause:3.2
+COPY
+1.6、导出镜像
+ctr -n k8s.io i export pause.tar k8s.gcr.io/pause:3.2
+COPY
+1.7、导入镜像
+
+# 不支持 build,commit 镜像
+ctr -n k8s.io i import pause.tar
+COPY
+1.8、查看容器相关操作
+ctr c
+COPY
+1.9、运行容器
+–null-io: 将容器内标准输出重定向到/dev/null
+–net-host: 主机网络
+-d: 当task执行后就进行下一步shell命令,如没有选项,则会等待用户输入,并定向到容器内
+–mount 挂载本地目录或文件到容器
+–env 环境变量
+ctr -n k8s.io run --null-io --net-host -d \
+–env PASSWORD="123456"
+–mount type=bind,src=/etc,dst=/host-etc,options=rbind:rw
+COPY
+1.10、容器日志
+注意: 容器默认使用fifo创建日志文件, 如果不读取日志文件,会因为fifo容量导致业务运行阻塞
+
+如要创建日志文件,建议如下方式创建:
+ctr -n k8s.io run --log-uri file:///var/log/xx.log
+COPY
+二、ctr和docker命令比较
+Containerd命令    Docker命令    描述
+ctr task ls    docker ps    查看运行容器
+ctr image ls    docker images    获取image信息
+ctr image pull pause    docker pull pause    pull 应该pause镜像
+ctr image push pause-test    docker push pause-test    改名
+ctr image import pause.tar    docker load 镜像    导入本地镜像
+ctr run -d pause-test pause    docker run -d --name=pause pause-test    运行容器
+ctr image tag pause pause-test    docker tag pause pause-test    tag应该pause镜像
+三、crictl 命令
+3.1、crictl 配置
+# 通过在配置文件中设置端点 --config=/etc/crictl.yaml
+root@k8s-node-0001:~$ cat /etc/crictl.yaml
+runtime-endpoint: unix:///run/containerd/containerd.sock
+COPY
+3.2、列出业务容器状态
+crictl inspect ee20ec2346fc5
+COPY
+3.3、查看运行中容器
+root@k8s-node-0001:~$ crictl pods
+POD ID              CREATED             STATE               NAME                                                     NAMESPACE           ATTEMPT             RUNTIME
+b39a7883a433d       10 minutes ago      Ready               canal-server-quark-b477b5d79-ql5l5                       mbz-alpha           0                   (default)
+COPY
+3.4、打印某个固定pod
+root@k8s-node-0001:~$ crictl pods --name canal-server-quark-b477b5d79-ql5l5
+POD ID              CREATED             STATE               NAME                                 NAMESPACE           ATTEMPT             RUNTIME
+b39a7883a433d       12 minutes ago      Ready               canal-server-quark-b477b5d79-ql5l5   mbz-alpha           0                   (default)
+COPY
+3.5、打印镜像
+root@k8s-node-0001:~$ crictl images
+IMAGE                                                          TAG                             IMAGE ID            SIZE
+ccr.ccs.tencentyun.com/koderover-public/library-docker         stable-dind                     a6e51fd179fb8       74.6MB
+ccr.ccs.tencentyun.com/koderover-public/library-nginx          stable                          588bb5d559c28       51MB
+ccr.ccs.tencentyun.com/koderover-public/nsqio-nsq              v1.0.0-compat                   2714222e1b39d       22MB
+COPY
+3.6、只打印镜像 ID
+root@k8s-node-0001:~$ crictl images -q
+sha256:a6e51fd179fb849f4ec6faee318101d32830103f5615215716bd686c56afaea1
+sha256:588bb5d559c2813834104ecfca000c9192e795ff3af473431497176b9cb5f2c3
+sha256:2714222e1b39d8bd6300da72b0805061cabeca3b24def12ffddf47abd47e2263
+sha256:be0f9cfd2d7266fdd710744ffd40e4ba6259359fc3bc855341a8c2adad5f5015
+COPY
+3.7、打印容器清单
+root@k8s-node-0001:~$ crictl ps -a
+CONTAINER           IMAGE               CREATED             STATE               NAME                     ATTEMPT             POD ID
+ee20ec2346fc5       c769a1937d035       13 minutes ago      Running             canal-server             0                   b39a7883a433d
+76226ddb736be       cc0c524d64c18       34 minutes ago      Running             mbz-rescue-manager       0                   2f9d48c49e891
+e2a19ff0591b4       eb40a52eb437d       About an hour ago   Running             export                   0                   9844b5ea5fdbc
+COPY
+3.8、打印正在运行的容器清单
+root@k8s-node-0001:~$ crictl ps
+CONTAINER           IMAGE               CREATED             STATE               NAME                   ATTEMPT             POD ID
+ee20ec2346fc5       c769a1937d035       13 minutes ago      Running             canal-server           0                   b39a7883a433d
+COPY
+3.9、容器上执行命令
+root@k8s-node-0001:~$ crictl exec -i -t ee20ec2346fc5 ls
+app.sh  bin  canal-server  health.sh  node_exporter  node_exporter-0.18.1.linux-arm64
+COPY
+3.10、获取容器的所有日志
+root@k8s-node-0001:~$ crictl logs ee20ec2346fc5
+DOCKER_DEPLOY_TYPE=VM
+==> INIT /alidata/init/02init-sshd.sh
+==> EXIT CODE: 0
+==> INIT /alidata/init/fix-hosts.py
+COPY
+3.11、获取最近的 N 行日志
+root@k8s-node-0001:~$ crictl logs --tail=2 ee20ec2346fc5
+start canal successful
+==> START SUCCESSFUL ...
+COPY
+3.12、拉取镜像
+crictl pull busybox
+
+crictl pods
+
+
+
+# 启动一个pod：给个名字mynginx，启动一个镜像nginx
+kubectl run mynginx --image=nginx
+
+# 查看default名称空间的Pod
+kubectl get pod  # 所有集群范围内，其他node的也可以看到
+
+# 描述
+kubectl describe pod 你自己的Pod名字  # 查看默认名称空间pod
+kubectl describe  -n [ns] pod 你自己的Pod名字  # 
+
+# 删除
+kubectl delete pod Pod名字
+
+# 查看Pod的运行日志
+kubectl logs Pod名字
+
+#查找指定的运行中的容器
+docker ps|grep mynginx
+
+#删除镜像
+kubectl delete -f pytest.yaml
+
+# 每个Pod - k8s都会分配一个ip
+kubectl get pod -owide  # 可以查看pod运行的node和ip地址，打印详细信息	
+
+# 使用Pod的ip+pod里面运行容器的端口
+curl xxx.xxx.xxx.xxx # 不写端口默认就是80端口
+
+# 进入pod
+kubectl exec -it myngix  -- /bin/bash
+
+# 集群中的任意一个机器以及任意的应用都能通过Pod分配的ip来访问这个Pod
+
+kubectl get namespace  # 获取名称空间
+kubectl get pods  # 获取默认名称空间pods
+kubectl get pods -A  # 获取全部名称空间pods
+kubectl get pods -n [namespace]  # 查看指定名称空间pod
+kubectl creat ns hello  # 创建名称空间
+
+也可以通过yaml文件创建ns：
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: hello
+
+vi hello.yaml
+kubectl apply -f hello.yaml
+
+# 描述
+kubectl describe pod 你自己的Pod名字
+
+# 删除
+kubectl delete pod Pod名字  # 会删除该名称空间的所有资源
+kubectl delete -f hello.yaml  # 用配置文件创建的ns用这种方式删，删的干净
+
+# 查看Pod的运行日志
+kubectl logs Pod名字
+
+\# 每个Pod - k8s都会分配一个ip kubectl get pod -owide # 使用Pod的ip+pod里面运行容器的端口 curl 192.168.169.136 # 集群中的任意一个机器以及任意的应用都能通过Pod分配的ip来访问这个Pod
