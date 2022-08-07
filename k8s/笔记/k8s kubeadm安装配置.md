@@ -772,9 +772,9 @@ https://github.com/goharbor/harbor
 
 替换为新的IP
 
-newIP=192.168.99.110
+oldIP=192.168.99.110
 
-oldIP=192.168.99.175
+newIP=192.168.93.56
 
 find . -type f | xargs sed -i "s/$oldIP/$newIP/"
 
@@ -806,6 +806,16 @@ cd /etc/kubernetes
 六，将kubeconfig默认配置文件替换为admin.conf，这样就可以直接使用kubectl get nodes
 
 /etc/kubernetes# cp  -f admin.conf  ~/.kube/config
+
+
+
+# docker  使用命令
+
+1. docker network inspect bridge 可以查看网桥的子网网络范围和网关
+
+   docker network inspect bridge
+
+ 
 
 
 
