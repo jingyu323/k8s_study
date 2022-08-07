@@ -101,7 +101,19 @@ grep sandbox_image  /etc/containerd/config.toml
 sed -i "s#k8s.gcr.io/pause#registry.aliyuncs.com/google_containers/pause#g"       /etc/containerd/config.toml
 grep sandbox_image  /etc/containerd/config.toml
 
-## 集群高可用配置
+
+
+#### 配置containerd cgroup 驱动程序systemd
+
+kubernets自ｖ1.24.0后，就不再使用docker.shim，替换采用containerd作为容器运行时端点。因此需要安装containerd（在docker的基础下安装），上面安装docker的时候就自动安装了containerd了。这里的docker只是作为客户端而已。容器引擎还是containerd。 
+
+```
+sed -i 's#SystemdCgroup = false#SystemdCgroup = true#g' /etc/containerd/config.toml
+# 应用所有更改后,重新启动containerd
+systemctl restart containerd
+```
+
+
 
 
 
