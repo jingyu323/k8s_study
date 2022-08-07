@@ -89,6 +89,8 @@ gpgkey=https://mirrors.aliyun.com/kubernetes/ yum/doc/yum-key.gpg
 
 EOF
 
+## 集群高可用配置
+
 
 
 
@@ -178,7 +180,7 @@ kubeadm init \
 如果执行失败， 先 kubeadm reset 再次执行    kubeadm init
 
 kubeadm init \
-  --apiserver-advertise-address=192.168.99.115 \
+  --apiserver-advertise-address=192.168.93.63 \
   --image-repository registry.aliyuncs.com/google_containers \
   --kubernetes-version v1.24.1 \
   --service-cidr=10.1.0.0/16 \
@@ -254,7 +256,6 @@ journalctl -f -u kubelet.service
 
 kubectl get pod --all-namespaces
 
-
 cat <<EOF | sudo tee /etc/docker/daemon.json
 {
   "exec-opts": ["native.cgroupdriver=systemd"],
@@ -279,7 +280,6 @@ docker tag registry.cn-hangzhou.aliyuncs.com/google_containers/pause:3.6 k8s.gcr
 Unknown desc = failed to get sandbox image "k8s.gcr.io/pause:3.6": failed to pull image "k8s.gcr.io/piled to pull and unpack image "k8s.gcr.io/pause:3.6": failed to resolve reference "k8s.gcr.io/pause:3request: Head "https://k8s.gcr.io/v2/pause/manifests/3.6": dial tcp 74.125.203.82:443: connect: conne
   Warning  FailedCreatePodSandBox  4m51s (x12 over 18m)  kubelet            Failed to create pod sandde = Unknown desc = failed to get sandbox image "k8s.gcr.io/pause:3.6": failed to pull image "k8s.gcriled to pull and unpack image "k8s.gcr.io/pause:3.6": failed to resolve reference "k8s.gcr.io/pause:3request: Head "https://k8s.gcr.io/v2/pause/manifests/3.6": dial tcp 142.250.157.82:443: connect: conn
   Warning  FailedCreatePodSandBox  3m7s (x8 over 16m)    kubelet            Failed to create pod sandde = Unknown desc = failed to get sandbox image "k8s.gcr.io/pause:3.6": failed to pull image "k8s.gcriled to pull and unpack image "k8s.gcr.io/pause:3.6": failed to resolve reference "k8s.gcr.io/pause:3request: Head "https://k8s.gcr.io/v2/pause/manifests/3.6": dial tcp 64.233.189.82:443: 
-
 
 [root@localhost ~]#mkdir -p /etc/containerd
 [root@localhost ~]#containerd config default > /etc/containerd/config.toml
@@ -772,9 +772,13 @@ https://github.com/goharbor/harbor
 
 替换为新的IP
 
-oldIP=192.168.99.110
 
-newIP=192.168.93.56
+
+newIP=192.168.93.63
+
+oldIP=192.168.93.56
+
+
 
 find . -type f | xargs sed -i "s/$oldIP/$newIP/"
 
@@ -807,6 +811,8 @@ cd /etc/kubernetes
 
 /etc/kubernetes# cp  -f admin.conf  ~/.kube/config
 
+此时kubectl的是能使用了原来创建的Pod IP都还未变。
+
 
 
 # docker  使用命令
@@ -821,10 +827,64 @@ cd /etc/kubernetes
 
 # 问题定位：
 
-1. 查看一下kubelet启动日志  *journalctl -f -u kubelet*
-2.  *systemctl status  kubelet*  查看状态
+1. ##### 查看一下kubelet启动日志  *journalctl -f -u kubelet*
+
+2. ##### *systemctl status  kubelet*  查看状态
+
+3. ##### Failed to create pod sandbox: rpc error: code = Unknown desc = [failed to set up sandbox container...
+
+   - 表现状态
+
+   ```
+   [root@linux03 ~]# kubectl get pods -n kube-system
+   NAME                              READY   STATUS              RESTARTS   AGE
+   coredns-7f89b7bc75-jzs26          0/1     ContainerCreating   0          63s
+   coredns-7f89b7bc75-qg924          0/1     ContainerCreating   0          63s
+   ```
 
  
+
+- 更改calico.yaml
+
+```
+# Cluster type to identify the deployment type
+  - name: CLUSTER_TYPE
+  value: "k8s,bgp"
+# 下方熙增新增
+  - name: IP_AUTODETECTION_METHOD
+    value: "interface=ens192"
+    # ens192为本地网卡名字
+```
+
+- kubectl apply -f calico.yaml
+
+  查看正常
+
+4.之前创建kubernetes-dashboard,只有service但是没有pod
+
+ 这个问题是因为修改过IP，修改IP之后节点之间不能正常通信，导致任务下发失败，所以就没看到创建的pod，重置节点之后，各个节点通信正常pod也创建正常
+
+```
+[root@master rain]# kubectl  get pod -A -o wide
+NAMESPACE              NAME                                        READY   STATUS    RESTARTS   AGE    IP               NODE     NOMINATED NODE   READINESS GATES
+kube-system            calico-kube-controllers-555bc4b957-7qxs4    1/1     Running   0          90m    10.244.166.129   node1    <none>           <none>
+kube-system            calico-node-f6zvj                           1/1     Running   0          90m    192.168.93.63    master   <none>           <none>
+kube-system            calico-node-w7skz                           1/1     Running   0          90m    192.168.93.64    node1    <none>           <none>
+kube-system            calico-node-xlk4n                           1/1     Running   0          90m    192.168.93.65    node2    <none>           <none>
+kube-system            coredns-74586cf9b6-pkx5r                    1/1     Running   0          102m   10.244.219.65    master   <none>           <none>
+kube-system            coredns-74586cf9b6-r2j9v                    1/1     Running   0          102m   10.244.219.66    master   <none>           <none>
+kube-system            etcd-master                                 1/1     Running   1          102m   192.168.93.63    master   <none>           <none>
+kube-system            kube-apiserver-master                       1/1     Running   1          102m   192.168.93.63    master   <none>           <none>
+kube-system            kube-controller-manager-master              1/1     Running   30         102m   192.168.93.63    master   <none>           <none>
+kube-system            kube-proxy-ktnnt                            1/1     Running   0          102m   192.168.93.63    master   <none>           <none>
+kube-system            kube-proxy-l5rgb                            1/1     Running   0          101m   192.168.93.64    node1    <none>           <none>
+kube-system            kube-proxy-ldqqj                            1/1     Running   0          101m   192.168.93.65    node2    <none>           <none>
+kube-system            kube-scheduler-master                       1/1     Running   29         102m   192.168.93.63    master   <none>           <none>
+kubernetes-dashboard   dashboard-metrics-scraper-8c47d4b5d-n8bdf   1/1     Running   0          85m    10.244.104.1     node2    <none>           <none>
+kubernetes-dashboard   kubernetes-dashboard-75d8f74d66-ck4sz       1/1     Running   0          86s    10.244.104.3     node2    <none>           <none>
+```
+
+
 
 ## keepalive配置
 
@@ -888,5 +948,40 @@ systemctl start keepalived && systemctl enable nginx keepalived && systemctl sta
 注意:keepalived无法启动的时候，查看keepalived.conf配置权限
 chmod 644 keepalived.conf
 
+## 常用命令：
+
+删除pod并重新创建
+
+kubectl get pod -n kube-system | grep kube-proxy |awk '{system("kubectl delete pod "$1" -n kube-system")}'
 
 
+
+kubectl get pod -n kube-system | grep kube-proxy
+
+查看集群情况：kubectl get pod -n kube-system
+查看kubelet情况:
+
+```
+systemctl status kubelet -l
+```
+
+查看kubelet系统日志：journalctl -xefu kubelet
+docker ps 查看容器启动情况
+
+
+
+systemctl restart networking
+
+强制删除pod
+
+kubectl  delete pod kubernetes-dashboard-75d8f74d66-bkxt7    -n kubernetes-dashboard  **--force --grace-period=0**
+
+
+
+## doccker 镜像
+
+ctr ns ls
+
+指定命名空间引入镜像
+
+ctr -n k8s.io  image import kubernetesui.tar
