@@ -617,7 +617,7 @@ subjects:
 
 
 
-查看Pod，没有找到相关的Pod
+查看Pod，没有找到相关的Pod，是因为节点之间通信有问题导致
 
 ```
 kubectl  get pod -A -o wide
@@ -968,13 +968,17 @@ systemctl status kubelet -l
 查看kubelet系统日志：journalctl -xefu kubelet
 docker ps 查看容器启动情况
 
-
-
 systemctl restart networking
 
-强制删除pod
+##### 强制删除pod(1.5以后)
 
 kubectl  delete pod kubernetes-dashboard-75d8f74d66-bkxt7    -n kubernetes-dashboard  **--force --grace-period=0**
+
+如果在这些命令后 Pod 仍处于 `Unknown` 状态，请使用以下命令从集群中删除 Pod:
+
+```shell
+kubectl patch pod <pod> -p '{"metadata":{"finalizers":null}}'
+```
 
 
 
