@@ -726,7 +726,7 @@ dockershim 将会从 Kubernetes 1.24 中完全移除，
 
 **containerd 其实就是用来替换Docker的**
 
-RunC 
+ 
 
 ## 2.1 Docker相关操作
 
