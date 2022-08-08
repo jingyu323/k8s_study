@@ -1052,13 +1052,23 @@ ctr -n k8s.io i export pause.tar k8s.gcr.io/pause:3.2
 COPY
 1.7、导入镜像
 
-# 不支持 build,commit 镜像
 ctr -n k8s.io i import pause.tar
+
+# 不支持 build,commit 镜像
 COPY
 1.8、查看容器相关操作
 ctr c
 COPY
 1.9、运行容器
+
+创建容器
+
+ ctr c create docker.io/library/nginx:alpine nginx
+
+创建并运行容器：
+
+ctr run -d docker.io/library/nginx:alpine nginx
+
 –null-io: 将容器内标准输出重定向到/dev/null
 –net-host: 主机网络
 -d: 当task执行后就进行下一步shell命令,如没有选项,则会等待用户输入,并定向到容器内
@@ -1074,10 +1084,28 @@ COPY
 如要创建日志文件,建议如下方式创建:
 ctr -n k8s.io run --log-uri file:///var/log/xx.log
 COPY
+
+#####  docker inspect 
+
+  ctr c info nginx 
+
+进入容器： ctr task exec --exec-id 0 -t nginx sh
+
+暂停容器： ctr task pause nginx
+
+杀死容器ctr task kill nginx
+
+ctr -n  <命名空间>  import 镜像名称，就可以指定镜像到固定命名空间
+
+
+
 二、ctr和docker命令比较
 Containerd命令    Docker命令    描述
 ctr task ls    docker ps    查看运行容器
-ctr image ls    docker images    获取image信息
+ctr image ls      docker images    获取image信息
+
+  ctr i ls 
+
 ctr image pull pause    docker pull pause    pull 应该pause镜像
 ctr image push pause-test    docker push pause-test    改名
 ctr image import pause.tar    docker load 镜像    导入本地镜像
@@ -1085,6 +1113,9 @@ ctr run -d pause-test pause    docker run -d --name=pause pause-test    运行�
 ctr image tag pause pause-test    docker tag pause pause-test    tag应该pause镜像
 三、crictl 命令
 3.1、crictl 配置
+
+
+
 # 通过在配置文件中设置端点 --config=/etc/crictl.yaml
 root@k8s-node-0001:~$ cat /etc/crictl.yaml
 runtime-endpoint: unix:///run/containerd/containerd.sock
