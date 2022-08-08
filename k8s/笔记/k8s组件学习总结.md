@@ -742,7 +742,38 @@ dockershim 将会从 Kubernetes 1.24 中完全移除，
 
 # 5. 容器网络,网络插件优缺点使用场景 
 
-#### 		5.1
+- veth 设备对
+
+- 网桥
+
+   ip route list 查看当前路由表
+
+  netstat -rn  查看路由表
+
+#### 		5.1 Docker 网络
+
+- host
+- container
+- none
+- bridge  默认类型
+
+##### 5.2 Kubernets 网络
+
+1. 容器之间直接通信
+
+   - 同Pod之内的容器直接通过localhost就可以
+   - 不容Pod节点的容器？
+
+2. pod到Pod之间的通讯
+
+   - 同一个Node内的通信。在同一个网桥上，IP地址段相同直接可以通讯
+   - 不同Node之间的Pod通信。
+
+3. Pod到Service 之间的通信
+
+4. 集群外部与内部的通信
+
+   
 
 # 6. ks8集群 升级 回退，扩缩容
 ## 6.1 集群的集群怎么做
