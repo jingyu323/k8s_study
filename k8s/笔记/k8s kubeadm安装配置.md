@@ -42,7 +42,7 @@ cat  /etc/hosts
 
 
 
-yum -y install  chronyd
+yum -y install  chrony 
 
 systemctl start chronyd
 systemctl enable chronyd
@@ -117,19 +117,17 @@ systemctl restart containerd
 
 
 
-
-# 设置开机启动
-$ systemctl enable docker
-# 启动docker
 ### 替换阿里云`docker`仓库
 
-yum-config-manager --add-repo http://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
+yum-config-manager  --add-repo http://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
 
 ### 安装`docker`引擎
 
 yum install --allowerasing docker-ce -y
 
 $ systemctl start docker
+
+
 
 cat > /etc/yum.repos.d/kubernetes.repo << EOF
 [kubernetes]
