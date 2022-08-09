@@ -191,7 +191,7 @@ cd /etc/yum.repos.d/ && wget -c https://mirrors.tuna.tsinghua.edu.cn/docker-ce/l
 
 
 kubeadm init \
---apiserver-advertise-address=192.168.99.115 \
+--apiserver-advertise-address=192.168.99.110 \
 --image-repository registry.aliyuncs.com/google_containers \
 --kubernetes-version v1.24.1  \
 --service-cidr=10.1.0.0/16 \
@@ -202,7 +202,7 @@ kubeadm init \
 如果执行失败， 先 kubeadm reset 再次执行    kubeadm init
 
 kubeadm init \
-  --apiserver-advertise-address=192.168.93.63 \
+  --apiserver-advertise-address=192.168.99.110 \
   --image-repository registry.aliyuncs.com/google_containers \
   --kubernetes-version v1.24.1 \
   --service-cidr=10.1.0.0/16 \
@@ -694,8 +694,6 @@ kubectl get secret -n kubernetes-dashboard
 
 可以通过service的nodePort模式，kubectl proxy,kubectl-port，ingress等各种方式进行访问。
 
-
-
 本例通过port-forwad将service映射到主机上
 
 ```shell
@@ -703,6 +701,125 @@ nohup kubectl port-forward -n kubernetes-dashboard service/kubernetes-dashboard 
 ```
 
 # k8s删除Terminating状态的命名空间
+
+# 部署Service
+
+#### 创建namespace.[yaml](https://so.csdn.net/so/search?q=yaml&spm=1001.2101.3001.7020)文件
+
+```
+ cat  >  /home/rain/namespase.yaml << EOF
+apiVersion: v1 #类型为Namespace
+kind: Namespace  #类型为Namespace
+metadata:
+  name: ssx-nginx-ns  #命名空间名称
+  labels:
+    name: lb-ssx-nginx-ns
+EOF
+```
+
+然后应用到k8s中  kubectl create -f namespace.yaml
+
+####  创建deployment.yaml文件
+
+```
+ 
+cat  >  /home/rain/deployment.yaml  << EOF
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: nginx #为该Deployment设置key为app，value为nginx的标签
+  name: ssx-nginx-dm
+  namespace: ssx-nginx-ns
+spec:
+  replicas: 2 #副本数量
+  selector: #标签选择器，与上面的标签共同作用
+    matchLabels: #选择包含标签app:nginx的资源
+      app: nginx
+  template: #这是选择或创建的Pod的模板
+    metadata: #Pod的元数据
+      labels: #Pod的标签，上面的selector即选择包含标签app:nginx的Pod
+        app: nginx
+    spec: #期望Pod实现的功能（即在pod中部署）
+      containers: #生成container，与docker中的container是同一种
+      - name: ssx-nginx-c
+        image: nginx:latest #使用镜像nginx: 创建container，该container默认80端口可访问
+        ports:
+        - containerPort: 80  # 开启本容器的80端口可访问
+        volumeMounts:  #挂载持久存储卷
+        - name: volume #挂载设备的名字，与volumes[*].name 需要对应 
+          mountPath: /usr/share/nginx/html #挂载到容器的某个路径下  
+      volumes:
+      - name: volume #和上面保持一致 这是本地的文件路径，上面是容器内部的路径
+        hostPath:
+          path: /opt/web/dist #此路径需要实现创建
+ EOF
+```
+
+然后应用到k8s中 kubectl create -f deployment.yaml
+
+#### 创建service.yaml文件
+
+```
+cat  >  /home/rain/service.yaml  << EOF
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+   app: nginx
+  name: ssx-nginx-sv
+  namespace: ssx-nginx-ns
+spec:
+  ports:
+  - port: 80 #写nginx本身端口
+    name: ssx-nginx-last
+    protocol: TCP
+    targetPort: 80 # 容器nginx对外开放的端口 上面的dm已经指定了
+    nodePort: 31090 #外网访问的端口
+  selector:
+    app: nginx    #选择包含标签app:nginx的资源
+  type: NodePort
+ EOF
+```
+
+然后应用到k8s中
+
+```bash
+kubectl create -f ./service.yaml
+```
+
+
+
+查看创建的service
+
+```
+kubectl  get svc -A
+NAMESPACE              NAME                        TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)                  AGE   SELECTOR
+default                kubernetes                  ClusterIP   10.1.0.1       <none>        443/TCP                  42m   <none>
+kube-system            kube-dns                    ClusterIP   10.1.0.10      <none>        53/UDP,53/TCP,9153/TCP   42m   k8s-app=kube-dns
+kubernetes-dashboard   dashboard-metrics-scraper   ClusterIP   10.1.24.143    <none>        8000/TCP                 39m   k8s-app=dashboard-metrics-scraper
+kubernetes-dashboard   kubernetes-dashboard        NodePort    10.1.124.236   <none>        443:30001/TCP            39m   k8s-app=kubernetes-dashboard
+ssx-nginx-ns           ssx-nginx-sv                NodePort    10.1.90.83     <none>        80:31090/TCP             22m   app=nginx
+
+```
+
+分别在node1 和node2下创建/opt/web/dist/index.html 
+
+访问：
+
+在master 节点访问 10.1.90.83  因为端口是80 所以可以直接访问返回：node1 或者node2
+
+外网访问：master IP:31090  访问返回node1 或者node2 ，主节点应该是有负载均衡的
+
+node1  IP:31090 只能返回node1
+
+node2  IP:31090 只能返回node2
+
+
+
+
+
+# 
 
 查看[命名空间](https://so.csdn.net/so/search?q=命名空间&spm=1001.2101.3001.7020)
 
@@ -807,9 +924,9 @@ https://github.com/goharbor/harbor
 
 
 
-newIP=192.168.93.63
+newIP=192.168.99.110
 
-oldIP=192.168.93.56
+oldIP=192.168.93.63	
 
 
 
