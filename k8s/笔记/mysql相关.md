@@ -56,3 +56,25 @@ alter user 'root'@'localhost' identified with mysql_native_password by 'root';
 
 vi /etc/my.cnf 去除only_full_group_by模式，文本最后一行添加sql_mode=STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION
 
+
+
+## java 安装配置
+
+vi /etc/profile
+
+JAVA_HOME=/usr/local/jdk1.8.0_231
+JRE_HOME=$JAVA_HOME/jre
+CLASS_PATH=.:$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar:$JRE_HOME/lib
+PATH=$PATH:$JAVA_HOME/bin:$JRE_HOME/bin
+export JAVA_HOME JRE_HOME CLASS_PATH PATH
+
+source /etc/profile 使生效  Java -version 检测安装是否安装成功
+
+
+
+## tomcat 配置
+
+
+
+
+
