@@ -47,7 +47,30 @@ yum -y install  chrony
 systemctl start chronyd
 systemctl enable chronyd
 
+开启ipvs#
+
+在每个节点安装ipset和ipvsadm：
+yum -y install ipset ipvsadm
+在所有节点执行如下脚本：
+cat > /etc/sysconfig/modules/ipvs.modules <<EOF
+#!/bin/bash
+modprobe -- ip_vs
+modprobe -- ip_vs_rr
+modprobe -- ip_vs_wrr
+modprobe -- ip_vs_sh
+modprobe -- nf_conntrack_ipv4
+
+ EOF
+
 4.关闭防火墙
+
+- 授权、运行、检查是否加载：
+
+  chmod 755 /etc/sysconfig/modules/ipvs.modules && bash /etc/sysconfig/modules/ipvs.modules && lsmod | grep -e ip_vs -e nf_conntrack_ipv4
+
+  检查是否加载
+
+  lsmod | grep -e ipvs -e nf_conntrack_ipv4
 
 systemctl stop firewalld
 systemctl disable firewalld
@@ -814,12 +837,6 @@ ssx-nginx-ns           ssx-nginx-sv                NodePort    10.1.90.83     <n
 node1  IP:31090 只能返回node1
 
 node2  IP:31090 只能返回node2
-
-
-
-
-
-# 
 
 查看[命名空间](https://so.csdn.net/so/search?q=命名空间&spm=1001.2101.3001.7020)
 
