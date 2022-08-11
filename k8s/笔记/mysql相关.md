@@ -1,6 +1,6 @@
 # 安装
 
-mysql8  centos8 安装
+## mysql8  centos8 安装
 
 安装顺序：
 
@@ -55,6 +55,21 @@ cat /var/log/mysqld.log
 alter user 'root'@'localhost' identified with mysql_native_password by 'root';
 
 vi /etc/my.cnf 去除only_full_group_by模式，文本最后一行添加sql_mode=STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION
+
+配置远程登录：
+
+update user set host = '%' where user = 'root';
+
+如果连不上注意关闭防火墙：
+
+systemctl stop firewalld
+systemctl disable firewalld
+
+确认时防火墙的问题 再去开放端口即可。
+
+
+
+
 
 
 
