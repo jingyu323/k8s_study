@@ -211,21 +211,10 @@ cat /etc/docker/daemon.json
 
 cd /etc/yum.repos.d/ && wget -c https://mirrors.tuna.tsinghua.edu.cn/docker-ce/linux/centos/docker-ce.repo --no-check-certificate
 
-
-
-kubeadm init \
---apiserver-advertise-address=192.168.99.110 \
---image-repository registry.aliyuncs.com/google_containers \
---kubernetes-version v1.24.1  \
---service-cidr=10.1.0.0/16 \
---pod-network-cidr=10.244.0.0/16 \
-
-
-
 如果执行失败， 先 kubeadm reset 再次执行    kubeadm init
 
 kubeadm init \
-  --apiserver-advertise-address=192.168.99.110 \
+  --apiserver-advertise-address=192.168.93.70 \
   --image-repository registry.aliyuncs.com/google_containers \
   --kubernetes-version v1.24.1 \
   --service-cidr=10.1.0.0/16 \
@@ -1086,7 +1075,7 @@ vrrp_instance VI_1 {
  } 
  # 虚拟 IP 
  virtual_ipaddress { 
- 192.168.48.199/24 
+ 192.168.48.199/24
  } 
  track_script { 
  check_nginx 
