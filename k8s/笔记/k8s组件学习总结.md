@@ -757,7 +757,20 @@ dockershim 将会从 Kubernetes 1.24 中完全移除，
 - none
 - bridge  默认类型
 
-##### 5.2 Kubernets 网络
+##### 5.2 Docker使用到的与Linux网络有关的主要技术：
+
+- Network Namespace(网络命名空间)
+- Veth设备对
+- Iptables/Netfilter
+- 网桥
+- 路由
+
+##### 5.3 Kubernets 网络
+
+**K8s网络模型设计的一个基础原则是：**
+
+每个Pod都拥有一个独立的IP地址，而且假定所有Pod都在一个可以直接连通的、扁平的网络空间中。
+同一个Pod内的不同容器将会共享一个网络命名空间，也就是说同一个Linux网络协议栈。同一个Pod内的容器可以通过localhost来连接对方的端口。
 
 1. 容器之间直接通信
 
@@ -770,13 +783,25 @@ dockershim 将会从 Kubernetes 1.24 中完全移除，
 
    - 不同Node之间的Pod通信。需要规划docker0 IP地址不能冲突。
 
-     **多机网络模式：**一类是 Docker 在 1.9 版本中引入Libnetwork项目，对跨节点网络的原生支持；一类是通过插件（plugin）方式引入的第三方实现方案，比如 Flannel，Calico 等等
+     **多机网络模式：**
+
+     一类是 Docker 在 1.9 版本中引入Libnetwork项目，对跨节点网络的原生支持CNM；
+
+     一类是通过插件（plugin）方式引入的第三方实现方案，CNI比如 Flannel，Calico 等等
 
 3. Pod到Service 之间的通信
 
 4. 集群外部与内部的通信
 
-   
+##### 5.4   开源网络插件
+
+	1. Flannel
+ 	2. Open vSwitch
+ 	3. Calico
+
+ **可不可以这么理解：docker 网络模型是解决docker容器的网络联通问题， Kubernets 网络解决的是Pod的联通问题**？
+
+
 
 # 6. ks8集群 升级 回退，扩缩容
 ## 6.1 集群的集群怎么做

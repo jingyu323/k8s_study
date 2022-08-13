@@ -1370,3 +1370,73 @@ kubectl logs Pod名字
  ip route list命令查看当前的路由表。
 
 netstat -rn   查看路由表
+
+ip link add veth0 type veth peer name veth1
+
+创建Veth设备对：
+
+ip link add veth0 type veth peer name veth1
+创建后查看Veth设备对的信息，使用ip link show命令查看所有网络接口：
+
+ip link show
+会生成两个设备，一个是veth0,peer是veth1
+两个设备都在同一个命名空间，将Veth看作是有两个头的网线，将另一个头甩给另一个命名空间
+
+ip link set veth1 netns netns1
+再次查看命名空间，只剩下一个veth0：
+
+ip link show
+在netns1命名空间可以看到veth1设备，符合预期。
+
+现在看到的结果是两个不同的命名空间各自有一个Veth的网线头，各显示为一个Device。（Docker的实现里面，除了将Veth放入容器内）
+
+下一步给两个设备veth0、veth1分配IP地址：
+
+ip netns exec netns1 ip addr add 10.1.1.1/24 dev veth1
+
+ip addr add 10.1.1.2/24 dev veth0
+现在两个网络命名空间可以互相通信了：
+
+ping 10.1.1.1
+
+ip netns exec netns1 ping 10.1.1.2
+
+## 网桥相关：
+
+新增一个网桥设备：
+
+brctl addbr xxxxx
+为网桥增加网口，在Linux中，一个网口其实就是一个物理网卡，将物理网卡和网桥连接起来。
+
+brctl addif xxxxx ethx
+网桥的物理网卡作为一个网口，由于在链路层工作，就不再需要IP地址了，这样上面的IP地址自然失效。
+
+ifconfig ethx 0.0.0.0
+给网桥配置一个IP地址：
+
+Ifconfig brxxx xxx.xxx.xxx.xxx
+
+
+
+## 路由：
+
+ 1.路由表的创建
+Linux的路由表至少包括两个表：一个是LOCAL，另一个是MAIN。在LOCAL表中会包含所有的本地设备地址。LOCAL路由表是在配置网络设备地址时自动创建的。LOCAL表用于供Linux协议栈识别本地地址，以及进行本地各个不同网络接口之间的数据转发。
+
+可以通过下面的命令查看LOCAL表的内容：
+
+ip route show table local type local
+MAIN表用于各类网络IP地址的转发。MAIN表的建立可以使用静态配置生存，也可以使用动态路由发现协议生成。
+
+2.路由表的查看
+使用ip route list命令查看当前的路由表。
+
+ip route list
+另一个查看路由表的工具：
+
+netstat -rn
+Kernel IP routing table
+Destination     Gateway         Genmask         Flags   MSS Window  irtt Iface
+0.0.0.0         10.128.232.1    0.0.0.0         UG        0 0          0 ens5
+10.128.232.0    0.0.0.0         255.255.252.0   U         0 0          0 ens5
+标志是U，说明是可达路由，标志是G,说明这个网络接口连接的是网关，否则说明是直连主机。
