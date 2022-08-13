@@ -767,7 +767,10 @@ dockershim 将会从 Kubernetes 1.24 中完全移除，
 2. pod到Pod之间的通讯
 
    - 同一个Node内的通信。在同一个网桥上，IP地址段相同直接可以通讯
-   - 不同Node之间的Pod通信。
+
+   - 不同Node之间的Pod通信。需要规划docker0 IP地址不能冲突。
+
+     **多机网络模式：**一类是 Docker 在 1.9 版本中引入Libnetwork项目，对跨节点网络的原生支持；一类是通过插件（plugin）方式引入的第三方实现方案，比如 Flannel，Calico 等等
 
 3. Pod到Service 之间的通信
 
@@ -818,3 +821,6 @@ PVC 定义资源使用多少
 
 StorageClass 可以认为是具体的资源和实际的物理资源的绑定关系
 
+# 14 子网隔离实现方案
+
+# 
