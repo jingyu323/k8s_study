@@ -817,12 +817,6 @@ dockershim 将会从 Kubernetes 1.24 中完全移除，
      - Calico节点组网可以直接利用数据中心的网络结构（无论是L2或者L3），不需要额外的NAT，隧道或者Overlay Network。
      - Calico基于iptables还提供了丰富而灵活的网络Policy，保证通过各个节点上的ACLs来提供Workload的多租户隔离、安全组以及其他可达性限制等功能。
 
-
-
-​	
-
-
-
  **可不可以这么理解：docker 网络模型是解决docker容器的网络联通问题， Kubernets 网络解决的是Pod的联通问题**？
 
 
@@ -870,7 +864,7 @@ PVC 定义资源使用多少
 
 StorageClass 可以认为是具体的资源和实际的物理资源的绑定关系
 
-# 14 子网隔离实现方案
+# 14 K8s容器子网隔离实现方案
 
 # 15.**技术术语：**
 
