@@ -50,3 +50,4 @@ $ curl -X DELETE http://127.0.0.1:2379/v2/keys/message
 4.查看所有key-value：
 
 curl -s http://127.0.0.1:2379/v2/keys/?recursive=true
+

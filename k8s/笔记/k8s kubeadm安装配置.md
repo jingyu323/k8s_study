@@ -1450,3 +1450,14 @@ Destination     Gateway         Genmask         Flags   MSS Window  irtt Iface
 0.0.0.0         10.128.232.1    0.0.0.0         UG        0 0          0 ens5
 10.128.232.0    0.0.0.0         255.255.252.0   U         0 0          0 ens5
 标志是U，说明是可达路由，标志是G,说明这个网络接口连接的是网关，否则说明是直连主机。
+
+
+
+# k8s使用外部ETCD 
+
+##  1.安装ETCD
+
+
+
+
+
