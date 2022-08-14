@@ -1365,6 +1365,16 @@ kubectl logs Pod名字
 
 \# 每个Pod - k8s都会分配一个ip kubectl get pod -owide # 使用Pod的ip+pod里面运行容器的端口 curl 192.168.169.136 # 集群中的任意一个机器以及任意的应用都能通过Pod分配的ip来访问这个Pod
 
+# 部署策略实践
+
+## 1.滚动跟新：Rolling update, 之前修改yaml后重新apply 就是这种方式
+
+## 2.重新创建 : Recreate，先停止旧的服务 在启动新服务
+
+## 3.蓝绿部署: 利用Service的Selector选择不同版本的服务
+
+## 4.金丝雀部署： 通过Ingress，轮询访问不同的服务。
+
 # 网络相关命令
 
  ip route list命令查看当前的路由表。
