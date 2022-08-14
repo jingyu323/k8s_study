@@ -21,6 +21,11 @@ https://blog.csdn.net/jasonhe2018/article/details/112749146
 1.设置hostname
 
 hostnamectl set-hostname master
+
+hostnamectl set-hostname master1
+
+hostnamectl set-hostname master2
+
 hostnamectl set-hostname node1
 hostnamectl set-hostname node2
 
@@ -32,8 +37,13 @@ cat  >  /etc/hosts << EOF
 127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
 ::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
 192.168.99.110  master
-192.168.99.178  node1
-192.168.99.142 node2
+
+192.168.99.110  master
+
+192.168.99.110  master
+
+192.168.93.74  node1
+192.168.93.75 node2
 
 EOF
 
@@ -214,7 +224,7 @@ cd /etc/yum.repos.d/ && wget -c https://mirrors.tuna.tsinghua.edu.cn/docker-ce/l
 如果执行失败， 先 kubeadm reset 再次执行    kubeadm init
 
 kubeadm init \
-  --apiserver-advertise-address=192.168.93.70 \
+  --apiserver-advertise-address=192.168.93.72 \
   --image-repository registry.aliyuncs.com/google_containers \
   --kubernetes-version v1.24.1 \
   --service-cidr=10.1.0.0/16 \
@@ -260,20 +270,13 @@ kubectl -n kube-system get cm kubeadm-config -o yaml
 
 /usr/lib/systemd/system/kubelet.service.d/10-kubeadm.conf
 
-
 关闭交换
 swapoff -a
-
-
 
 cd /etc/sysconfig/network-scripts
 ONBOOT=yes
 重启网卡
  nmcli c reload
-
- 
-
-
 
 拉镜像
 ctr -n k8s.io images import <your tar file>
@@ -281,12 +284,8 @@ ctr -n k8s.io images import <your tar file>
 查看镜像：
 crictl img
 
- 
-
 
 journalctl -f -u kubelet.service
-
-
 
 kubectl get pod --all-namespaces
 
@@ -305,11 +304,7 @@ EOF
 
 
 
-
-
 docker tag registry.cn-hangzhou.aliyuncs.com/google_containers/pause:3.6 k8s.gcr.io/pause:3.6
-
-
 
 Unknown desc = failed to get sandbox image "k8s.gcr.io/pause:3.6": failed to pull image "k8s.gcr.io/piled to pull and unpack image "k8s.gcr.io/pause:3.6": failed to resolve reference "k8s.gcr.io/pause:3request: Head "https://k8s.gcr.io/v2/pause/manifests/3.6": dial tcp 74.125.203.82:443: connect: conne
   Warning  FailedCreatePodSandBox  4m51s (x12 over 18m)  kubelet            Failed to create pod sandde = Unknown desc = failed to get sandbox image "k8s.gcr.io/pause:3.6": failed to pull image "k8s.gcriled to pull and unpack image "k8s.gcr.io/pause:3.6": failed to resolve reference "k8s.gcr.io/pause:3request: Head "https://k8s.gcr.io/v2/pause/manifests/3.6": dial tcp 142.250.157.82:443: connect: conn
@@ -364,12 +359,11 @@ kubeadm join 192.168.109.134:6443 --token voyqtd.dn5fr6wm9oomycfk \
 
 ### 添加master
 
-kubeadm join 192.168.109.134:6443 --token voyqtd.dn5fr6wm9oomycfk \
-	--discovery-token-ca-cert-hash sha256:1482bd7c078a97b2dd3c4655542a5809821ce474240f5303aa2789fc1da54947  \
+    kubeadm join 192.168.93.72:6443 --token pv895u.zugh48mqxx82ny2o \
+     --discovery-token-ca-cert-hash sha256:ec9e6e5c9dd8476b008788ba9430e3b01b91d264d2bb378626f581ab6f943040  \
+     --control-plane \
+     --v=5 
 
---control-plane
-
- 
 
 
 #如果超过2小时忘记了令牌，可以这样做
@@ -510,6 +504,108 @@ mkdir .kube 创建.kube文件
 cd .kube
 
 # 添加worknode
+
+# k8s多master安装
+
+创建默认的kubeadm-config.yaml文件
+
+```
+ kubeadm config print init-defaults  > kubeadm-config.yaml
+```
+
+
+
+```
+apiVersion: kubeadm.k8s.io/v1beta3
+bootstrapTokens:
+- groups:
+  - system:bootstrappers:kubeadm:default-node-token
+  token: abcdef.0123456789abcdef
+  ttl: 24h0m0s
+  usages:
+  - signing
+  - authentication
+kind: InitConfiguration
+localAPIEndpoint:
+  advertiseAddress: 1.2.3.4
+  bindPort: 6443
+nodeRegistration:
+  criSocket: unix:///var/run/containerd/containerd.sock
+  imagePullPolicy: IfNotPresent
+  name: node
+  taints: null
+---
+apiServer:
+  timeoutForControlPlane: 4m0s
+apiVersion: kubeadm.k8s.io/v1beta3
+certificatesDir: /etc/kubernetes/pki
+clusterName: kubernetes
+controllerManager: {}
+dns: {}
+etcd:
+  local:
+    dataDir: /var/lib/etcd
+imageRepository: k8s.gcr.io
+kind: ClusterConfiguration
+kubernetesVersion: 1.24.0
+networking:
+  dnsDomain: cluster.local
+  serviceSubnet: 10.96.0.0/12
+scheduler: {}
+```
+
+修改内容如下：
+
+![](\images\kubeamd_config.png)
+
+kubeadm-config.yaml组成部署说明：
+InitConfiguration： 用于定义一些初始化配置，如初始化使用的token以及apiserver地址等
+ClusterConfiguration：用于定义apiserver、etcd、network、scheduler、controller-manager等master组件相关配置项
+KubeletConfiguration：用于定义kubelet组件相关的配置项
+KubeProxyConfiguration：用于定义kube-proxy组件相关的配置项
+可以看到，在默认的kubeadm-config.yaml文件中只有InitConfiguration、ClusterConfiguration 两部分。我们可以通过如下操作生成另外两部分的示例文件：
+
+##### 生成KubeletConfiguration示例文件 
+kubeadm config print init-defaults --component-configs KubeletConfiguration
+
+##### 生成KubeProxyConfiguration示例文件 
+kubeadm config print init-defaults --component-configs KubeProxyConfiguration
+
+#使用指定的yaml文件进行初始化安装 自动颁发证书(1.13后支持) 把所有的信息都写入到 kubeadm-init.log中
+kubeadm init --config=kubeadm-config.yaml --upload-certs | tee kubeadm-init.log
+--experimental-upload-certs已被弃用，官方推荐使用--upload-certs替代，官方公告：https://v1-15.docs.kubernetes.io/docs/setup/release/notes/ 
+
+##### 初始化
+
+```
+kubeadm init --config=kubeadm-config.yaml --upload-certs   --ignore-preflight-errors=SystemVerification   --v=5 | tee kubeadm-init.log
+```
+
+
+
+
+
+etc外部配置
+
+```
+etcd:
+  external:
+    # 修改etcd服务器地址
+    endpoints:
+      - https://172.18.30.195:2379
+      - https://172.18.30.196:2379
+      - https://172.18.30.197:2379
+    #搭建etcd集群时生成的ca证书
+    caFile: /etc/etcd/pki/ca.pem
+    #搭建etcd集群时生成的客户端证书
+    certFile: /etc/etcd/pki/client.pem
+    #搭建etcd集群时生成的客户端密钥
+    keyFile: /etc/etcd/pki/client-key.pem
+```
+
+
+
+
 
 
 
@@ -1455,7 +1551,19 @@ Destination     Gateway         Genmask         Flags   MSS Window  irtt Iface
 
 # k8s使用外部ETCD 
 
-##  1.安装ETCD
+k8s 多master使用ETCD, 有两种方式
+
+##  1.安装非容器话ETCD
+
+##  2.安装容器化ETCD
+
+
+
+
+
+# Helm 使用总结
+
+https://blog.csdn.net/hjue/article/details/125881911
 
 
 
