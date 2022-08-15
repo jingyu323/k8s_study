@@ -502,7 +502,7 @@ Ingress Controller：具体实现反向代理及负载均衡的程序，对Ingre
 
 
 
-# Kubernetes 的安全机制 APIServer 认证、授权、准入控制
+## Kubernetes 的安全机制 APIServer 认证、授权、准入控制
 
 Kubernetes安全
 安全永远是一个重大的话题，特别是云计算平台，更需要设计出一套完善的安全方案，以应对复杂的场景。 Kubernetes主要使用Docker作为应用承载环境，Kubernetes首先设计出一套API和敏感信息处理方案，当然也基于Docker提供容器安全控制。以下是Kubernetes的安全设计原则：
@@ -524,7 +524,7 @@ kubenetes 默认在两个端口提供服务：一个是基于 https 安全端口
 - **准入控制**
 - **实际的 API 请求**
 
-# API Server**的** 认证Authentication
+## API Server**的** 认证Authentication
 
 API Server认证 Authentication提供管理三种级别的客户端身份认证方式：
 
@@ -812,10 +812,10 @@ dockershim 将会从 Kubernetes 1.24 中完全移除，
 
  	1. Open vSwitch
  	2. Calico
-     - Calico是一个纯3层的数据中心网络方案，而且无缝集成像OpenStack这种IaaS云架构，能够提供可控的VM、容器、裸机之间的IP通信。Calico不使用重叠网络比如flannel和libnetwork重叠网络驱动，它是一个纯三层的方法，使用虚拟路由代替虚拟交换，每一台虚拟路由通过BGP协议传播可达信息（路由）到剩余数据中心。
-     - Calico在每一个计算节点利用Linux Kernel实现了一个高效的vRouter来负责数据转发，而每个vRouter通过BGP协议负责把自己上运行的workload的路由信息像整个Calico网络内传播——小规模部署可以直接互联，大规模下可通过指定的BGP route reflector来完成。
-     - Calico节点组网可以直接利用数据中心的网络结构（无论是L2或者L3），不需要额外的NAT，隧道或者Overlay Network。
-     - Calico基于iptables还提供了丰富而灵活的网络Policy，保证通过各个节点上的ACLs来提供Workload的多租户隔离、安全组以及其他可达性限制等功能。
+ 	 - Calico是一个纯3层的数据中心网络方案，而且无缝集成像OpenStack这种IaaS云架构，能够提供可控的VM、容器、裸机之间的IP通信。Calico不使用重叠网络比如flannel和libnetwork重叠网络驱动，它是一个纯三层的方法，使用虚拟路由代替虚拟交换，每一台虚拟路由通过BGP协议传播可达信息（路由）到剩余数据中心。
+ 	 - Calico在每一个计算节点利用Linux Kernel实现了一个高效的vRouter来负责数据转发，而每个vRouter通过BGP协议负责把自己上运行的workload的路由信息像整个Calico网络内传播——小规模部署可以直接互联，大规模下可通过指定的BGP route reflector来完成。
+ 	 - Calico节点组网可以直接利用数据中心的网络结构（无论是L2或者L3），不需要额外的NAT，隧道或者Overlay Network。
+ 	 - Calico基于iptables还提供了丰富而灵活的网络Policy，保证通过各个节点上的ACLs来提供Workload的多租户隔离、安全组以及其他可达性限制等功能。
 
  **可不可以这么理解：docker 网络模型是解决docker容器的网络联通问题， Kubernets 网络解决的是Pod的联通问题**？
 
