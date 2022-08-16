@@ -38,12 +38,12 @@ cat  >  /etc/hosts << EOF
 ::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
 192.168.99.110  master
 
-192.168.99.110  master
+192.168.99.164  master2
 
-192.168.99.110  master
+192.168.99.156  master3
 
-192.168.93.74  node1
-192.168.93.75 node2
+192.168.99.178  node1
+192.168.99.142  node2
 
 EOF
 
