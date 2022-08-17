@@ -224,7 +224,10 @@ cd /etc/yum.repos.d/ && wget -c https://mirrors.tuna.tsinghua.edu.cn/docker-ce/l
 如果执行失败， 先 kubeadm reset 再次执行    kubeadm init
 
 kubeadm init \
-  --apiserver-advertise-address=192.168.93.72 \
+  --apiserver-advertise-address=192.168.99.110 \
+
+--control-plane-endpoint="192.168.99.110:6443"\
+
   --image-repository registry.aliyuncs.com/google_containers \
   --kubernetes-version v1.24.1 \
   --service-cidr=10.1.0.0/16 \
@@ -233,6 +236,23 @@ kubeadm init \
   --v=5 
 
 
+
+### 添加集群
+
+1.初始化集群
+
+```
+kubeadm init --kubernetes-version=v1.24.1  --control-plane-endpoint "192.168.99.164:6443" --apiserver-advertise-address=192.168.99.164  --pod-network-cidr=10.244.0.0/16 --service-cidr 10.1.0.0/16  --image-repository=registry.aliyuncs.com/google_containers  --ignore-preflight-errors=all    --v=5
+```
+
+2. 复制证书
+
+```
+kubeadm join 192.168.99.164:6443 --token 2xjsrr.w8eqw2k1yarjoar1 \
+	--discovery-token-ca-cert-hash sha256:f3fc6976cce9cdbf24b280549b1a15bb8a0ef68e621f1462a97402cd72d1ec79 \
+	--control-plane \   --v=5
+
+```
 
 
 
@@ -513,7 +533,7 @@ cd .kube
  kubeadm config print init-defaults  > kubeadm-config.yaml
 ```
 
-
+https://www.cnblogs.com/wang-hongwei/p/14623753.html
 
 ```
 apiVersion: kubeadm.k8s.io/v1beta3
@@ -579,6 +599,9 @@ kubeadm init --config=kubeadm-config.yaml --upload-certs | tee kubeadm-init.log
 
 ```
 kubeadm init --config=kubeadm-config.yaml --upload-certs   --ignore-preflight-errors=SystemVerification   --v=5 | tee kubeadm-init.log
+
+
+kubeadm init --config=kubeadm-config.yaml     --ignore-preflight-errors=SystemVerification   --v=5 | tee kubeadm-init.log
 ```
 
 
@@ -1565,7 +1588,10 @@ k8s 多master使用ETCD, 有两种方式
 
 https://blog.csdn.net/hjue/article/details/125881911
 
+# Linux 相关操作
 
+(centos7系统）：
+开机启动：systemctl enable service_name
 
-
+开机关闭：systemctl disable service_name
 
