@@ -62,25 +62,31 @@ systemctl enable chronyd
 在每个节点安装ipset和ipvsadm：
 yum -y install ipset ipvsadm
 在所有节点执行如下脚本：
-cat > /etc/sysconfig/modules/ipvs.modules <<EOF
+cat > /etc/sysconfig/modules/ipvs.modules  <<EOF
 #!/bin/bash
 modprobe -- ip_vs
 modprobe -- ip_vs_rr
 modprobe -- ip_vs_wrr
 modprobe -- ip_vs_sh
-modprobe -- nf_conntrack_ipv4
+modprobe -- nf_conntrack
 
  EOF
+
+```
+nf_conntrack_ipv4,有的教程跟着做会显示找不到nf_conntrack_ipv4,高版本的内核因为nf_conntrack_ipv4被nf_conntrack替换了,需要注意
+```
+
+
 
 4.关闭防火墙
 
 - 授权、运行、检查是否加载：
 
-  chmod 755 /etc/sysconfig/modules/ipvs.modules && bash /etc/sysconfig/modules/ipvs.modules && lsmod | grep -e ip_vs -e nf_conntrack_ipv4
+  chmod 755 /etc/sysconfig/modules/ipvs.modules && bash /etc/sysconfig/modules/ipvs.modules && lsmod | grep -e ip_vs -e nf_conntrack
 
   检查是否加载
 
-  lsmod | grep -e ipvs -e nf_conntrack_ipv4
+  lsmod | grep -e ipvs -e nf_conntrack
 
 systemctl stop firewalld
 systemctl disable firewalld
@@ -1594,4 +1600,8 @@ https://blog.csdn.net/hjue/article/details/125881911
 开机启动：systemctl enable service_name
 
 开机关闭：systemctl disable service_name
+
+systemctl status firewalld.service
+
+systemctl stop firewalld
 
