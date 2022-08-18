@@ -229,19 +229,17 @@ cd /etc/yum.repos.d/ && wget -c https://mirrors.tuna.tsinghua.edu.cn/docker-ce/l
 
 如果执行失败， 先 kubeadm reset 再次执行    kubeadm init
 
+```
 kubeadm init \
-  --apiserver-advertise-address=192.168.99.110 \
-
---control-plane-endpoint="192.168.99.110:6443"\
-
+  --apiserver-advertise-address=192.168.93.82 \
+   --control-plane-endpoint="192.168.93.82:6443" \
   --image-repository registry.aliyuncs.com/google_containers \
   --kubernetes-version v1.24.1 \
   --service-cidr=10.1.0.0/16 \
   --pod-network-cidr=10.244.0.0/16 \
   --ignore-preflight-errors=all \
   --v=5 
-
-
+```
 
 ### 添加集群
 
@@ -252,6 +250,14 @@ kubeadm init --kubernetes-version=v1.24.1  --control-plane-endpoint "192.168.99.
 ```
 
 2. 复制证书
+
+```
+
+```
+
+
+
+3.  执行添加节点命令
 
 ```
 kubeadm join 192.168.99.164:6443 --token 2xjsrr.w8eqw2k1yarjoar1 \
