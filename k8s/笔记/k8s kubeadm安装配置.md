@@ -937,7 +937,7 @@ spec:
       - name: volume #和上面保持一致 这是本地的文件路径，上面是容器内部的路径
         hostPath:
           path: /opt/web/dist #此路径需要实现创建
- EOF
+EOF
 ```
 
 然后应用到k8s中 kubectl create -f deployment.yaml
@@ -963,7 +963,7 @@ spec:
   selector:
     app: nginx    #选择包含标签app:nginx的资源
   type: NodePort
- EOF
+EOF
 ```
 
 然后应用到k8s中
@@ -989,7 +989,7 @@ ssx-nginx-ns           ssx-nginx-sv                NodePort    10.1.90.83     <n
 
 分别在node1 和node2下创建/opt/web/dist/index.html 
 
-访问：
+访问：(不要带https)
 
 在master 节点访问 10.1.90.83  因为端口是80 所以可以直接访问返回：node1 或者node2
 
