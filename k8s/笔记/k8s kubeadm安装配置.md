@@ -248,7 +248,7 @@ kubeadm init \
 1.初始化集群
 
 ```
-kubeadm init --kubernetes-version=v1.24.1  --control-plane-endpoint "192.168.99.164:6443" --apiserver-advertise-address=192.168.99.164  --pod-network-cidr=10.244.0.0/16 --service-cidr 10.1.0.0/16  --image-repository=registry.aliyuncs.com/google_containers  --ignore-preflight-errors=all    --v=5
+kubeadm init --kubernetes-version=v1.24.1  --control-plane-endpoint "192.168.99.142:6443" --apiserver-advertise-address=192.168.99.142  --pod-network-cidr=10.244.0.0/16 --service-cidr 10.1.0.0/16  --image-repository=registry.aliyuncs.com/google_containers  --ignore-preflight-errors=all    --v=5
 ```
 
 2. 复制证书
@@ -582,7 +582,7 @@ scheduler: {}
 
 修改内容如下：
 
-![](\images\kubeamd_config.png)
+![](images\kubeamd_config.png)
 
 kubeadm-config.yaml组成部署说明：
 InitConfiguration： 用于定义一些初始化配置，如初始化使用的token以及apiserver地址等
@@ -610,6 +610,21 @@ kubeadm init --config=kubeadm-config.yaml --upload-certs   --ignore-preflight-er
 kubeadm init --config=kubeadm-config.yaml     --ignore-preflight-errors=SystemVerification   --v=5 | tee kubeadm-init.log
 ```
 
+复制证书
+
+```
+ssh k8s-master02 "cd /root && mkdir -p /etc/kubernetes/pki/etcd &&mkdir -p ~/.kube/"
+scp /etc/kubernetes/pki/ca.crt k8s-master02:/etc/kubernetes/pki/
+scp /etc/kubernetes/pki/ca.key k8s-master02:/etc/kubernetes/pki/
+scp /etc/kubernetes/pki/sa.key k8s-master02:/etc/kubernetes/pki/
+scp /etc/kubernetes/pki/sa.pub k8s-master02:/etc/kubernetes/pki/
+scp /etc/kubernetes/pki/front-proxy-ca.crt k8s-master02:/etc/kubernetes/pki/
+scp /etc/kubernetes/pki/front-proxy-ca.key k8s-master02:/etc/kubernetes/pki/
+scp /etc/kubernetes/pki/etcd/ca.crt k8s-master02:/etc/kubernetes/pki/etcd/
+scp /etc/kubernetes/pki/etcd/ca.key k8s-master02:/etc/kubernetes/pki/etcd/
+
+```
+
 
 
 
@@ -630,6 +645,38 @@ etcd:
     certFile: /etc/etcd/pki/client.pem
     #搭建etcd集群时生成的客户端密钥
     keyFile: /etc/etcd/pki/client-key.pem
+```
+
+
+
+问题：
+
+```
+
+To see the stack trace of this error execute with --v=5 or higher
+[root@master2 ~]#  kubeadm join 192.168.99.142:6443 --token 7fxtp2.jiaodl6y475m99uy --discovery-token-ca-cert-hash sha256:424384ad6a7f517f438423a570a31f837b58a3b4d62feff0d23734f63039cffe --control-plane 
+[preflight] Running pre-flight checks
+[preflight] Reading configuration from the cluster...
+[preflight] FYI: You can look at this config file with 'kubectl -n kube-system get cm kubeadm-config -o yaml'
+[preflight] Running pre-flight checks before initializing the new control plane instance
+[preflight] Pulling images required for setting up a Kubernetes cluster
+[preflight] This might take a minute or two, depending on the speed of your internet connection
+[preflight] You can also perform this action in beforehand using 'kubeadm config images pull'
+[certs] Using certificateDir folder "/etc/kubernetes/pki"
+error execution phase control-plane-prepare/certs: error creating PKI assets: failed to write or validate certificate "apiserver": certificate apiserver is invalid: x509: certificate is valid for kubernetes, kubernetes.default, kubernetes.default.svc, kubernetes.default.svc.cluster.local, master, not master2
+To see the stack trace of this error execute with --v=5 or higher
+
+解决方法：
+证书复制的不对只需要复制如下证书：
+scp /etc/kubernetes/pki/ca.crt k8s-master02:/etc/kubernetes/pki/
+scp /etc/kubernetes/pki/ca.key k8s-master02:/etc/kubernetes/pki/
+scp /etc/kubernetes/pki/sa.key k8s-master02:/etc/kubernetes/pki/
+scp /etc/kubernetes/pki/sa.pub k8s-master02:/etc/kubernetes/pki/
+scp /etc/kubernetes/pki/front-proxy-ca.crt k8s-master02:/etc/kubernetes/pki/
+scp /etc/kubernetes/pki/front-proxy-ca.key k8s-master02:/etc/kubernetes/pki/
+scp /etc/kubernetes/pki/etcd/ca.crt k8s-master02:/etc/kubernetes/pki/etcd/
+scp /etc/kubernetes/pki/etcd/ca.key k8s-master02:/etc/kubernetes/pki/etcd/
+
 ```
 
 
