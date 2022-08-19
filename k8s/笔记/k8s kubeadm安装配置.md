@@ -1212,6 +1212,31 @@ kubernetes-dashboard   dashboard-metrics-scraper-8c47d4b5d-n8bdf   1/1     Runni
 kubernetes-dashboard   kubernetes-dashboard-75d8f74d66-ck4sz       1/1     Running   0          86s    10.244.104.3     node2    <none>           <none>
 ```
 
+大量的 ESTABLISHED
+
+```
+ netstat -aptn
+Active Internet connections (servers and established)
+Proto Recv-Q Send-Q Local Address           Foreign Address         State       PID/Program name    
+tcp        0      0 127.0.0.1:25            0.0.0.0:*               LISTEN      1297/master         
+tcp        0      0 127.0.0.1:10248         0.0.0.0:*               LISTEN      14515/kubelet       
+tcp        0      0 127.0.0.1:43432         0.0.0.0:*               LISTEN      14515/kubelet       
+tcp        0      0 127.0.0.1:10249         0.0.0.0:*               LISTEN      19553/kube-proxy    
+tcp        0      0 0.0.0.0:22              0.0.0.0:*               LISTEN      1125/sshd           
+tcp        0      0 192.168.192.130:22      192.168.192.1:54611     ESTABLISHED 2533/sshd: root@not 
+tcp        0      0 192.168.192.130:22      192.168.192.1:57514     ESTABLISHED 40747/sshd: root@no 
+tcp        0      0 192.168.192.130:52768   192.168.192.129:6443    ESTABLISHED 14515/kubelet       
+tcp        0    116 192.168.192.130:22      192.168.192.1:57513     ESTABLISHED 40654/sshd: root@pt 
+tcp        0      0 10.96.0.1:42564         10.96.0.1:443           ESTABLISHED 19998/flanneld      
+tcp        0      0 192.168.192.130:52772   192.168.192.129:6443    ESTABLISHED 19553/kube-proxy    
+tcp6       0      0 ::1:25                  :::*                    LISTEN      1297/master         
+tcp6       0      0 :::10250                :::*                    LISTEN      14515/kubelet       
+tcp6       0      0 :::10256                :::*                    LISTEN      19553/kube-proxy    
+tcp6       1      0 :::31090                :::*                    LISTEN      19553/kube-proxy    
+tcp6       0      0 :::22                   :::*                    LISTEN      1125/sshd           
+tcp6      84      0 10.98.148.160:31090     192.168.192.130:45786   CLOSE_WAIT  -    
+```
+
 
 
 ## keepalive配置
