@@ -462,7 +462,61 @@ _tcp 是服务使用的传输协议
 用于将域或子域指向另一个主机名
 可用于联合服务的跨集群服务发现 
 
+## CoreDNS配置解析
+
+配置模板
+
+```
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: coredns
+  namespace: namespace-test
+data:
+  Corefile: |
+    .:53 {
+        errors
+        health
+        ready
+        kubernetes cluster.local  10.200.0.0/16 {
+          pods insecure
+          upstream 114.114.114.114
+          fallthrough in-addr.arpa ip6.arpa
+          namespaces namespace-test
+        }
+        prometheus :9153
+        forward . /etc/resolv.conf
+        cache 30
+        loop
+        reload
+        loadbalance
+    }
+```
+
+
+
+CoreDNS的主要功能是通过插件系统实现的。它实现了一种链式插件的结构，将dns的逻辑抽象成了一个个插件。常见的插件如下：
+
+loadbalance：提供基于dns的负载均衡功能
+loop：检测在dns解析过程中出现的简单循环问题
+cache：提供前端缓存功能
+health：对Endpoint进行健康检查
+kubernetes：从kubernetes中读取zone数据
+etcd：从etcd读取zone数据，可以用于自定义域名记录
+file：从文件中读取zone数据
+hosts：使用/etc/hosts文件或者其他文件读取zone数据，可以用于自定义域名记录
+auto：从磁盘中自动加载区域文件
+reload：定时自动重新加载Corefile配置文件的内容
+forward：转发域名查询到上游dns服务器
+proxy：转发特定的域名查询到多个其他dns服务器，同时提供到多个dns服务器的负载均衡功能
+prometheus：为prometheus系统提供采集性能指标数据的URL
+pprof：在URL路径/debug/pprof下提供运行是的西能数据
+log：对dns查询进行日志记录
+errors：对错误信息镜像日志记录
+
 # Ingress
+
+**Kubernetes 暴露服务的有三种方式，分别为 LoadBlancer Service、NodePort Service、Ingress**。
 
  用于将不同的URL 访问转发到后端不同的Service，解决的是外部客户端访问一组服务的问题。
 
@@ -470,6 +524,34 @@ ngress相当于一个7层的负载均衡器，是Kubernetes对反向代理的一
 
 Ingress：Kubernetes中的一个对象，作用是定义请求如何转发到Service的规则
 Ingress Controller：具体实现反向代理及负载均衡的程序，对Ingress定义的规则进行解析，根据配置的规则来实现请求转发，实现方式有很多，比如Nginx、Haproxy 
+
+## Ingress-nginx介绍
+
+1）Ingress-nginx组成
+ingress-nginx-controller：根据用户编写的ingress规则（创建的ingress的yaml文件），动态的去更改nginx服务的配置文件，并且reload重载使其生效（是自动化的，通过lua脚本来实现）
+ingress资源对象：将Nginx的配置抽象成一个Ingress对象，每添加一个新的Service资源对象只需写一个新的Ingress规则的yaml文件即可（或修改已存在的ingress规则的yaml文件）
+
+2）Ingress-nginx工作流程
+Ingress 的实现分为两个部分 Ingress Controller 和 Ingress .
+
+截至目前，nginx-ingress 已经能够完成 7/4 层的代理功能（4 层代理基于 ConfigMap，感觉还有改进的空间）；Nginx 的 7 层反向代理模式，可以简单用下图表示：
+
+Nginx 对后端运行的服务（Service1、Service2）提供反向代理，在配置文件中配置了域名与后端服务 Endpoints 的对应关系。
+客户端通过使用 DNS 服务或者直接配置本地的 hosts 文件，将域名都映射到 Nginx 代理服务器。
+当客户端访问 service1.com 时，浏览器会把包含域名的请求发送给 nginx 服务器，nginx 服务器根据传来的域名，选择对应的 Service，这里就是选择 Service 1 后端服务，然后根据一定的负载均衡策略，选择 Service1 中的某个容器接收来自客户端的请求并作出响应。
+过程很简单，nginx 在整个过程中仿佛是一台根据域名进行请求转发的“路由器”，这也就是7层代理的整体工作流程了！
+
+3）工作原理
+对于 Nginx 反向代理做了什么，我们已经大概了解了。在 k8s 系统中，后端服务的变化是十分频繁的，单纯依靠人工来更新nginx 的配置文件几乎不可能，nginx-ingress 由此应运而生。Nginx-ingress 通过监视 k8s 的资源状态变化实现对 nginx 配置文件的自动更新，下面本文就来分析下其工作原理。
+
+
+
+nginx-ingress 模块在运行时主要包括三个主体：NginxController、Store、SyncQueue。
+Store 主要负责从 kubernetes APIServer 收集运行时信息，感知各类资源（如 ingress、service等）的变化，并及时将更新事件消息（event）写入一个环形管道。
+SyncQueue 协程定期扫描 syncQueue 队列，发现有任务就执行更新操作，即借助 Store 完成最新运行数据的拉取，然后根据一定的规则产生新的 nginx 配置，（有些更新必须 reload，就本地写入新配置，执行 reload），然后执行动态更新操作，即构造 POST 数据，向本地 Nginx Lua 服务模块发送 post 请求，实现配置更新。
+NginxController 作为中间的联系者，监听 updateChannel，一旦收到配置更新事件，就向同步队列 syncQueue 里写入一个更新请求。
+
+
 
 ​	1.使用Ingress ,需要创建Ingress controller，backend服务，Ingress 策略。创建Ingress 需要保证后端的服务已经创建完成否则会报错。
 
@@ -495,6 +577,12 @@ Ingress Controller：具体实现反向代理及负载均衡的程序，对Ingre
    LoadBalancer依赖于**云服务商提供的LoadBalancer**的实现机制。
    
    ingress需要额外安装**ingress模块**，配置路由规则，且仅能通过所配置域名访问，配置好域名后，可以直接对外提供服务，和传统的nginx作用类似
+
+
+
+### 参考资料：
+
+https://liugp.blog.csdn.net/article/details/120499402
 
 # 集群安全机制
 

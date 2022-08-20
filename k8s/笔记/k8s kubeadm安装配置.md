@@ -249,7 +249,25 @@ kubeadm init \
 kubeadm init --kubernetes-version=v1.24.1  --control-plane-endpoint "192.168.99.142:6443" --apiserver-advertise-address=192.168.99.142  --pod-network-cidr=10.244.0.0/16 --service-cidr 10.1.0.0/16  --image-repository=registry.aliyuncs.com/google_containers  --ignore-preflight-errors=all    --v=5
 ```
 
-2. 复制证书
+```
+kubeadm init \
+  --apiserver-advertise-address=192.168.0.113 \
+  --image-repository registry.aliyuncs.com/google_containers \
+  --control-plane-endpoint=cluster-endpoint \
+  --kubernetes-version v1.24.1 \
+  --service-cidr=10.1.0.0/16 \
+  --pod-network-cidr=10.244.0.0/16 \
+  --v=5
+# –image-repository string：    这个用于指定从什么位置来拉取镜像（1.13版本才有的），默认值是k8s.gcr.io，我们将其指定为国内镜像地址：registry.aliyuncs.com/google_containers
+# –kubernetes-version string：  指定kubenets版本号，默认值是stable-1，会导致从https://dl.k8s.io/release/stable-1.txt下载最新的版本号，我们可以将其指定为固定版本（v1.22.1）来跳过网络请求。
+# –apiserver-advertise-address  指明用 Master 的哪个 interface 与 Cluster 的其他节点通信。如果 Master 有多个 interface，建议明确指定，如果不指定，kubeadm 会自动选择有默认网关的 interface。这里的ip为master节点ip，记得更换。
+# –pod-network-cidr             指定 Pod 网络的范围。Kubernetes 支持多种网络方案，而且不同网络方案对  –pod-network-cidr有自己的要求，这里设置为10.244.0.0/16 是因为我们将使用 flannel 网络方案，必须设置成这个 CIDR。
+# --control-plane-endpoint     cluster-endpoint 是映射到该 IP 的自定义 DNS 名称，这里配置hosts映射：192.168.0.113   cluster-endpoint。 这将允许你将 --control-plane-endpoint=cluster-endpoint 传递给 kubeadm init，并将相同的 DNS 名称传递给 kubeadm join。 稍后你可以修改 cluster-endpoint 以指向高可用性方案中的负载均衡器的地址。
+```
+
+https://blog.csdn.net/qq_35745940/article/details/125455467
+
+1. 复制证书
 
 ```
 
