@@ -580,31 +580,65 @@ NginxController 作为中间的联系者，监听 updateChannel，一旦收到�
 
 
 
-1.2 DaemonSet修改Ingress-Nginx
-Deployment 部署的副本 Pod 会分布在各个 Node 上，每个 Node 都可能运行好几个副本。DaemonSet 的不同之处在于：每个 Node 上最多只能运行一个副本。
-使用DaemonSet的好处，我们不用管随机生成的副本，想在哪个执行机上执行只要打个标签即可。如果使用Deployment每次增加减少都要考虑副本数。
-#　查看之前ingress-nginx deployment具体信息
-kubectl get deploy -n ingress-nginx nginx-ingress-controller -o yaml
-# 用Demonset控制尝试修改ingress-nginx 先给它重新命名
-kubectl get deploy -n ingress-nginx nginx-ingress-controller -o yaml > nginx-ingress-controller.yaml
-# 修改它 
-# 1. 修改Deployment为DaemonSet 
-# 2. 删除注释annotations 以及一些看着不顺眼的生成。删除progressDeadlineSeconds
-# 3. 删除replicas副本数，因为不需要。
-# 4. 修改strategy为updateStrategy。去掉最大激增数maxSurge(最多可以比replicas预先设定值多出的pod数量)
-# 5. 删除status下面没什么用。在文件最下面
-vim nginx-ingress-controller.yaml
-# 删除之前的服务使用修改后的配置
-kubectl delete  deploy -n ingress-nginx nginx-ingress-controller
-kubectl apply -f nginx-ingress-controller.yaml
-# 发现运行在s2上 测试下之前的服务http://tomcat.mooc.com/ 发现没问题
-kubectl get pod  -n ingress-nginx -o wide
+###  Ingress-Nginx的四层代理
 
-# 优势: 如果我想在s1上也跑一个nginx-ingress-controller 只需要打一个标签就行。注意这里会在node上开80端口奥
-kubectl label node s1 app=ingress
-kubectl get pod  -n ingress-nginx -o wide
+1. **TCP服务如何用Ingress-Nginx做服务发现。**
 
- 
+   ```
+   # 首先，看下它的ConfigMap 其中有一项是tcp-service。它是在部署时创建的。
+   kubectl get cm -n ingress-nginx
+   kubectl get cm -n ingress-nginx -o yaml
+   
+   # 使用配置文件tcp-config.yaml 30000是我要暴露的执行机的对外端口 后面是暴露的服务
+   # dev命名空间下web-demo服务的80端口
+   apiVersion: v1
+   kind: ConfigMap
+   metadata:
+     name: tcp-services
+     namespace: ingress-nginx
+   data:
+     "30000": dev/web-demo:80
+   
+   kubectl apply -f tcp-config.yaml
+   # 查看执行机是否监听30000
+   netstat -ntlp|grep 30000
+   # 直接通过ip+端口访问测试 这种方式很简单 主要用来测试一些东西方便
+   http://192.168.242.131:30000/
+   ```
+
+### Ingress-Nginx的定制配置
+
+1. 自定义配置-**改一些配置参数**
+
+   ```
+   # 进入到容器中
+   docker ps | grep ingress-nginx
+   docker exec -it e45667e1185b bash
+   # 查看nginx的配置文件
+   ps -ef | grep nginx
+   more /etc/nginx/nginx.conf
+   # 1. 这里通过ConfigMap修改一些配置参数 具体可以修改的参数参考github官网:https://github.com/kubernetes/ingress-nginx
+   # 详细用法:https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/configmap/
+   kind: ConfigMap
+   apiVersion: v1
+   metadata:
+     name: nginx-configuration
+     namespace: ingress-nginx
+     labels:
+       app: ingress-nginx
+   data:
+     proxy-body-size: "64m"
+     proxy-read-timeout: "180"
+     proxy-send-timeout: "180"
+     
+   # 应用全局配置查看是否生效
+   kubectl apply -f nginx-config.yaml
+   docker exec -it e45667e1185b bash
+   # 这里字段可能不完全一样 可以去上面地址文档查询
+   more /etc/nginx/nginx.conf
+   ```
+
+   
 
 ### 参考资料：
 
