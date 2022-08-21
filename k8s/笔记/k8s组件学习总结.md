@@ -870,6 +870,63 @@ kubectl apply -f ingress-cookie.yaml
 
 ```
 
+**通过header定向流量**
+
+```
+#ingress canary-by-header
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: web-canary-b
+  namespace: canary
+  annotations:
+    nginx.ingress.kubernetes.io/canary: "true"
+    nginx.ingress.kubernetes.io/canary-by-header: "web-canary"
+spec:
+  rules:
+  - host: canary.mooc.com
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: web-canary-b
+          servicePort: 80
+          
+kubectl apply -f ingress-header.yaml
+# 返回一直是b版本
+curl -H "web-canary: always" http://canary.mooc.com/hello?name=michael
+
+```
+
+##### **通过组合方式定向流量**
+
+```
+#ingress 这里从上到下优先级
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: web-canary-b
+  namespace: canary
+  annotations:
+    nginx.ingress.kubernetes.io/canary: "true"
+    nginx.ingress.kubernetes.io/canary-by-header: "web-canary"
+    nginx.ingress.kubernetes.io/canary-by-cookie: "web-canary"
+    nginx.ingress.kubernetes.io/canary-weight: "90"
+spec:
+  rules:
+  - host: canary.mooc.com
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: web-canary-b
+          servicePort: 80
+
+
+kubectl apply -f ingress-compose.yaml
+
+```
+
 
 
 ### 参考资料：
