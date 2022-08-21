@@ -750,7 +750,91 @@ kubectl create -f web-ingress.yaml
 https://web-dev.mooc.com/hello?name=qierj
 ```
 
+##### 访问控制session保持
 
+```
+# 查看两个的pod的镜象
+kubectl get deploy -n dev web-demo -o yaml| grep image
+kubectl get deploy -n dev web-demo-new -o yaml| grep image
+# 修改一个镜像为spring-web 这样可以区分不同的服务 一个域名下两个服务靠刷新切换
+# 如果保持会话让它在一个会话中只访问一个后端 只要配置下annotations下三个即可
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    nginx.ingress.kubernetes.io/affinity: cookie
+    nginx.ingress.kubernetes.io/session-cookie-hash: sha1
+    nginx.ingress.kubernetes.io/session-cookie-name: route
+  name: web-demo
+  namespace: dev
+spec:
+  rules:
+  - host: web-dev.mooc.com
+    http:
+      paths:
+      - backend:
+          serviceName: web-demo
+          servicePort: 80
+        path: /
+
+# 再次刷新页面就能看到效果
+kubectl apply -f ingress-session.yaml
+https://web-dev.mooc.com/hello?name=qierj
+
+```
+
+
+
+##### 小流量和定向流量控制
+
+```
+比如：服务上去之后不知道有没有问题，先给切流量10%过去，测试下有没有问题。没有问题之后再给他慢慢开启流量。
+ingress-nginx也帮我们想到这些问题了。但是是比较新的版本。。。
+
+vi nginx-ingress-controller.yaml
+# 把版本修改为0.23.0
+image: quay.io/kubernetes-ingress-controller/nginx-ingress-controller:0.23.0
+kubectl apply -f nginx-ingress-controller.yaml
+
+实现小流量控制
+# 创建canary命名空间
+kubectl create ns canary
+
+vimdiff web-canary-a.yaml web-canary-b.yaml
+kubectl apply -f web-canary-a.yaml
+kubectl apply -f web-canary-b.yaml
+
+kubectl apply -f ingress-common.yaml
+docker logs db2305dcc074
+# 服务没启动 因为之前用的nginx.tmpl从0.19.0中复制过来的 可以先去掉 不适用最新版本
+kubectl apply -f nginx-ingress-controller.yaml
+kubectl get pods -n ingress-nginx
+docker logs f3bacef5f19f
+# 这时访问:http://canary.mooc.com/hello?name=michael 一直访问的是web-canary-a的服务
+# 上线web-canary-b 这里设置10%的流量会到新服务上web-canary-b 
+#ingress canary-weight
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: web-canary-b
+  namespace: canary
+  annotations:
+    nginx.ingress.kubernetes.io/canary: "true"
+    nginx.ingress.kubernetes.io/canary-weight: "10"
+spec:
+  rules:
+  - host: canary.mooc.com
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: web-canary-b
+          servicePort: 80
+          
+kubectl apply -f ingress-weight.yaml
+# 创建成功后 刷新访问http://canary.mooc.com/hello?name=michael 或者循环访问 有10%的流量给到服务web-canary-b
+while sleep 0.2;do curl http://canary.mooc.com/hello?name=michael && echo ""; done
+```
 
 
 
