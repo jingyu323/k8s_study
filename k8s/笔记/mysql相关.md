@@ -69,7 +69,13 @@ systemctl disable firewalld
 
 
 
+## 集群搭建
 
+
+
+## SQL优化
+
+## 分库分表
 
 
 

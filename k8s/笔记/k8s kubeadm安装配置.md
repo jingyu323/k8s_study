@@ -1095,6 +1095,33 @@ kubectl replace --force -f recommended.yaml
 
 *kubectl get pods -A -o wide*
 
+# Ingress
+
+1）Ingress-nginx组成
+ingress-nginx-controller：根据用户编写的ingress规则（创建的ingress的yaml文件），动态的去更改nginx服务的配置文件，并且reload重载使其生效（是自动化的，通过lua脚本来实现）
+ingress资源对象：将Nginx的配置抽象成一个Ingress对象，每添加一个新的Service资源对象只需写一个新的Ingress规则的yaml文件即可（或修改已存在的ingress规则的yaml文件）
+2）Ingress-nginx工作流程
+Ingress 的实现分为两个部分 Ingress Controller 和 Ingress  
+
+##### 用的是1.3.0  的配置
+
+```
+#下载配置 部署文件
+$ wget https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.0.0/deploy/static/provider/baremetal/deploy.yaml
+
+# 修改镜像地址 , egistry.cn-hangzhou.aliyuncs.com/google_containers
+$ sed -i 's@k8s.gcr.io/ingress-nginx/controller:v1.0.0\(.*\)@willdockerhub/ingress-nginx-controller:v1.0.0@' deploy.yaml
+$ sed -i 's@k8s.gcr.io/ingress-nginx/kube-webhook-certgen:v1.0\(.*\)$@hzde0128/kube-webhook-certgen:v1.0@' deploy.yaml
+kubectl apply -f deploy.yaml
+
+```
+
+
+
+
+
+
+
 # istio
 
 https://blog.csdn.net/aa18855953229/article/details/109281007
