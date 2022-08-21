@@ -838,6 +838,40 @@ while sleep 0.2;do curl http://canary.mooc.com/hello?name=michael && echo ""; do
 
 通过标签选择： name: web-canary-b ，添加 nginx.ingress.kubernetes.io/canary: "true"    nginx.ingress.kubernetes.io/canary-weight: "10" 注解权重
 
+##### 还有一种需求并**不让线上的用户访问，只让测试人员测试下有没有问题**。测试后在走上线流程。**通过cookie做一个定向流量控制**
+
+  nginx.ingress.kubernetes.io/canary: "true"
+  nginx.ingress.kubernetes.io/canary-by-cookie: "web-canary"
+
+```
+#ingress canary-by-cookie
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: web-canary-b
+  namespace: canary
+  annotations:
+    nginx.ingress.kubernetes.io/canary: "true"
+    nginx.ingress.kubernetes.io/canary-by-cookie: "web-canary"
+spec:
+  rules:
+  - host: canary.mooc.com
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: web-canary-b
+          servicePort: 80
+          
+kubectl apply -f ingress-cookie.yaml
+# 刷新访问http://canary.mooc.com/hello?name=michael 发现全是A版本, 那如何访问到b呢。
+# 在浏览器端手动修改cookie的名字为:web-canary 值为:always
+# 然后访问http://canary.mooc.com/hello?name=michael 测试全是B版本
+
+```
+
+
+
 ### 参考资料：
 
 https://liugp.blog.csdn.net/article/details/120499402
