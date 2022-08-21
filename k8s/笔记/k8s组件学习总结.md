@@ -215,6 +215,9 @@ Pod如果是通过Deployment 创建的，则升级回退就是要使用Deploymen
    - 创建一个Headlesse Service用户维护Mongo DB的集群状态
    - 创建一个StatefulSet
 
+## Pod 驱逐策略
+
+驱逐策略
 
 
 
@@ -222,8 +225,7 @@ Pod如果是通过Deployment 创建的，则升级回退就是要使用Deploymen
 
 
 
-
-##  service 
+#  service 
 解决的是容器负载的问题。service的引入旨在保证pod的动态变化对访问端透明，访问端只需要知道service的地址，由service来提供代理**解决的是**： 
 
  服务发现（防止pod 失联）防止Pod失联；定义一组Pod的访问策略
@@ -578,9 +580,37 @@ NginxController 作为中间的联系者，监听 updateChannel，一旦收到�
 
 
 
+1.2 DaemonSet修改Ingress-Nginx
+Deployment 部署的副本 Pod 会分布在各个 Node 上，每个 Node 都可能运行好几个副本。DaemonSet 的不同之处在于：每个 Node 上最多只能运行一个副本。
+使用DaemonSet的好处，我们不用管随机生成的副本，想在哪个执行机上执行只要打个标签即可。如果使用Deployment每次增加减少都要考虑副本数。
+#　查看之前ingress-nginx deployment具体信息
+kubectl get deploy -n ingress-nginx nginx-ingress-controller -o yaml
+# 用Demonset控制尝试修改ingress-nginx 先给它重新命名
+kubectl get deploy -n ingress-nginx nginx-ingress-controller -o yaml > nginx-ingress-controller.yaml
+# 修改它 
+# 1. 修改Deployment为DaemonSet 
+# 2. 删除注释annotations 以及一些看着不顺眼的生成。删除progressDeadlineSeconds
+# 3. 删除replicas副本数，因为不需要。
+# 4. 修改strategy为updateStrategy。去掉最大激增数maxSurge(最多可以比replicas预先设定值多出的pod数量)
+# 5. 删除status下面没什么用。在文件最下面
+vim nginx-ingress-controller.yaml
+# 删除之前的服务使用修改后的配置
+kubectl delete  deploy -n ingress-nginx nginx-ingress-controller
+kubectl apply -f nginx-ingress-controller.yaml
+# 发现运行在s2上 测试下之前的服务http://tomcat.mooc.com/ 发现没问题
+kubectl get pod  -n ingress-nginx -o wide
+
+# 优势: 如果我想在s1上也跑一个nginx-ingress-controller 只需要打一个标签就行。注意这里会在node上开80端口奥
+kubectl label node s1 app=ingress
+kubectl get pod  -n ingress-nginx -o wide
+
+ 
+
 ### 参考资料：
 
 https://liugp.blog.csdn.net/article/details/120499402
+
+https://blog.csdn.net/aa18855953229/article/details/109188201
 
 # 集群安全机制
 
@@ -1189,9 +1219,19 @@ docker ps |grep -E 'k8s_kube-apiserver|k8s_kube-controller-manager|k8s_kube-sche
 
 ## NUMA：
 
- 
+  
+
+# 学习材料：
+
+阿里云云原生介绍：
+
+https://developer.aliyun.com/learning/roadmap/cloudnative
 
 
+
+中文社区：
+
+https://www.kubernetes.org.cn/6295.html
 
 
 
