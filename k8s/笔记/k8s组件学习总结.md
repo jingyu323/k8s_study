@@ -608,37 +608,151 @@ NginxController 作为中间的联系者，监听 updateChannel，一旦收到�
 
 ### Ingress-Nginx的定制配置
 
-1. 自定义配置-**改一些配置参数**
+##### 自定义配置-**改一些配置参数**
 
-   ```
-   # 进入到容器中
-   docker ps | grep ingress-nginx
-   docker exec -it e45667e1185b bash
-   # 查看nginx的配置文件
-   ps -ef | grep nginx
-   more /etc/nginx/nginx.conf
-   # 1. 这里通过ConfigMap修改一些配置参数 具体可以修改的参数参考github官网:https://github.com/kubernetes/ingress-nginx
-   # 详细用法:https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/configmap/
-   kind: ConfigMap
-   apiVersion: v1
-   metadata:
-     name: nginx-configuration
-     namespace: ingress-nginx
-     labels:
-       app: ingress-nginx
-   data:
-     proxy-body-size: "64m"
-     proxy-read-timeout: "180"
-     proxy-send-timeout: "180"
-     
-   # 应用全局配置查看是否生效
-   kubectl apply -f nginx-config.yaml
-   docker exec -it e45667e1185b bash
-   # 这里字段可能不完全一样 可以去上面地址文档查询
-   more /etc/nginx/nginx.conf
-   ```
+```
+# 进入到容器中
+docker ps | grep ingress-nginx
+docker exec -it e45667e1185b bash
+# 查看nginx的配置文件
+ps -ef | grep nginx
+more /etc/nginx/nginx.conf
+# 1. 这里通过ConfigMap修改一些配置参数 具体可以修改的参数参考github官网:https://github.com/kubernetes/ingress-nginx
+# 详细用法:https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/configmap/
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: nginx-configuration
+  namespace: ingress-nginx
+  labels:
+    app: ingress-nginx
+data:
+  proxy-body-size: "64m"
+  proxy-read-timeout: "180"
+  proxy-send-timeout: "180"
+  
+# 应用全局配置查看是否生效
+kubectl apply -f nginx-config.yaml
+docker exec -it e45667e1185b bash
+# 这里字段可能不完全一样 可以去上面地址文档查询
+more /etc/nginx/nginx.conf
+```
 
-   
+##### 自定义配置-**定义全局的header**
+
+```
+# 2. 自定义全局的header
+apiVersion: v1
+kind: ConfigMap
+data:
+  proxy-set-headers: "ingress-nginx/custom-headers"
+metadata:
+  name: nginx-configuration
+  namespace: ingress-nginx
+  labels:
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+---
+apiVersion: v1
+kind: ConfigMap
+data:
+  X-Different-Name: "true"
+  X-Request-Start: t=${msec}
+  X-Using-Nginx-Controller: "true"
+metadata:
+  name: custom-headers
+  namespace: ingress-nginx
+
+# 测试一下
+kubectl apply -f custom-header-global.yaml
+docker exec -it 15b497b1108e bash
+more /etc/nginx/nginx.conf
+
+```
+
+##### 自定义配置-**自定义ingress下的header**
+
+```
+# 3. 自定义ingress下的header nginx.ingress.kubernetes.io/configuration-snippet
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      more_set_headers "Request-Id: $req_id";
+  name: web-demo
+  namespace: dev
+spec:
+  rules:
+  - host: web-dev.mooc.com
+    http:
+      paths:
+      - backend:
+          serviceName: web-demo
+          servicePort: 80
+        path: /
+
+# 测试一下
+kubectl create -f custom-header-global.yaml
+docker exec -it 15b497b1108e bash
+more /etc/nginx/nginx.conf
+
+```
+
+##### TSL配置HTTPS的配置
+
+```
+编写一个脚本生成证书，然后创建一个secret。
+#!/bin/bash
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout mooc.key -out mooc.crt -subj "/CN=*.mooc.com/O=*.mooc.com"
+kubectl create secret tls mooc-tls --key mooc.key --cert mooc.crt
+
+# 查看生成的secret
+kubectl get secret mooc-tls -o yaml
+# 进入容器中 查看证书文件怎么使用 --default-ssl-certificate
+docker ps | grep ingress-nginx
+docker exec -it db2305dcc074 bash
+/nginx-ingress-controller -h
+
+# 修改nginx-ingress-controller.yaml文件参数加入证书 default命名空间下的mooc-tls
+- --default-ssl-certificate=default/mooc-tls
+
+# 重新应用
+kubectl apply -f nginx-ingress-controller.yaml
+kubectl get pod -n ingress-nginx
+
+# 试一下我们的https 返现返回default backend - 404 没有找到服务
+https://web-dev.mooc.com/
+
+# 除了给ingress-nginx配置好证书之后，还需要在具体域名下给域名指定证书
+# 否则并不会创建web-dev.mooc.com Https的服务
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: web-demo
+  namespace: dev
+spec:
+  rules:
+  - host: web-dev.mooc.com
+    http:
+      paths:
+      - backend:
+          serviceName: web-demo
+          servicePort: 80
+        path: /
+  tls:
+    - hosts:
+      - web-dev.mooc.com
+      secretName: mooc-tls
+
+# 启动并访问 发现正常返回
+kubectl create -f web-ingress.yaml
+https://web-dev.mooc.com/hello?name=qierj
+```
+
+
+
+
 
 ### 参考资料：
 
