@@ -836,7 +836,7 @@ kubectl apply -f ingress-weight.yaml
 while sleep 0.2;do curl http://canary.mooc.com/hello?name=michael && echo ""; done
 ```
 
-
+通过标签选择： name: web-canary-b ，添加 nginx.ingress.kubernetes.io/canary: "true"    nginx.ingress.kubernetes.io/canary-weight: "10" 注解权重
 
 ### 参考资料：
 
