@@ -1173,3 +1173,27 @@ docker ps |grep -E 'k8s_kube-apiserver|k8s_kube-controller-manager|k8s_kube-sche
 
 # 18 k8s 资源管理
 
+## 资源配额与集群资源总量的关系：
+
+资源配额与集群总量是完全独立的。资源配额是通过绝对单位来配置的，意味着新加入节点资源配额不会自动更新。
+
+
+
+# 19 大页内存，NUMA机制
+
+## 大页内存：
+
+ 
+
+
+
+## NUMA：
+
+ 
+
+
+
+
+
+
+
