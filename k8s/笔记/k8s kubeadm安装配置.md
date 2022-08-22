@@ -1797,3 +1797,11 @@ systemctl status firewalld.service
 
 systemctl stop firewalld
 
+
+
+# 参考材料
+
+##### 一套教程搞定k8s安装到实战
+
+https://blog.csdn.net/guolianggsta/article/details/125275711
+
