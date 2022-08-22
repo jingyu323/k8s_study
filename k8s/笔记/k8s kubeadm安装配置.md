@@ -991,6 +991,7 @@ spec:
         hostPath:
           path: /opt/web/dist #此路径需要实现创建
 EOF
+
 ```
 
 然后应用到k8s中 kubectl create -f deployment.yaml
@@ -1143,6 +1144,7 @@ $ sed -i 's@k8s.gcr.io/ingress-nginx/controller:v1.0.0\(.*\)@willdockerhub/ingre
 $ sed -i 's@k8s.gcr.io/ingress-nginx/kube-webhook-certgen:v1.0\(.*\)$@hzde0128/kube-webhook-certgen:v1.0@' deploy.yaml
 kubectl apply -f deploy.yaml
 
+docker pull aidasi/ingress-nginx-controller:v1.2.1
 ```
 
 
