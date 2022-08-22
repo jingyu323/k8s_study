@@ -31,26 +31,21 @@ hostnamectl set-hostname node2
 
 2.配置 /etc/hosts
 
+ ```
+ cat  >  /etc/hosts << EOF
+ 127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
+ ::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
+ 192.168.99.104  master
+ 192.168.99.112  master2
+ 192.168.99.119  master3
+ 192.168.99.150  node1
+ 192.168.99.170  node2
+ EOF
+ 
+ cat  /etc/hosts
+ ```
 
-cat  >  /etc/hosts << EOF
-
-127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
-::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
-192.168.99.110  master
-
-192.168.99.164  master2
-
-192.168.99.156  master3
-
-192.168.99.178  node1
-192.168.99.142  node2
-
-EOF
-
-
-cat  /etc/hosts
-
-
+安装时间同步服务
 
 yum -y install  chrony 
 
@@ -62,6 +57,8 @@ systemctl enable chronyd
 在每个节点安装ipset和ipvsadm：
 yum -y install ipset ipvsadm
 在所有节点执行如下脚本：
+
+```
 cat > /etc/sysconfig/modules/ipvs.modules  <<EOF
 #!/bin/bash
 modprobe -- ip_vs
@@ -69,14 +66,12 @@ modprobe -- ip_vs_rr
 modprobe -- ip_vs_wrr
 modprobe -- ip_vs_sh
 modprobe -- nf_conntrack
-
- EOF
+EOF
+```
 
 ```
 nf_conntrack_ipv4,有的教程跟着做会显示找不到nf_conntrack_ipv4,高版本的内核因为nf_conntrack_ipv4被nf_conntrack替换了,需要注意
 ```
-
-
 
 4.关闭防火墙
 
@@ -94,6 +89,32 @@ systemctl disable firewalld
 yum makecache      //更新yum软件包索引
 
 yum -y install yum-utils
+
+
+
+关闭交换
+swapoff -a
+
+永久关闭
+
+```
+sed -ri 's/.*swap.*/#&/' /etc/fstab
+```
+
+
+
+Swap 是交换分区，如果机器内存不够，会使用 swap 分区，但是 swap 分区的性能较低，k8s 设计的
+时候为了能提升性能，默认是不允许使用姜欢分区的。Kubeadm 初始化的时候会检测 swap 是否关闭，如果没关闭，那就初始化失败。如果不想要关闭交换分区，安装 k8s 的时候可以指定--ignorepreflight-errors=Swap 来解决。
+
+###### 关闭所有节点的Slinux/防火墙
+
+```
+setenforce 0 \
+&& sed -i 's/^SELINUX=.*$/SELINUX=disabled/' /etc/selinux/config \
+&& getenforce
+```
+
+
 
 
 
@@ -147,8 +168,11 @@ grep sandbox_image  /etc/containerd/config.toml
 kubernets自ｖ1.24.0后，就不再使用docker.shim，替换采用containerd作为容器运行时端点。因此需要安装containerd（在docker的基础下安装），上面安装docker的时候就自动安装了containerd了。这里的docker只是作为客户端而已。容器引擎还是containerd。 
 
 ```
-sed -i 's#SystemdCgroup = false#SystemdCgroup = true#g' /etc/containerd/config.toml
+    sed -i 's#SystemdCgroup = false#SystemdCgroup = true#g' /etc/containerd/config.toml
 # 应用所有更改后,重新启动containerd
+
+cat   /etc/containerd/config.toml | grep SystemdCgroup
+
 systemctl restart containerd
 ```
 
@@ -251,7 +275,7 @@ kubeadm init --kubernetes-version=v1.24.1  --control-plane-endpoint "192.168.99.
 
 ```
 kubeadm init \
-  --apiserver-advertise-address=192.168.0.113 \
+  --apiserver-advertise-address=192.168.99.104 \
   --image-repository registry.aliyuncs.com/google_containers \
   --control-plane-endpoint=cluster-endpoint \
   --kubernetes-version v1.24.1 \
@@ -320,8 +344,7 @@ kubectl -n kube-system get cm kubeadm-config -o yaml
 
 /usr/lib/systemd/system/kubelet.service.d/10-kubeadm.conf
 
-关闭交换
-swapoff -a
+
 
 cd /etc/sysconfig/network-scripts
 ONBOOT=yes
@@ -632,6 +655,10 @@ kubeadm init --config=kubeadm-config.yaml --upload-certs   --ignore-preflight-er
 
 
 kubeadm init --config=kubeadm-config.yaml     --ignore-preflight-errors=SystemVerification   --v=5 | tee kubeadm-init.log
+
+ kubeadm join 192.168.99.104:6443 --token peou97.63943msx03iweetx \
+	--discovery-token-ca-cert-hash sha256:3bc3b1fa29fb73ddd3f7e1b9e9caa8a3f1b2a99950ab30f508d9ee738b8e4a92 \
+	--control-plane --v=5
 ```
 
 复制证书
@@ -646,6 +673,8 @@ scp /etc/kubernetes/pki/front-proxy-ca.crt k8s-master02:/etc/kubernetes/pki/
 scp /etc/kubernetes/pki/front-proxy-ca.key k8s-master02:/etc/kubernetes/pki/
 scp /etc/kubernetes/pki/etcd/ca.crt k8s-master02:/etc/kubernetes/pki/etcd/
 scp /etc/kubernetes/pki/etcd/ca.key k8s-master02:/etc/kubernetes/pki/etcd/
+
+
 
 ```
 
@@ -1109,7 +1138,7 @@ Ingress 的实现分为两个部分 Ingress Controller 和 Ingress
 #下载配置 部署文件
 $ wget https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.0.0/deploy/static/provider/baremetal/deploy.yaml
 
-# 修改镜像地址 , egistry.cn-hangzhou.aliyuncs.com/google_containers
+# 修改镜像地址 , registry.cn-hangzhou.aliyuncs.com/google_containers
 $ sed -i 's@k8s.gcr.io/ingress-nginx/controller:v1.0.0\(.*\)@willdockerhub/ingress-nginx-controller:v1.0.0@' deploy.yaml
 $ sed -i 's@k8s.gcr.io/ingress-nginx/kube-webhook-certgen:v1.0\(.*\)$@hzde0128/kube-webhook-certgen:v1.0@' deploy.yaml
 kubectl apply -f deploy.yaml
@@ -1206,11 +1235,21 @@ cd /etc/kubernetes
 
 # 问题定位：
 
-1. ##### 查看一下kubelet启动日志  *journalctl -f -u kubelet*
+  查看一下kubelet启动日志  *journalctl -f -u kubelet*
 
-2. ##### *systemctl status  kubelet*  查看状态
+```
+ journalctl -f -u kubelet
+```
 
-3. ##### Failed to create pod sandbox: rpc error: code = Unknown desc = [failed to set up sandbox container...
+
+
+1. #####  *systemctl status  kubelet*  查看状态
+
+   ```
+   systemctl status  kubelet
+   ```
+
+2. ##### Failed to create pod sandbox: rpc error: code = Unknown desc = [failed to set up sandbox container...
 
    - 表现状态
 
@@ -1238,6 +1277,8 @@ cd /etc/kubernetes
 - kubectl apply -f calico.yaml
 
   查看正常
+  
+- 可以查看 /var/log/pods 查看相关Pod日志
 
 4.之前创建kubernetes-dashboard,只有service但是没有pod
 
@@ -1287,6 +1328,32 @@ tcp6       1      0 :::31090                :::*                    LISTEN      
 tcp6       0      0 :::22                   :::*                    LISTEN      1125/sshd           
 tcp6      84      0 10.98.148.160:31090     192.168.192.130:45786   CLOSE_WAIT  -    
 ```
+
+```
+
+Unfortunately, an error has occurred:
+	timed out waiting for the condition
+
+This error is likely caused by:
+	- The kubelet is not running
+	- The kubelet is unhealthy due to a misconfiguration of the node in some way (required cgroups disabled)
+
+If you are on a systemd-powered system, you can try to troubleshoot the error with the following commands:
+	- 'systemctl status kubelet'
+	- 'journalctl -xeu kubelet'
+
+Additionally, a control plane component may have crashed or exited when started by the container runtime.
+To troubleshoot, list all containers using your preferred container runtimes CLI.
+Here is one example how you may list all running Kubernetes containers by using crictl:
+	- 'crictl --runtime-endpoint unix:///var/run/containerd/containerd.sock ps -a | grep kube | grep -v pause'
+	Once you have found the failing container, you can inspect its logs with:
+	- 'crictl --runtime-endpoint unix:///var/run/containerd/containerd.sock logs CONTAINERID'
+couldn't initialize a Kubernetes cluster
+
+
+```
+
+
 
 
 
