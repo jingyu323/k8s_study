@@ -98,6 +98,10 @@ swapoff -a
 永久关闭
 
 ```
+setenforce 0
+sed -i '/SELINUX/s/enforcing/disabled/g' /etc/selinux/config
+swapoff -a
+sed -i '/ swap / s/^\(.*\)$/#\1/g'  /etc/fstab
 sed -ri 's/.*swap.*/#&/' /etc/fstab
 ```
 
@@ -1797,3 +1801,73 @@ systemctl status firewalld.service
 
 systemctl stop firewalld
 
+
+
+# harbor私有镜像仓库
+
+```
+openssl req \
+    -newkey rsa:4096 -nodes -sha256 -keyout ca.key \
+    -x509 -days 365 -out ca.crt
+
+
+openssl req \
+    -newkey rsa:4096 -nodes -sha256 -keyout reg.secsmart.com.key \
+    -out reg.secsmart.com.csr
+
+
+openssl x509 -req -days 365 -in reg.secsmart.com.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out reg.secsmart.com.crt
+
+```
+
+2、解压
+
+3、修改harbor配置文件harbor.yml
+
+
+
+```
+hostname : reg.secsmart.com
+
+https:
+  # https port for harbor, default is 443
+  port: 443
+  # The path of cert and key files for nginx
+  certificate: /etc/harbor/reg.secsmart.com.crt
+  private_key: /etc/harbor/reg.secsmart.com.key
+```
+
+在harbor目录中执行
+
+```bash
+./prepare
+
+./install
+```
+
+浏览器输入：https://192.168.99.104:80
+
+账号：admin
+
+密码：Harbor12345
+
+
+
+
+
+mkdir -p /etc/docker/certs.d/reg.secsmart.com/
+
+
+
+cp  /etc/harbor/reg.secsmart.com.crt /etc/docker/certs.d/reg.secsmart.com
+
+mkdir -p /etc/docker/certs.d/reg.secsmart.com
+scp root@192.168.18.229:/root/reg.secsmart.com.crt /etc/docker/certs.d/reg.secsmart.com/
+
+
+
+docker login 192.168.99.104:80 -uadmin -pHarbor12345
+
+
+
+docker restart `docker ps -a |awk '{print $1}' `
