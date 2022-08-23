@@ -1893,6 +1893,54 @@ docker login 192.168.99.104:80
 
 cp  /etc/harbor/reg.secsmart.com.crt /etc/docker/certs.d/reg.secsmart.com/
 
+镜像添加标签
+
+docker tag tomcat:latest 192.168.99.104:80/library/tomcat:latest
+
+docker tag nginx:tomcat 192.168.99.104:80/library/tomcat:latest
+
+docker  push  192.168.99.104:80/library/tomcat:latest
+
+镜像搜索
+
+docker search java8 
+
+
+
+接下来我们来测试下如何在 containerd 中使用 Harbor 镜像仓库。
+
+首先我们需要将私有镜像仓库配置到 containerd 中去，修改 containerd 的配置文件
+
+```
+[plugins."io.containerd.grpc.v1.cri".registry.configs."harbor.k8s.local".tls]
+      insecure_skip_verify = true
+    [plugins."io.containerd.grpc.v1.cri".registry.configs."harbor.k8s.local".auth]
+      username = "admin"
+      password = "Harbor12345"
+```
+
+在 `plugins."io.containerd.grpc.v1.cri".registry.configs` 下面添加对应 `harbor.k8s.local` 的配置信息，`insecure_skip_verify = true` 表示跳过安全校验，然后通过 `plugins."io.containerd.grpc.v1.cri".registry.configs."harbor.k8s.local".auth` 配置 Harbor 镜像仓库的用户名和密码。
+
+配置完成后重启 containerd：
+
+```text
+$ systemctl restart containerd
+```
+
+```text
+nerdctl login -u admin harbor.k8s.local
+```
+
+
+
+nerdctl 命令找不到
+
+https://github.com/containerd/nerdctl
+
+
+
+
+
 
 
 ##### 遇到问题：
@@ -1903,11 +1951,16 @@ unauthorized: unauthorized to access repository: library/nginx, action: push: un
 ```
 
 
-=======
+
+
+
+**received unexpected HTTP status: 502 Bad Gateway**
+
+
+
 # 参考材料
 
 ##### 一套教程搞定k8s安装到实战
 
 https://blog.csdn.net/guolianggsta/article/details/125275711
->>>>>>> 9262c8bc00e7c352e4cc63811f222879143b9ec4
 
