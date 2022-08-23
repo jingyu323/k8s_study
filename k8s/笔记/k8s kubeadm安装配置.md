@@ -1868,6 +1868,26 @@ scp root@192.168.18.229:/root/reg.secsmart.com.crt /etc/docker/certs.d/reg.secsm
 
 docker login 192.168.99.104:80 -uadmin -pHarbor12345
 
-
+重启所有容器
 
 docker restart `docker ps -a |awk '{print $1}' `
+
+docker tag nginx:latest 192.168.99.104:80/library/nginx:latest
+
+
+docker login 192.168.99.104:80
+
+
+cp  /etc/harbor/reg.secsmart.com.crt /etc/docker/certs.d/reg.secsmart.com/
+
+
+
+##### 遇到问题：
+
+```
+unauthorized: unauthorized to access repository: library/nginx, action: push: unauthorized to access repository: library/nginx, action: push
+解决办法重新登录
+```
+
+
+
