@@ -1811,11 +1811,8 @@ https://blog.csdn.net/hjue/article/details/125881911
 
 systemctl status firewalld.service
 
-systemctl stop firewalld
+systemctl stop firewalld 
 
-
-
-<<<<<<< HEAD
 # harbor私有镜像仓库
 
 ```
@@ -1900,6 +1897,26 @@ docker tag tomcat:latest 192.168.99.104:80/library/tomcat:latest
 docker tag nginx:tomcat 192.168.99.104:80/library/tomcat:latest
 
 docker  push  192.168.99.104:80/library/tomcat:latest
+
+
+
+docker tag busybox:latest 192.168.99.104:80/library/busybox:latest
+
+
+docker login 192.168.99.104:80
+
+
+cp  /etc/harbor/reg.secsmart.com.crt /etc/docker/certs.d/reg.secsmart.com/
+
+docker tag williamyeh/java8 192.168.99.104:80/library/java:v8
+
+
+docker  push  192.168.99.104:80/library/java:v8
+
+
+ca_file = "/etc/containerd/ca.crt" # CA 证书
+cert_file = "/etc/containerd/reg.secsmart.com.crt" # harbor 证书
+key_file = "/etc/containerd/reg.secsmart.com.key" # harbor 私钥 
 
 镜像搜索
 
