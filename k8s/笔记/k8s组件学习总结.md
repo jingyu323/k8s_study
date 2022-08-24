@@ -1542,7 +1542,23 @@ docker ps |grep -E 'k8s_kube-apiserver|k8s_kube-controller-manager|k8s_kube-sche
 
 ## NUMA：
 
-  
+#  20 Overlay 
+
+
+
+#  21 流表 
+
+
+
+
+
+
+
+
+
+
+
+
 
 # 学习材料：
 
