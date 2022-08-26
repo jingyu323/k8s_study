@@ -62,6 +62,10 @@ curl -s http://127.0.0.1:2379/v2/keys/?recursive=true
 
 # ETCD架构和原理
 
+![](images\etcd_jiagou.png)
+
+
+
 ## 1. etcd 集群生命周期管理
 
 - etcd 集群创建，销毁，停止，升级，故障恢复等。
