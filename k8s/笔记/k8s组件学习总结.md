@@ -1542,7 +1542,35 @@ docker ps |grep -E 'k8s_kube-apiserver|k8s_kube-controller-manager|k8s_kube-sche
 
 ## NUMA：
 
-  
+# 20 网络
+
+## 20.1 Overlay 
+
+## 20.2流表
+
+
+
+## 20.3  flannel介绍
+
+
+
+
+
+## 20.4  Calico介绍
+
+## 20.5 VXLAN 
+
+
+
+
+
+
+
+
+
+
+
+
 
 # 学习材料：
 
@@ -1555,6 +1583,10 @@ https://developer.aliyun.com/learning/roadmap/cloudnative
 中文社区：
 
 https://www.kubernetes.org.cn/6295.html
+
+flannel 网络介绍
+
+https://blog.csdn.net/weixin_38299404/article/details/121409548
 
 
 
