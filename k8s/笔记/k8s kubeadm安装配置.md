@@ -1815,6 +1815,10 @@ systemctl stop firewalld
 
 # harbor私有镜像仓库
 
+官网：https://goharbor.io/docs/2.0.0/install-config/run-installer-script/
+
+
+
 ```
 openssl req \
     -newkey rsa:4096 -nodes -sha256 -keyout ca.key \
@@ -1912,7 +1916,6 @@ docker tag williamyeh/java8 192.168.99.104:80/library/java:v8
 
 
 docker  push  192.168.99.104:80/library/java:v8
-
 
 ca_file = "/etc/containerd/ca.crt" # CA 证书
 cert_file = "/etc/containerd/reg.secsmart.com.crt" # harbor 证书

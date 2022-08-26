@@ -41,3 +41,30 @@ public class PwdCheckUtil {
 }
 ```
 
+## jvm相关
+
+### 1.tomcat 相关
+
+##### 查看tomcat进程启动了多少个线程
+
+1、 获取tomcat进程pid
+
+```linux
+ps -ef|grep tomcat
+```
+
+例如进程号是29295
+
+2、 统计该tomcat进程内的线程个数
+
+```linux
+ps -Lf 29295|wc -l
+```
+
+
+
+pstree -p 进程号，这个命令可以列出该进程的所有线程出来。
+
+pstree -p 进程号 | wc -l,直接算出线程的总数过来
+
+命令找不到  yum -y install psmisc
