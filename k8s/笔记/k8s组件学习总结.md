@@ -1272,7 +1272,32 @@ Flannel之所以可以搭建kubernets依赖的底层网络，是因为它可以�
 
  **可不可以这么理解：docker 网络模型是解决docker容器的网络联通问题， Kubernets 网络解决的是Pod的联通问题**？
 
-## Calico
+flannel启动过程解析：
+
+flannel服务需要先于Docker启动。flannel服务启动时主要做了以下几步的工作：
+
+1）启动参数设置网卡及对外IP选择
+
+2）从etcd中获取network的配置信息。
+
+3）划分子网subnet，并在etcd中进行注册。
+4）将子网信息记录到/run/flannel/subnet.env中。
+
+5）在Node节点上，会创建一个名为flannel.1的虚拟网卡。
+
+可以看到每个node上/run/flannel/subnet.env 子网掩码不一样。
+
+启动参数设置网卡及对外IP选择
+
+flanneld的启动参数中通过”–iface”或者”–iface-regex”进行指定。其中”–iface”的内容可以是完整的网卡名或IP地址，而”–iface-regex”则是用正则表达式表示的网卡名或IP地址，并且两个参数都能指定多个实例。flannel将以如下的优先级顺序来选取：
+
+1) 如果”–iface”和”—-iface-regex”都未指定时，则直接选取默认路由所使用的输出网卡
+
+2) 如果”–iface”参数不为空，则依次遍历其中的各个实例，直到找到和该网卡名或IP匹配的实例为止
+
+3) 如果”–iface-regex”参数不为空，操作方式和2)相同，唯一不同的是使用正则表达式去匹配
+
+最后，对于集群间交互的Public IP，我们同样可以通过启动参数”–public-ip”进行指定。否则，将使用–iface获取网卡的IP作为Public IP。
 
 
 
