@@ -1276,7 +1276,9 @@ Flannel之所以可以搭建kubernets依赖的底层网络，是因为它可以�
 
 
 
-b.Calico的设计优势
+在安装calico网络时，**默认安装是IPIP网络**。calico.yaml文件中，将CALICO_IPV4POOL_IPIP的值修改成 “off”，就能够替换成BGP网络
+
+Calico的设计优势
 1.更优的资源利用
 
 二层网络通讯需要依赖广播消息机制，广播消息的开销与 host 的数量呈指数级增长，Calico 使用的三层路由方法，则完全抑制了二层广播，减少了资源开销。
