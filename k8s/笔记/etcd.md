@@ -217,5 +217,14 @@ https://www.cnblogs.com/datacoding/p/7473953.html
 
 
 
+其他参考
 
-
+- https://ms2008.github.io/2019/12/04/etcd-rumor/
+- ReadIndex：https://zhuanlan.zhihu.com/p/31050303
+- LeaseRead：https://zhuanlan.zhihu.com/p/31118381
+- 线性一致读：https://zhengyinyong.com/post/etcd-linearizable-read-implementation/
+- https://juejin.im/post/5d843b995188257e8e46e25d
+- https://skyao.io/learning-etcd3/documentation/op-guide/gateway.html
+- https://github.com/etcd-io/etcd/issues/7522
+- https://github.com/etcd-io/etcd/blob/master/Documentation/learning/design-learner.md
+- [etcd 问题、调优、监控](http://www.xuyasong.com/?p=1983)
