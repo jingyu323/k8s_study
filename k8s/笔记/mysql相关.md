@@ -77,6 +77,18 @@ systemctl disable firewalld
 
 ## 分库分表
 
+## 数据库数据同步方案
+
+
+
+一种是mysql-binlog-connector，另一种是ali的canal。
+mysql-binlog-connector：是通过引入依赖jar包实现，需要自行实现解析，但是相对轻量。
+canal：是数据同步中间件，需要单独部署维护，功能强大，支持数据库及MQ的同步，维护成本高。
+根据实际业务场景，按需索取，业务量小，业务简单，轻量可以通过mysql-binlog-connector，业务量大，逻辑复杂，有专门的运维团队，可以考虑canal，比较经过阿里高并发验证，相对稳定。
+
+Canal监听mysql的binlog日志实现数据同步：https://blog.csdn.net/m0_37583655/article/details/119517336
+Java监听mysql的binlog详解(mysql-binlog-connector)：https://blog.csdn.net/m0_37583655/article/details/119148470 
+
 
 
 ## java 安装配置
