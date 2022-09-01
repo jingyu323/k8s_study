@@ -65,6 +65,9 @@ curl -s http://127.0.0.1:2379/v2/keys/?recursive=true
 ![](images\etcd_jiagou.png)
 
 - ***\*选举（Leader election）\*******\*：\****Raft定义集群节点有4种状态，分别是Leader、Follower、Candidate、PreCandidate。***\*正常情况下\*******\*，\****Leader节点会按照心跳间隔时间，定时广播心跳消息给Follower节点，以维持Leader身份。Follower收到后回复消息给Leader。Leader都会带有一个任期号(term)，用于比较各个节点数据新旧，识别过期Leader等。***\*当Leader节点异常时，\****Follower节点会接收Leader的心跳消息超时，当超时时间大于竞选超时时间后，会进入PreCandidate状态，不自增任期号仅发起预投票，获得大多数节点认可后，进入Candidate状态并等待一个随机时间，然后发起选举流程，自增任期号投票给自己，并向其他节点发送竞选投票信息。当节点收到其他节点的竞选消息后，首先判断竞选节点的数据及任期号大于本节点，并且在本节点未发起选举给自己投，则可以投票给竞选节点，否则拒绝投票。
+
+  任何时候如果其它 follower 在 election timeout 期间都没有收到来自 leader 的 heartbeat，同样会将自己的状态切换为 candidate 并发起选举。每成功选举一次，新 leader 的任期（Term）都会比之前leader 的任期大1
+
 - ***\*日志复制（Log replication）\*******\*：\****Raft日志由有序索引的一个个条目组成，每个日志条目包含了任期号和提案内容。Leader通过维护两个字段来追踪各个Follower的进度信息。一个是***\*NextIndex，\****表示Leader发送给该Follower节点的下一个日志条目索引;另一个是***\*MatchIndex\****，表示该Follower节点已复制的最大日志条目索引。
 - 一个用户的请求发送过来，会经由HTTP Server转发给Store进行具体的事务处理，如果涉及到节点的修改，则交给Raft模块进行状态的变更、日志的记录，然后再同步给别的etcd节点以确认数据提交，最后进行数据的提交，再次同步
 
@@ -358,6 +361,12 @@ WAL（Write Ahead Log）最大的作用是记录了整个数据变化的全部�
 
 - 故障快速恢复： 当你的数据遭到破坏时，就可以通过执行所有WAL中记录的修改操作，快速从最原始的数据恢复到数据损坏前的状态。
 - 数据回滚（undo）/重做（redo）：因为所有的修改操作都被记录在WAL中，需要回滚或重做，只需要方向或正向执行日志中的操作即可。
+- wal日志是二进制的，解析出来后是以上数据结构LogEntry。
+  - 第一个字段type，主要有两种，一种是0表示Normal，1表示ConfChange（ConfChange表示 Etcd 本身的配置变更同步，比如有新的节点加入等）。
+    第二个字段是term，每个term代表一个主节点的任期，每次主节点变更term就会变化。
+    第三个字段是index，这个序号是严格有序递增的，代表变更序号。
+    第四个字段是二进制的data，将raft request对象的pb结构整个保存下。etcd 源码下有个tools/etcd-
+    dump-logs，可以将wal日志dump成文本查看，可以协助分析Raft协议。
 
 #### WAL与snapshot在etcd中的命名规则
 
