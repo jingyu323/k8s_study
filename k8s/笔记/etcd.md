@@ -853,6 +853,6 @@ https://www.cnblogs.com/datacoding/p/7473953.html
 - https://skyao.io/learning-etcd3/documentation/op-guide/gateway.html
 - https://github.com/etcd-io/etcd/issues/7522
 - https://github.com/etcd-io/etcd/blob/master/Documentation/learning/design-learner.md
-- [etcd 问题、调优、监控](http://www.xuyasong.com/?p=1983)
+- [etcd 问题、调优、监控](http://www.xuyasong.com/?p=1983)  心跳间隔 网络延迟 磁盘 IO
 - [etcd：从应用场景到实现原理的全方位解读](https://www.cnblogs.com/datacoding/p/7473953.html)
 - [ETCD详解](https://blog.csdn.net/weixin_49925141/article/details/123023334)
