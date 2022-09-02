@@ -855,3 +855,4 @@ https://www.cnblogs.com/datacoding/p/7473953.html
 - https://github.com/etcd-io/etcd/blob/master/Documentation/learning/design-learner.md
 - [etcd 问题、调优、监控](http://www.xuyasong.com/?p=1983)
 - [etcd：从应用场景到实现原理的全方位解读](https://www.cnblogs.com/datacoding/p/7473953.html)
+- [ETCD详解](https://blog.csdn.net/weixin_49925141/article/details/123023334)
