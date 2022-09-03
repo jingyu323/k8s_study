@@ -1445,7 +1445,13 @@ flannel vxlan和calico ipip模式都是隧道方案，但是calico的封装协�
 额外的封装导致带宽浪费，大约有30%左右的带宽损耗；
 
 flannel vxlan和calico ipip模式都是隧道方案，但是calico的封装协议IPIP的header更小，所以性能比flannel vxlan要好一点点。
- 
+
+##### 
+
+[ 网络模型、网络通信、集群内负载均衡机制](https://blog.csdn.net/HiWangWenBing/article/details/122806829)
+
+
+
 
 # 6. ks8集群 升级 回退，扩缩容
 ## 6.1 集群的集群怎么做
