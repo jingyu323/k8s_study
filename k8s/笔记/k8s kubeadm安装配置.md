@@ -1275,6 +1275,33 @@ node1  IP:31090 只能返回node1
 
 node2  IP:31090 只能返回node2
 
+#### Headless Service “无头服务”
+
+Headless Service不需要分配一个VIP，而是直接以DNS记录的方式解析出被代理Pod的IP地址。
+
+```
+域名格式：$(servicename).$(namespace).svc.cluster.local
+```
+
+无头服务，不分配ip地址，使用域名
+
+```
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-svc
+spec:
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+  selector:
+      app: nginx
+  clusterIP: None
+```
+
+
+
 
 
 # Ingress

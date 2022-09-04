@@ -15,3 +15,4 @@ spec:
   selector:
     app: nginx    #选择包含标签app:nginx的资源
   type: NodePort
+  #sessionAffinity: ClientIP	
