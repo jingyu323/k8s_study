@@ -789,8 +789,15 @@ E0903 09:19:56.672281   48279 remote_image.go:121] "ListImages with filter from 
 FATA[0000] listing images: rpc error: code = Unimplemented desc = unknown service runtime.v1alpha2.ImageService 
     
  解决方案：
+mv /etc/containerd/config.toml /tmp
     
-  mv  mv /etc/containerd/config.toml /tmp
+产生config.toml
+containerd config default > /etc/containerd/config.toml
+替换镜像，不然镜像下载不下来
+grep sandbox_image  /etc/containerd/config.toml
+sed -i "s#k8s.gcr.io/pause#registry.aliyuncs.com/google_containers/pause#g"       /etc/containerd/config.toml
+grep sandbox_image  /etc/containerd/config.toml
+    
 ```
 
 
