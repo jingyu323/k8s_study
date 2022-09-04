@@ -1326,7 +1326,29 @@ kubectl apply -f deploy.yaml
 docker pull aidasi/ingress-nginx-controller:v1.2.1
 ```
 
+配置ingress策略：
 
+```
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress-nginx-service
+spec:
+  rules:
+  - host: nginx.test.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: ssx-nginx-sv
+            port:
+              number: 80
+  ingressClassName: nginx
+```
+
+http://nginx.test.com:31090/
 
 
 
