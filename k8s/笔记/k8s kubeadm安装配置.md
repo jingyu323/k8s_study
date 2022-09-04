@@ -1348,7 +1348,49 @@ spec:
   ingressClassName: nginx
 ```
 
-http://nginx.test.com:31090/
+ 
+
+查看ingress配置情况
+
+kubectl get ingress
+
+```
+NAME                    CLASS   HOSTS            ADDRESS   PORTS   AGE
+ingress-nginx-service   nginx   nginx.test.com             80      3m38s
+```
+
+测试ingress
+
+````
+curl -H "Host:nginx.test.com" http://192.168.93.113:31090/
+返回结果：
+node2 test in file.....
+[root@master rain]# curl -H "Host:nginx.test.com" http://192.168.93.113:31090/ 
+node1
+[root@master rain]# curl -H "Host:nginx.test.com" http://192.168.93.113:31090/ 
+node2 test in file.....
+[root@master rain]# curl -H "Host:nginx.test.com" http://192.168.93.113:31090/ 
+node1
+[root@master rain]# curl -H "Host:nginx.test.com" http://192.168.93.113:31090/ 
+node2 test in file.....
+[root@master rain]# curl -H "Host:nginx.test.com" http://192.168.93.113:31090/ 
+node1
+[root@master rain]# curl -H "Host:nginx.test.com" http://192.168.93.113:31090/ 
+node2 test in file.....
+[root@master rain]# curl -H "Host:nginx.test.com" http://192.168.93.113:31090/ 
+node1
+[root@master rain]# curl -H "Host:nginx.test.com" http://192.168.93.113:31090/ 
+node2 test in file.....
+[root@master rain]# curl -H "Host:nginx.test.com" http://192.168.93.113:31090/ 
+node1
+[root@master rain]# curl -H "Host:nginx.test.com" http://192.168.93.113:31090/ 
+node2 test in file.....
+
+````
+
+
+
+
 
 
 
