@@ -1390,6 +1390,10 @@ node2 test in file.....
 
 
 
+参考材料：
+
+#### [使用ingress+service机制实现高可用负载均衡](https://www.cnblogs.com/kebibuluan/p/15143837.html)
+
 
 
 
