@@ -307,6 +307,16 @@ kubeadm init \
 # --control-plane-endpoint     cluster-endpoint 是映射到该 IP 的自定义 DNS 名称，这里配置hosts映射：192.168.0.113   cluster-endpoint。 这将允许你将 --control-plane-endpoint=cluster-endpoint 传递给 kubeadm init，并将相同的 DNS 名称传递给 kubeadm join。 稍后你可以修改 cluster-endpoint 以指向高可用性方案中的负载均衡器的地址。
 ```
 
+
+
+### 
+
+
+
+
+
+
+
 https://blog.csdn.net/qq_35745940/article/details/125455467
 
 1. 复制证书
@@ -1003,9 +1013,155 @@ kubectl get secret -n kubernetes-dashboard
 nohup kubectl port-forward -n kubernetes-dashboard service/kubernetes-dashboard 8080:443 --address='172.20.58.83' &
 ```
 
+
+
+
+
+查看[命名空间](https://so.csdn.net/so/search?q=命名空间&spm=1001.2101.3001.7020)
+
+```
+# kubectl  get ns 
+NAME                   STATUS        AGE
+default                Active        31h
+kube-node-lease        Active        31h
+kube-public            Active        31h
+kube-system            Active        31h
+kubernetes-dashboard   Terminating   3h16m
+```
+
+**解决方法**
+查看kubesphere-system的namespace描述
+
+```
+kubectl get ns  kubernetes-dashboard   -o json > kubernetes-dashboard.json
+```
+
+编辑json文件，删除spec字段的内存，因为k8s集群时需要认证的。
+
+vi kubernetes-dashboard.json
+将
+
+"spec": {
+        "finalizers": [
+            "kubernetes"
+        ]
+    },
+更改为：
+
+"spec": {
+    
+  },
+
+
+
+新开一个窗口运行kubectl proxy跑一个API代理在本地的8081端口
+
+```
+# kubectl proxy --port=8081
+Starting to serve on 127.0.0.1:8081
+```
+
+```
+curl -k -H "Content-Type:application/json" -X PUT --data-binary @kubernetes-dashboard.json http://127.0.0.1:8081/api/v1/namespaces/kubernetes-dashboard/finalize 
+注意：命令中的kubernetes-dashboard就是命名空间。
+
+再次查看命名空间
+
+# kubectl get ns
+	NAME              STATUS   AGE
+default           Active   31h
+kube-node-lease   Active   31h
+kube-public       Active   31h
+kube-system       Active   31h
+```
+
+查看Pod 状态
+
+ kubectl get po,svc -n kubernetes-dashboard
+
+删除服务
+
+kubectl replace --force -f recommended.yaml
+
+
+
+查看所有命名空间的Pod
+
+*kubectl get pods -A -o wide*
+
+
+
 # k8s删除Terminating状态的命名空间
 
 # 部署Service
+
+
+
+service[模式介绍](https://www.cnblogs.com/Ayanamidesu/p/15119636.html)
+
+<img src="images\ipvs_model.png" style="zoom: 50%;" />
+
+
+
+#### 开启ipvs模式
+
+ipvs模式和iptables类似，kube-proxy监控pod的变化并创建相应的ipvs规则，ipvs相对iptables转发效率更高。除此以外，ipvs支持更多的LB算法
+
+```
+[root@master ~]# kubectl edit cm kube-proxy -n kube-system
+
+找到mode:"" 默认是空的
+改为 mode:"ipvs" 
+
+```
+
+ 删除kube-proxy的pod并重建
+
+```
+[root@master ~]# kubectl delete pod -l k8s-app=kube-proxy -n kube-system
+pod "kube-proxy-ck9sg" deleted
+pod "kube-proxy-hlpd6" deleted
+pod "kube-proxy-jh9gq" deleted
+```
+
+```
+ipvsadm -Ln
+未修改之前
+IP Virtual Server version 1.2.1 (size=4096)
+Prot LocalAddress:Port Scheduler Flags
+  -> RemoteAddress:Port           Forward Weight ActiveConn InActConn
+
+
+修改以后
+IP Virtual Server version 1.2.1 (size=4096)
+Prot LocalAddress:Port Scheduler Flags
+  -> RemoteAddress:Port           Forward Weight ActiveConn InActConn
+TCP  172.17.0.1:30000 rr
+  -> 10.244.104.2:8443            Masq    1      0          0         
+TCP  172.17.0.1:31090 rr
+  -> 10.244.104.4:80              Masq    1      0          0         
+  -> 10.244.166.133:80            Masq    1      0          0         
+TCP  172.17.0.1:31761 rr
+  -> 10.244.104.6:443             Masq    1      0          0         
+TCP  172.17.0.1:31833 rr
+  -> 10.244.104.6:80              Masq    1      0          0         
+TCP  172.18.0.1:30000 rr
+  -> 10.244.104.2:8443            Masq    1      0          0         
+TCP  172.18.0.1:31090 rr
+  -> 10.244.104.4:80              Masq    1      0          0         
+  -> 10.244.166.133:80            Masq    1      0          0         
+TCP  172.18.0.1:31761 rr
+  -> 10.244.104.6:443             Masq    1      0          0         
+TCP  172.18.0.1:31833 rr
+  -> 10.244.104.6:80              Masq    1      0          0         
+TCP  192.168.93.112:30000 rr
+  -> 10.244.104.2:8443            Masq    1      0          0         
+TCP  192.168.93.112:31090 rr
+  -> 10.244.104.4:80              Masq    1      0          0        
+
+```
+
+
 
 #### 创建namespace.[yaml](https://so.csdn.net/so/search?q=yaml&spm=1001.2101.3001.7020)文件
 
@@ -1119,77 +1275,7 @@ node1  IP:31090 只能返回node1
 
 node2  IP:31090 只能返回node2
 
-查看[命名空间](https://so.csdn.net/so/search?q=命名空间&spm=1001.2101.3001.7020)
 
-```
-# kubectl  get ns 
-NAME                   STATUS        AGE
-default                Active        31h
-kube-node-lease        Active        31h
-kube-public            Active        31h
-kube-system            Active        31h
-kubernetes-dashboard   Terminating   3h16m
-```
-
-**解决方法**
-查看kubesphere-system的namespace描述
-
-```
-kubectl get ns  kubernetes-dashboard   -o json > kubernetes-dashboard.json
-```
-
-编辑json文件，删除spec字段的内存，因为k8s集群时需要认证的。
-
-vi kubernetes-dashboard.json
-将
-
-"spec": {
-        "finalizers": [
-            "kubernetes"
-        ]
-    },
-更改为：
-
-"spec": {
-    
-  },
-
-
-
-新开一个窗口运行kubectl proxy跑一个API代理在本地的8081端口
-
-```
-# kubectl proxy --port=8081
-Starting to serve on 127.0.0.1:8081
-```
-
-```
-curl -k -H "Content-Type:application/json" -X PUT --data-binary @kubernetes-dashboard.json http://127.0.0.1:8081/api/v1/namespaces/kubernetes-dashboard/finalize 
-注意：命令中的kubernetes-dashboard就是命名空间。
-
-再次查看命名空间
-
-# kubectl get ns
-	NAME              STATUS   AGE
-default           Active   31h
-kube-node-lease   Active   31h
-kube-public       Active   31h
-kube-system       Active   31h
-```
-
-查看Pod 状态
-
- kubectl get po,svc -n kubernetes-dashboard
-
-删除服务
-
-kubectl replace --force -f recommended.yaml
-
-
-
-查看所有命名空间的Pod
-
-*kubectl get pods -A -o wide*
 
 # Ingress
 
