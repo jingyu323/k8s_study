@@ -258,6 +258,8 @@ crictl config runtime-endpoint unix:///run/containerd/containerd.sock
  crictl config runtime-endpoint unix:///run/containerd/containerd.sock
 crictl config image-endpoint unix:///run/containerd/containerd.sock
 
+systemctl restart containerd
+
 mkdir -p /etc/docker
 echo -e "{
    "registry-mirrors": ["https://r61ch9pn.mirror.aliyuncs.com"]
@@ -271,14 +273,14 @@ cd /etc/yum.repos.d/ && wget -c https://mirrors.tuna.tsinghua.edu.cn/docker-ce/l
 
 ```
 kubeadm init \
-  --apiserver-advertise-address=192.168.93.82 \
-   --control-plane-endpoint="192.168.93.82:6443" \
-  --image-repository registry.aliyuncs.com/google_containers \
-  --kubernetes-version v1.24.1 \
-  --service-cidr=10.1.0.0/16 \
-  --pod-network-cidr=10.244.0.0/16 \
-  --ignore-preflight-errors=all \
-  --v=5 
+--apiserver-advertise-address=192.168.93.82 \
+--control-plane-endpoint="192.168.93.82:6443" \
+--image-repository registry.aliyuncs.com/google_containers \
+--kubernetes-version v1.24.1 \
+--service-cidr=10.1.0.0/16 \
+--pod-network-cidr=10.244.0.0/16 \
+--ignore-preflight-errors=all \
+--v=5 
 ```
 
 ### 添加集群
@@ -291,13 +293,13 @@ kubeadm init --kubernetes-version=v1.24.1  --control-plane-endpoint "192.168.99.
 
 ```
 kubeadm init \
-  --apiserver-advertise-address=192.168.99.104 \
-  --image-repository registry.aliyuncs.com/google_containers \
-  --control-plane-endpoint=cluster-endpoint \
-  --kubernetes-version v1.24.1 \
-  --service-cidr=10.1.0.0/16 \
-  --pod-network-cidr=10.244.0.0/16 \
-  --v=5
+--apiserver-advertise-address=192.168.99.104 \
+--image-repository registry.aliyuncs.com/google_containers \
+--control-plane-endpoint=cluster-endpoint \
+--kubernetes-version v1.24.1 \
+--service-cidr=10.1.0.0/16 \
+--pod-network-cidr=10.244.0.0/16 \
+--v=5
 # –image-repository string：    这个用于指定从什么位置来拉取镜像（1.13版本才有的），默认值是k8s.gcr.io，我们将其指定为国内镜像地址：registry.aliyuncs.com/google_containers
 # –kubernetes-version string：  指定kubenets版本号，默认值是stable-1，会导致从https://dl.k8s.io/release/stable-1.txt下载最新的版本号，我们可以将其指定为固定版本（v1.22.1）来跳过网络请求。
 # –apiserver-advertise-address  指明用 Master 的哪个 interface 与 Cluster 的其他节点通信。如果 Master 有多个 interface，建议明确指定，如果不指定，kubeadm 会自动选择有默认网关的 interface。这里的ip为master节点ip，记得更换。
@@ -748,7 +750,48 @@ scp /etc/kubernetes/pki/etcd/ca.key k8s-master02:/etc/kubernetes/pki/etcd/
 
 ```
 
+问题2：
 
+```
+15409 join.go:413] [preflight] found NodeName empty; using OS hostname as NodeName
+I0903 04:12:18.403457   15409 join.go:417] [preflight] found advertiseAddress empty; using default interface's IP address as advertiseAddress
+I0903 04:12:18.404096   15409 initconfiguration.go:117] detected and using CRI socket: unix:///var/run/containerd/containerd.sock
+W0903 04:12:18.404239   15409 common.go:169] WARNING: could not obtain a bind address for the API Server: no default routes found in "/proc/net/route" or "/proc/net/ipv6_route"; using: 0.0.0.0
+cannot use "0.0.0.0" as the bind address for the API Server
+
+问题原因：
+之前都是动态获取IP的，配置静态IP的时候设置做了网关IP
+IPADDR="192.168.93.116"        # 设置的静态IP地址
+NETMASK="255.255.255.0"         # 子网掩码
+GATEWAY="192.168.93.255"         # 网关地址
+DNS1="192.168.93.1"            # DNS服务器
+本应该是
+GATEWAY="192.168.93.1"         # 网关地址
+导致本问题出现
+
+修改之后重启，多了一条路由
+0.0.0.0         192.168.93.1    0.0.0.0         UG    100    0        0 ens160
+Destination     Gateway         Genmask         Flags Metric Ref    Use Iface
+0.0.0.0         192.168.93.1    0.0.0.0         UG    100    0        0 ens160
+172.17.0.0      0.0.0.0         255.255.0.0     U     0      0        0 docker0
+192.168.93.0    0.0.0.0         255.255.255.0   U     100    0        0 ens160
+192.168.122.0   0.0.0.0         255.255.255.0   U     0      0        0 virbr0
+
+估计执行如下命令也是可以的
+route add default gw 192.168.93.1
+
+```
+
+问题3：执行 crictl image 命令报错
+
+```java
+E0903 09:19:56.672281   48279 remote_image.go:121] "ListImages with filter from image service failed" err="rpc error: code = Unimplemented desc = unknown service runtime.v1alpha2.ImageService" filter="&ImageFilter{Image:&ImageSpec{Image:,Annotations:map[string]string{},},}"
+FATA[0000] listing images: rpc error: code = Unimplemented desc = unknown service runtime.v1alpha2.ImageService 
+    
+ 解决方案：
+    
+  mv  mv /etc/containerd/config.toml /tmp
+```
 
 
 
@@ -1162,8 +1205,6 @@ kubectl apply -f deploy.yaml
 
 docker pull aidasi/ingress-nginx-controller:v1.2.1
 ```
-
-
 
 
 
@@ -1813,6 +1854,17 @@ systemctl status firewalld.service
 
 systemctl stop firewalld 
 
+
+
+配置静态IP
+
+IPADDR="192.168.93.112"        # 设置的静态IP地址
+NETMASK="255.255.255.0"         # 子网掩码
+GATEWAY="192.168.93.255"         # 网关地址
+DNS1="192.168.93.1"            # DNS服务器
+
+
+
 # harbor私有镜像仓库
 
 官网：https://goharbor.io/docs/2.0.0/install-config/run-installer-script/
@@ -1967,7 +2019,7 @@ https://github.com/containerd/nerdctl
 
 ```
 unauthorized: unauthorized to access repository: library/nginx, action: push: unauthorized to access repository: library/nginx, action: push
-解决办法重新登录
+解决办法:未登录，重新登录
 ```
 
 
