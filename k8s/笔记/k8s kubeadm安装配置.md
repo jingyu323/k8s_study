@@ -258,6 +258,8 @@ crictl config runtime-endpoint unix:///run/containerd/containerd.sock
  crictl config runtime-endpoint unix:///run/containerd/containerd.sock
 crictl config image-endpoint unix:///run/containerd/containerd.sock
 
+systemctl restart containerd
+
 mkdir -p /etc/docker
 echo -e "{
    "registry-mirrors": ["https://r61ch9pn.mirror.aliyuncs.com"]
@@ -271,14 +273,14 @@ cd /etc/yum.repos.d/ && wget -c https://mirrors.tuna.tsinghua.edu.cn/docker-ce/l
 
 ```
 kubeadm init \
-  --apiserver-advertise-address=192.168.93.82 \
-   --control-plane-endpoint="192.168.93.82:6443" \
-  --image-repository registry.aliyuncs.com/google_containers \
-  --kubernetes-version v1.24.1 \
-  --service-cidr=10.1.0.0/16 \
-  --pod-network-cidr=10.244.0.0/16 \
-  --ignore-preflight-errors=all \
-  --v=5 
+--apiserver-advertise-address=192.168.93.82 \
+--control-plane-endpoint="192.168.93.82:6443" \
+--image-repository registry.aliyuncs.com/google_containers \
+--kubernetes-version v1.24.1 \
+--service-cidr=10.1.0.0/16 \
+--pod-network-cidr=10.244.0.0/16 \
+--ignore-preflight-errors=all \
+--v=5 
 ```
 
 ### 添加集群
@@ -291,19 +293,29 @@ kubeadm init --kubernetes-version=v1.24.1  --control-plane-endpoint "192.168.99.
 
 ```
 kubeadm init \
-  --apiserver-advertise-address=192.168.99.104 \
-  --image-repository registry.aliyuncs.com/google_containers \
-  --control-plane-endpoint=cluster-endpoint \
-  --kubernetes-version v1.24.1 \
-  --service-cidr=10.1.0.0/16 \
-  --pod-network-cidr=10.244.0.0/16 \
-  --v=5
+--apiserver-advertise-address=192.168.99.104 \
+--image-repository registry.aliyuncs.com/google_containers \
+--control-plane-endpoint=cluster-endpoint \
+--kubernetes-version v1.24.1 \
+--service-cidr=10.1.0.0/16 \
+--pod-network-cidr=10.244.0.0/16 \
+--v=5
 # –image-repository string：    这个用于指定从什么位置来拉取镜像（1.13版本才有的），默认值是k8s.gcr.io，我们将其指定为国内镜像地址：registry.aliyuncs.com/google_containers
 # –kubernetes-version string：  指定kubenets版本号，默认值是stable-1，会导致从https://dl.k8s.io/release/stable-1.txt下载最新的版本号，我们可以将其指定为固定版本（v1.22.1）来跳过网络请求。
 # –apiserver-advertise-address  指明用 Master 的哪个 interface 与 Cluster 的其他节点通信。如果 Master 有多个 interface，建议明确指定，如果不指定，kubeadm 会自动选择有默认网关的 interface。这里的ip为master节点ip，记得更换。
 # –pod-network-cidr             指定 Pod 网络的范围。Kubernetes 支持多种网络方案，而且不同网络方案对  –pod-network-cidr有自己的要求，这里设置为10.244.0.0/16 是因为我们将使用 flannel 网络方案，必须设置成这个 CIDR。
 # --control-plane-endpoint     cluster-endpoint 是映射到该 IP 的自定义 DNS 名称，这里配置hosts映射：192.168.0.113   cluster-endpoint。 这将允许你将 --control-plane-endpoint=cluster-endpoint 传递给 kubeadm init，并将相同的 DNS 名称传递给 kubeadm join。 稍后你可以修改 cluster-endpoint 以指向高可用性方案中的负载均衡器的地址。
 ```
+
+
+
+### 
+
+
+
+
+
+
 
 https://blog.csdn.net/qq_35745940/article/details/125455467
 
@@ -748,7 +760,55 @@ scp /etc/kubernetes/pki/etcd/ca.key k8s-master02:/etc/kubernetes/pki/etcd/
 
 ```
 
+问题2：
 
+```
+15409 join.go:413] [preflight] found NodeName empty; using OS hostname as NodeName
+I0903 04:12:18.403457   15409 join.go:417] [preflight] found advertiseAddress empty; using default interface's IP address as advertiseAddress
+I0903 04:12:18.404096   15409 initconfiguration.go:117] detected and using CRI socket: unix:///var/run/containerd/containerd.sock
+W0903 04:12:18.404239   15409 common.go:169] WARNING: could not obtain a bind address for the API Server: no default routes found in "/proc/net/route" or "/proc/net/ipv6_route"; using: 0.0.0.0
+cannot use "0.0.0.0" as the bind address for the API Server
+
+问题原因：
+之前都是动态获取IP的，配置静态IP的时候设置做了网关IP
+IPADDR="192.168.93.116"        # 设置的静态IP地址
+NETMASK="255.255.255.0"         # 子网掩码
+GATEWAY="192.168.93.255"         # 网关地址
+DNS1="192.168.93.1"            # DNS服务器
+本应该是
+GATEWAY="192.168.93.1"         # 网关地址
+导致本问题出现
+
+修改之后重启，多了一条路由
+0.0.0.0         192.168.93.1    0.0.0.0         UG    100    0        0 ens160
+Destination     Gateway         Genmask         Flags Metric Ref    Use Iface
+0.0.0.0         192.168.93.1    0.0.0.0         UG    100    0        0 ens160
+172.17.0.0      0.0.0.0         255.255.0.0     U     0      0        0 docker0
+192.168.93.0    0.0.0.0         255.255.255.0   U     100    0        0 ens160
+192.168.122.0   0.0.0.0         255.255.255.0   U     0      0        0 virbr0
+
+估计执行如下命令也是可以的
+route add default gw 192.168.93.1
+
+```
+
+问题3：执行 crictl image 命令报错
+
+```java
+E0903 09:19:56.672281   48279 remote_image.go:121] "ListImages with filter from image service failed" err="rpc error: code = Unimplemented desc = unknown service runtime.v1alpha2.ImageService" filter="&ImageFilter{Image:&ImageSpec{Image:,Annotations:map[string]string{},},}"
+FATA[0000] listing images: rpc error: code = Unimplemented desc = unknown service runtime.v1alpha2.ImageService 
+    
+ 解决方案：
+mv /etc/containerd/config.toml /tmp
+    
+产生config.toml
+containerd config default > /etc/containerd/config.toml
+替换镜像，不然镜像下载不下来
+grep sandbox_image  /etc/containerd/config.toml
+sed -i "s#k8s.gcr.io/pause#registry.aliyuncs.com/google_containers/pause#g"       /etc/containerd/config.toml
+grep sandbox_image  /etc/containerd/config.toml
+    
+```
 
 
 
@@ -953,9 +1013,155 @@ kubectl get secret -n kubernetes-dashboard
 nohup kubectl port-forward -n kubernetes-dashboard service/kubernetes-dashboard 8080:443 --address='172.20.58.83' &
 ```
 
+
+
+
+
+查看[命名空间](https://so.csdn.net/so/search?q=命名空间&spm=1001.2101.3001.7020)
+
+```
+# kubectl  get ns 
+NAME                   STATUS        AGE
+default                Active        31h
+kube-node-lease        Active        31h
+kube-public            Active        31h
+kube-system            Active        31h
+kubernetes-dashboard   Terminating   3h16m
+```
+
+**解决方法**
+查看kubesphere-system的namespace描述
+
+```
+kubectl get ns  kubernetes-dashboard   -o json > kubernetes-dashboard.json
+```
+
+编辑json文件，删除spec字段的内存，因为k8s集群时需要认证的。
+
+vi kubernetes-dashboard.json
+将
+
+"spec": {
+        "finalizers": [
+            "kubernetes"
+        ]
+    },
+更改为：
+
+"spec": {
+    
+  },
+
+
+
+新开一个窗口运行kubectl proxy跑一个API代理在本地的8081端口
+
+```
+# kubectl proxy --port=8081
+Starting to serve on 127.0.0.1:8081
+```
+
+```
+curl -k -H "Content-Type:application/json" -X PUT --data-binary @kubernetes-dashboard.json http://127.0.0.1:8081/api/v1/namespaces/kubernetes-dashboard/finalize 
+注意：命令中的kubernetes-dashboard就是命名空间。
+
+再次查看命名空间
+
+# kubectl get ns
+	NAME              STATUS   AGE
+default           Active   31h
+kube-node-lease   Active   31h
+kube-public       Active   31h
+kube-system       Active   31h
+```
+
+查看Pod 状态
+
+ kubectl get po,svc -n kubernetes-dashboard
+
+删除服务
+
+kubectl replace --force -f recommended.yaml
+
+
+
+查看所有命名空间的Pod
+
+*kubectl get pods -A -o wide*
+
+
+
 # k8s删除Terminating状态的命名空间
 
 # 部署Service
+
+
+
+service[模式介绍](https://www.cnblogs.com/Ayanamidesu/p/15119636.html)
+
+<img src="images\ipvs_model.png" style="zoom: 50%;" />
+
+
+
+#### 开启ipvs模式
+
+ipvs模式和iptables类似，kube-proxy监控pod的变化并创建相应的ipvs规则，ipvs相对iptables转发效率更高。除此以外，ipvs支持更多的LB算法
+
+```
+[root@master ~]# kubectl edit cm kube-proxy -n kube-system
+
+找到mode:"" 默认是空的
+改为 mode:"ipvs" 
+
+```
+
+ 删除kube-proxy的pod并重建
+
+```
+[root@master ~]# kubectl delete pod -l k8s-app=kube-proxy -n kube-system
+pod "kube-proxy-ck9sg" deleted
+pod "kube-proxy-hlpd6" deleted
+pod "kube-proxy-jh9gq" deleted
+```
+
+```
+ipvsadm -Ln
+未修改之前
+IP Virtual Server version 1.2.1 (size=4096)
+Prot LocalAddress:Port Scheduler Flags
+  -> RemoteAddress:Port           Forward Weight ActiveConn InActConn
+
+
+修改以后
+IP Virtual Server version 1.2.1 (size=4096)
+Prot LocalAddress:Port Scheduler Flags
+  -> RemoteAddress:Port           Forward Weight ActiveConn InActConn
+TCP  172.17.0.1:30000 rr
+  -> 10.244.104.2:8443            Masq    1      0          0         
+TCP  172.17.0.1:31090 rr
+  -> 10.244.104.4:80              Masq    1      0          0         
+  -> 10.244.166.133:80            Masq    1      0          0         
+TCP  172.17.0.1:31761 rr
+  -> 10.244.104.6:443             Masq    1      0          0         
+TCP  172.17.0.1:31833 rr
+  -> 10.244.104.6:80              Masq    1      0          0         
+TCP  172.18.0.1:30000 rr
+  -> 10.244.104.2:8443            Masq    1      0          0         
+TCP  172.18.0.1:31090 rr
+  -> 10.244.104.4:80              Masq    1      0          0         
+  -> 10.244.166.133:80            Masq    1      0          0         
+TCP  172.18.0.1:31761 rr
+  -> 10.244.104.6:443             Masq    1      0          0         
+TCP  172.18.0.1:31833 rr
+  -> 10.244.104.6:80              Masq    1      0          0         
+TCP  192.168.93.112:30000 rr
+  -> 10.244.104.2:8443            Masq    1      0          0         
+TCP  192.168.93.112:31090 rr
+  -> 10.244.104.4:80              Masq    1      0          0        
+
+```
+
+
 
 #### 创建namespace.[yaml](https://so.csdn.net/so/search?q=yaml&spm=1001.2101.3001.7020)文件
 
@@ -1069,77 +1275,34 @@ node1  IP:31090 只能返回node1
 
 node2  IP:31090 只能返回node2
 
-查看[命名空间](https://so.csdn.net/so/search?q=命名空间&spm=1001.2101.3001.7020)
+#### Headless Service “无头服务”
+
+Headless Service不需要分配一个VIP，而是直接以DNS记录的方式解析出被代理Pod的IP地址。
 
 ```
-# kubectl  get ns 
-NAME                   STATUS        AGE
-default                Active        31h
-kube-node-lease        Active        31h
-kube-public            Active        31h
-kube-system            Active        31h
-kubernetes-dashboard   Terminating   3h16m
+域名格式：$(servicename).$(namespace).svc.cluster.local
 ```
 
-**解决方法**
-查看kubesphere-system的namespace描述
+无头服务，不分配ip地址，使用域名
 
 ```
-kubectl get ns  kubernetes-dashboard   -o json > kubernetes-dashboard.json
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-svc
+spec:
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+  selector:
+      app: nginx
+  clusterIP: None
 ```
 
-编辑json文件，删除spec字段的内存，因为k8s集群时需要认证的。
-
-vi kubernetes-dashboard.json
-将
-
-"spec": {
-        "finalizers": [
-            "kubernetes"
-        ]
-    },
-更改为：
-
-"spec": {
-    
-  },
 
 
 
-新开一个窗口运行kubectl proxy跑一个API代理在本地的8081端口
-
-```
-# kubectl proxy --port=8081
-Starting to serve on 127.0.0.1:8081
-```
-
-```
-curl -k -H "Content-Type:application/json" -X PUT --data-binary @kubernetes-dashboard.json http://127.0.0.1:8081/api/v1/namespaces/kubernetes-dashboard/finalize 
-注意：命令中的kubernetes-dashboard就是命名空间。
-
-再次查看命名空间
-
-# kubectl get ns
-	NAME              STATUS   AGE
-default           Active   31h
-kube-node-lease   Active   31h
-kube-public       Active   31h
-kube-system       Active   31h
-```
-
-查看Pod 状态
-
- kubectl get po,svc -n kubernetes-dashboard
-
-删除服务
-
-kubectl replace --force -f recommended.yaml
-
-
-
-查看所有命名空间的Pod
-
-*kubectl get pods -A -o wide*
 
 # Ingress
 
@@ -1163,7 +1326,73 @@ kubectl apply -f deploy.yaml
 docker pull aidasi/ingress-nginx-controller:v1.2.1
 ```
 
+配置ingress策略：
 
+```
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress-nginx-service
+spec:
+  rules:
+  - host: nginx.test.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: ssx-nginx-sv
+            port:
+              number: 80
+  ingressClassName: nginx
+```
+
+ 
+
+查看ingress配置情况
+
+kubectl get ingress
+
+```
+NAME                    CLASS   HOSTS            ADDRESS   PORTS   AGE
+ingress-nginx-service   nginx   nginx.test.com             80      3m38s
+```
+
+测试ingress
+
+````
+curl -H "Host:nginx.test.com" http://192.168.93.113:31090/
+返回结果：
+node2 test in file.....
+[root@master rain]# curl -H "Host:nginx.test.com" http://192.168.93.113:31090/ 
+node1
+[root@master rain]# curl -H "Host:nginx.test.com" http://192.168.93.113:31090/ 
+node2 test in file.....
+[root@master rain]# curl -H "Host:nginx.test.com" http://192.168.93.113:31090/ 
+node1
+[root@master rain]# curl -H "Host:nginx.test.com" http://192.168.93.113:31090/ 
+node2 test in file.....
+[root@master rain]# curl -H "Host:nginx.test.com" http://192.168.93.113:31090/ 
+node1
+[root@master rain]# curl -H "Host:nginx.test.com" http://192.168.93.113:31090/ 
+node2 test in file.....
+[root@master rain]# curl -H "Host:nginx.test.com" http://192.168.93.113:31090/ 
+node1
+[root@master rain]# curl -H "Host:nginx.test.com" http://192.168.93.113:31090/ 
+node2 test in file.....
+[root@master rain]# curl -H "Host:nginx.test.com" http://192.168.93.113:31090/ 
+node1
+[root@master rain]# curl -H "Host:nginx.test.com" http://192.168.93.113:31090/ 
+node2 test in file.....
+
+````
+
+
+
+参考材料：
+
+#### [使用ingress+service机制实现高可用负载均衡](https://www.cnblogs.com/kebibuluan/p/15143837.html)
 
 
 
@@ -1813,6 +2042,17 @@ systemctl status firewalld.service
 
 systemctl stop firewalld 
 
+
+
+配置静态IP
+
+IPADDR="192.168.93.112"        # 设置的静态IP地址
+NETMASK="255.255.255.0"         # 子网掩码
+GATEWAY="192.168.93.255"         # 网关地址
+DNS1="192.168.93.1"            # DNS服务器
+
+
+
 # harbor私有镜像仓库
 
 官网：https://goharbor.io/docs/2.0.0/install-config/run-installer-script/
@@ -1967,7 +2207,7 @@ https://github.com/containerd/nerdctl
 
 ```
 unauthorized: unauthorized to access repository: library/nginx, action: push: unauthorized to access repository: library/nginx, action: push
-解决办法重新登录
+解决办法:未登录，重新登录
 ```
 
 
