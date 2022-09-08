@@ -71,6 +71,10 @@ pstree -p 进程号 | wc -l,直接算出线程的总数过来
 
 
 
+JAVA_OPTS="-server -Djava.awt.headless=true  -XX:+PrintGCDetails -XX:+PrintGCTimeStamps -XX:+PrintGCDateStamps -Xloggc:gc-%t.log -XX:+HeapDumpOnOutOfMemoryError  -XX:HeapDumpPath=/home/app/oom"
+
+
+
 ## 线程池
 
 ```
