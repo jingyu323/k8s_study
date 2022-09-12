@@ -1247,12 +1247,6 @@ Flannel实质上是一种“覆盖网络(overlaynetwork)”，也就是将TCP数
 
 
 
-
-
-
-
-
-
 Flannel之所以可以搭建kubernets依赖的底层网络，是因为它可以实现以下两点：
 
 - 它给每个node上的docker容器分配相互不想冲突的IP地址；
@@ -1303,6 +1297,8 @@ flanneld的启动参数中通过”–iface”或者”–iface-regex”进行�
 最后，对于集群间交互的Public IP，我们同样可以通过启动参数”–public-ip”进行指定。否则，将使用–iface获取网卡的IP作为Public IP。
 
 
+
+## Calico
 
 在安装calico网络时，**默认安装是IPIP网络**。calico.yaml文件中，将CALICO_IPV4POOL_IPIP的值修改成 “off”，就能够替换成BGP网络
 
@@ -1737,7 +1733,11 @@ docker ps |grep -E 'k8s_kube-apiserver|k8s_kube-controller-manager|k8s_kube-sche
 
 # 20 网络
 
+
+
 ## 20.1 Overlay 
+
+
 
 ## 20.2流表
 
@@ -1751,7 +1751,81 @@ docker ps |grep -E 'k8s_kube-apiserver|k8s_kube-controller-manager|k8s_kube-sche
 
 ## 20.4  Calico介绍
 
+Calico是Tigera开源，基于Apache 2.0协议的网络与网络安全解决方案，适用于容器、虚拟机、以及物理机等场景。Calico支持包含Kubernetes、OpenShift以及OpenStack等主流平台。在Kubernetes云原生容器网络方面，Calico完全遵循CNI的标准，Flannel的简单成为初始用户的首选，Calico则是以性能及灵活性成为另一个不错的选择。当前Flannel与Calico两大插件占据容器网络插件90%以上的份额。相比Flannel插件，Calico的功能更为全面，不仅提供主机和Pod之间的网络连接，还涉及网络安全和管理。从Calico 3.x版本开始，Calico默认的模式从BGP调整为IPIP，一种更加高效的Overlay模式。**Calico特点如下：**
+
+- 高效的可视化管理：Calico提供完善的可视化管理，包括原生Linux eBPF管理、标准Linux 网络管理、以及Windows HNS管理。Calico通过将基础网络、网络策略和IP地址等功能抽象统一，提供简单易用且操作一致的管理平面。
+
+- 网络安全策略：Calico提供丰富的网络策略模型，可以轻松的实现网络流量治理，同时结合内置的Wireguard加密功能，可以快速实现Pod间的数据传输。还有Calico策略引擎可以在主机网络及服务网络执行相同的策略模型，实现基础设施与上层服务的网络数据风险隔离。
+
+- 高性能及可扩展性：Calico采用前沿的eBPF技术，以及深度调优操作系统内核网络管道，以此来提高网络性能。Calico支持网络配置较多，大部分场景可以不使用Overlay，避免数据包封装/解封的大开销操作。同时Calico遵守云原生设计模式，底层都是采用标准的网络协议，具备出色可扩展性。
+
+- 大规模生产运行实践：Calico有大规模生产环境运行实践，包括SaaS提供商、金融服务公司和制造商；在公有云方面，包含Amazon EKS、Azure AKS、Google GKE 和 IBM IKS，都有集成开箱即用的Calico网络安全能力 
+
+
+
+Calico灵活的网络模块化架构，包括CNI网络插件，CNI IPAM插件，网络模式，网络策略四个方面：
+
+- CNI网络插件：Calico CNI网络插件通过一对虚拟以太网设备（vethpair），将Pod连接到主机网络命名空间的三层路由上，避免了许多其他Kubernetes网络解决方案中的二层网桥的性能开销。
+
+- CNI IPAM插件：Calico CNI IPAM插件从一个或多个可配置的IP地址范围内为Pod分配IP地址，并根据需要为每个节点动态分配小块IP。与其他CNI IPAM插件相比，Calico CNI IPAM插的IP地址空间使用效率更高。
+
+- 网络模式：Calico支持的网络模式分为Overlay与Non-overlay两种：Overlay模式，Calico提供VXLAN或IP-in-IP网络模式，包括限制跨子网模式（cross-subnet）。Non-overlay模式，Calico提供在L2网络或L3网络之上运行的Non-overlay网络。
+
+- 网络策略：Calico的网络策略执行引擎实现了Kubernetes网络策略的全部功能，并且增加额外的扩展功能。 
+
+
+
+![](images\calicao_arc.png)
+
+
+
+上图是一个完整Calico网络及策略架构图，包含了必须与可选的所有组件，包含Calico API server、Felix、BIRD、confd、Dikastes、CNI plugin、Datastore plugin、IPAM plugin、kube-controllers、Typha、calicoctl：
+
+Calico API server：支持通过kubectl管理Calico资源。
+Felix：以守护进程的方式运行在集群的每个节点上，主要提供四个关键能力：接口管理（Interface management）、编程式路由（Route programming），编程式权限（ACL programming），状态报告（State reporting）。
+BIRD：从Felix获取路由并分发给网络上的BGP对端，用于主机间路由。与Felix一样都是运行在集群的每个节点。主要提供两个关键能力：路由分发（Route distribution）、路由映射配置（BGP route reflector configuration）
+Confd：开源、轻量级的配置管理工具，存储BGP配置和全局默认值，监听数据变化动态生成BIRD配置文件，会触发BIRD重新加载配置信息。
+CNI plugin：为 Kubernetes集群提供Calico网络能力。
+IPAM plugin：是Calico CNI插件之一，使用Calico的IP池资源，来控制IP地址分配给集群内的Pod。
+kube-controllers：Kubernetes的控制器，包含Policy controller、Namespace controller、Serviceaccount controller、Workloadendpoint controller、Node controller。
+calicoctl：创建、读取、更新和删除Calico对象的命令行界面。
+Datastore plugin：通过减少每个节点对数据存储的影响来增加规模，是Calico CNI插件之一。
+Typha：通过减少每个节点对数据存储的影响来扩大规模。 在数据存储和Felix实例之间作为守护进程运行。
+Dikastes：增强Istio服务网格的网络策略，作为Istio Envoy的sidecar代理方式运行。 
+
+
+
+
+
+
+
 ## 20.5 VXLAN 
+
+
+
+
+
+## 20.6 OpenvSwitch（OVS）
+
+
+
+## 20.7  容器网络及策略
+
+Kubernetes底层是通过Linux的Cgroup与Namesapce来实现底层基础资源隔离，每个命名空间（namespace）都有自己网络堆栈，包括接口、路由表、套接字和 IPTABLE 规则等。一个接口只能属于一个网络命名空间，这样多个容器就需要多个接口，一般情况是通过虚拟化技术来实现硬件资源共享，通过将虚拟化设备连接到真实的物理设备上，具体分为三种实现：
+
+虚拟网桥（Virtual bridge）：创建一个虚拟网卡对（veth pair），一端在容器内一头端宿主机的root namespace内，并且使用Linux bridge（网桥）或者OpenvSwitch（OVS）来连接两个不同namespace内的网卡对。这样一来，容器内发出的网络数据包，可以通过网桥进入宿主机网络栈，而发往容器的网络数据包也可以经过网桥进入容器。
+多路复用（Multiplexing）：使用一个中间网络设备，暴露多个虚拟网卡接口，容器网卡都可以接入这个中间设备，并通过mac地址/IP地址来区分packet应该转发给具体的容器设备。
+硬件交换（Hardware switching）：为每个Pod分配一个虚拟网卡，这样一来Pod与Pod之间的连接关系就会变的非常清晰，因为近乎物理机之间的通信基础。如今大多数网卡都支持SR-IOV功能，该功能将单一的物理网卡虚拟成多个VF接口，每个VF接口都有单独的虚拟PCIe通道，这些虚拟的PCIe通道共用物理网卡的PCIe通道。 
+
+![](images\contaner_net.png)
+
+
+
+
+
+
+
+
 
 
 
