@@ -371,7 +371,6 @@ kubectl -n kube-system get cm kubeadm-config -o yaml
 添加controlPlaneEndpoint
 
 kubectl -n kube-system edit cm kubeadm-config
-1
 大概在这么个位置：
 
 kind: ClusterConfiguration
