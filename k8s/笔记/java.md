@@ -135,3 +135,10 @@ public ThreadPoolExecutor(int corePoolSize, int maximumPoolSize, long keepAliveT
 
 
 ## 垃圾回收
+
+
+
+1.垃圾回收的对象位于哪里？
+
+主要是堆区，
+
