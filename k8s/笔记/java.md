@@ -73,6 +73,34 @@ pstree -p 进程号 | wc -l,直接算出线程的总数过来
 
 JAVA_OPTS="-server -Djava.awt.headless=true  -XX:+PrintGCDetails -XX:+PrintGCTimeStamps -XX:+PrintGCDateStamps -Xloggc:gc-%t.log -XX:+HeapDumpOnOutOfMemoryError  -XX:HeapDumpPath=/home/app/oom"
 
+# 多线程
+##  锁
+####  sychronized
+传统的synchronized锁：队列锁
+####  lock
+####  lock
+
+#### synchronized和Lock锁的区别
+
+synchronized:
+
+是java内置的关键字
+无法获取锁的状态
+会自动释放锁
+线程一在获得锁的情况下阻塞了，第二个线程就只能傻傻的等着
+是不可中断的、非公平的、可重入锁
+适合锁少量的同步代码
+有代码块锁和方法锁
+Lock:
+
+是java的一个类
+可判断是否获取了锁
+需手动释放锁，如果不释放会造成死锁
+线程一在获得锁的情况下阻塞了，可以使用tryLock()尝试获取锁
+非公平的、可判断的、可重入锁
+适合锁大量的同步代码
+只有代码块锁
+使用Lock锁，JVM将花费较少的时间来调度线程，性能更好。并且具有更好的扩展性（拥有更多的子类）
 
 
 ## 线程池
