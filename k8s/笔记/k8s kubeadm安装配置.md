@@ -366,8 +366,16 @@ net.bridge.bridge-nf-call-ip6tables = 1
 net.bridge.bridge-nf-call-iptables = 1
 EOF
 
-
 kubectl -n kube-system get cm kubeadm-config -o yaml
+
+添加controlPlaneEndpoint
+
+kubectl -n kube-system edit cm kubeadm-config
+大概在这么个位置：
+
+kind: ClusterConfiguration
+kubernetesVersion: v1.18.0
+controlPlaneEndpoint: 192.168.2.124:6443//添加这个
 
 
 /usr/lib/systemd/system/kubelet.service.d/10-kubeadm.conf

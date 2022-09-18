@@ -308,7 +308,7 @@ Pod如果是通过Deployment 创建的，则升级回退就是要使用Deploymen
 
 8. 最佳实践
    
-
+   
    
    
 - 创建完成deployment之后，直接expose生成service，减少手动配置
@@ -937,6 +937,8 @@ kubectl apply -f ingress-compose.yaml
 https://liugp.blog.csdn.net/article/details/120499402
 
 https://blog.csdn.net/aa18855953229/article/details/109188201
+
+https://blog.csdn.net/qq_52807660/article/details/121553756
 
 # 集群安全机制
 
