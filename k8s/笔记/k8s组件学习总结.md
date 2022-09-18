@@ -1813,9 +1813,11 @@ Dikastes：增强Istio服务网格的网络策略，作为Istio Envoy的sidecar�
 
 Kubernetes底层是通过Linux的Cgroup与Namesapce来实现底层基础资源隔离，每个命名空间（namespace）都有自己网络堆栈，包括接口、路由表、套接字和 IPTABLE 规则等。一个接口只能属于一个网络命名空间，这样多个容器就需要多个接口，一般情况是通过虚拟化技术来实现硬件资源共享，通过将虚拟化设备连接到真实的物理设备上，具体分为三种实现：
 
-虚拟网桥（Virtual bridge）：创建一个虚拟网卡对（veth pair），一端在容器内一头端宿主机的root namespace内，并且使用Linux bridge（网桥）或者OpenvSwitch（OVS）来连接两个不同namespace内的网卡对。这样一来，容器内发出的网络数据包，可以通过网桥进入宿主机网络栈，而发往容器的网络数据包也可以经过网桥进入容器。
-多路复用（Multiplexing）：使用一个中间网络设备，暴露多个虚拟网卡接口，容器网卡都可以接入这个中间设备，并通过mac地址/IP地址来区分packet应该转发给具体的容器设备。
-硬件交换（Hardware switching）：为每个Pod分配一个虚拟网卡，这样一来Pod与Pod之间的连接关系就会变的非常清晰，因为近乎物理机之间的通信基础。如今大多数网卡都支持SR-IOV功能，该功能将单一的物理网卡虚拟成多个VF接口，每个VF接口都有单独的虚拟PCIe通道，这些虚拟的PCIe通道共用物理网卡的PCIe通道。 
+- 虚拟网桥（Virtual bridge）：创建一个虚拟网卡对（veth pair），一端在容器内一头端宿主机的root namespace内，并且使用Linux bridge（网桥）或者OpenvSwitch（OVS）来连接两个不同namespace内的网卡对。这样一来，容器内发出的网络数据包，可以通过网桥进入宿主机网络栈，而发往容器的网络数据包也可以经过网桥进入容器。
+
+- 多路复用（Multiplexing）：使用一个中间网络设备，暴露多个虚拟网卡接口，容器网卡都可以接入这个中间设备，并通过mac地址/IP地址来区分packet应该转发给具体的容器设备。
+
+- 硬件交换（Hardware switching）：为每个Pod分配一个虚拟网卡，这样一来Pod与Pod之间的连接关系就会变的非常清晰，因为近乎物理机之间的通信基础。如今大多数网卡都支持SR-IOV功能，该功能将单一的物理网卡虚拟成多个VF接口，每个VF接口都有单独的虚拟PCIe通道，这些虚拟的PCIe通道共用物理网卡的PCIe通道。 
 
 ![](images\contaner_net.png)
 
