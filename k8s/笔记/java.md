@@ -78,7 +78,18 @@ JAVA_OPTS="-server -Djava.awt.headless=true  -XX:+PrintGCDetails -XX:+PrintGCTim
 ####  sychronized
 传统的synchronized锁：队列锁
 ####  lock
-####  lock
+Lock所是一个接口，其所有的实现类为
+
+ReentrantLock(可重入锁)
+ReentrantReadWriteLock.ReadLock(可重入读写锁的读锁)
+ReentrantReadWriteLock.WriteLock(可重入读写锁的写锁)
+
+####  voilate
+
+#### ThreadLocal
+1. ThreadLocal是什么
+   ThreadLocal叫做线程变量，意思是ThreadLocal中填充的变量属于当前线程，该变量对其他线程而言是隔离的。ThreadLocal为变量在每个线程中都创建了一个副本，那么每个线程可以访问自己内部的副本变量
+
 
 #### synchronized和Lock锁的区别
 
