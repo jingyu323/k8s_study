@@ -39,6 +39,27 @@ alertmanager：从 Prometheus server 端接收到 alerts 后，会进行去除�
 Web UI：Prometheus内置一个简单的Web控制台，可以查询指标，查看配置信息或者Service Discovery等，实际工作中，查看指标或者创建仪表盘通常使用Grafana，Prometheus作为Grafana的数据源；
 注：大多数 Prometheus 组件都是用 Go 编写的，因此很容易构建和部署为静态的二进制文件。
 
+## Prometheus 数据模型
+
+ Prometheus将所有数据存储为时间序列；具有相同度量名称以及标签属于同一个指标。
+
+每个时间序列都由度量标准名称和一组键值对（也成为标签）唯一标识。
+
+时间序列格式：
+
+<metric name>{<label name>=<label value>, ...}
+示例：
+
+api_http_requests_total{method="POST", handler="/messages"}
+度量名称{标签名=值}值
+
+HELP 说明指标是干什么的
+
+TYPE 指标类型，这个数据的指标类型
+
+注：度量名通常是一英文命名清晰。标签名英文、值推荐英文。
+
+
 # 参考材料
 
 部署和监控
