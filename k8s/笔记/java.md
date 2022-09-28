@@ -89,6 +89,33 @@ ReentrantReadWriteLock.WriteLock(可重入读写锁的写锁)
 #### ThreadLocal
 1. ThreadLocal是什么
    ThreadLocal叫做线程变量，意思是ThreadLocal中填充的变量属于当前线程，该变量对其他线程而言是隔离的。ThreadLocal为变量在每个线程中都创建了一个副本，那么每个线程可以访问自己内部的副本变量
+作用：
+1、在进行对象跨层传递的时候，使用ThreadLocal可以避免多次传递，打破层次间的约束。
+2、线程间数据隔离
+3、进行事务操作，用于存储线程事务信息。
+4、数据库连接，Session会话管理。
+
+#####  总结
+
+（1）每个Thread维护着一个ThreadLocalMap的引用
+
+（2）ThreadLocalMap是ThreadLocal的内部类，用Entry来进行存储
+
+（3）ThreadLocal创建的副本是存储在自己的threadLocals中的，也就是自己的ThreadLocalMap。
+
+（4）ThreadLocalMap的键值为ThreadLocal对象，而且可以有多个threadLocal变量，因此保存在map中
+
+（5）在进行get之前，必须先set，否则会报空指针异常，当然也可以初始化一个，但是必须重写initialValue()方法。
+
+（6）ThreadLocal本身并不存储值，它只是作为一个key来让线程从ThreadLocalMap获取value。
+
+
+threadLocal 如何实现变量副本？
+本质上就是一个Map 存放数据的map
+注意点：
+重点来了，突然我们ThreadLocal是null了，也就是要被垃圾回收器回收了，但是此时我们的ThreadLocalMap生命周期和Thread的一样，它不会回收，这时候就出现了一个现象。那就是ThreadLocalMap的key没了，但是value还在，这就造成了内存泄漏。
+
+解决办法：使用完ThreadLocal后，执行remove操作，避免出现内存溢出情况。
 
 
 #### synchronized和Lock锁的区别
