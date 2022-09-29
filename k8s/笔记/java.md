@@ -84,6 +84,31 @@ JAVA_OPTS="-server -Djava.awt.headless=true  -XX:+PrintGCDetails -XX:+PrintGCTim
 
 ##  锁
 
+### 重入锁
+锁重入的意思就是当一个线程得到一个对象锁后，再次请求此对象锁时是可以再次得到该对象的锁的。synchronized关键字拥有锁重入的功能，在一个synchronized方法/块内部调用本对象的其他synchronized方法/块时，是永远可以得到锁的，原因是Java中线程获得对象锁的操作是以线程为单位的，而不是以调用为单位的。同一个线程获得一个对象锁之后，再次访问这个对象的其他同步方法，所需的对象锁没有发生变化。
+
+也就是说，当这个这个线程获取对象锁的时候，可以再次对这个对象加锁，
+
+###  锁粗化
+就是将多个连续的加锁、解锁操作连接在一起，扩展成一个范围更大的锁。
+扩大加锁解锁的范围
+
+###  锁消除
+JVM检测到不可能存在共享数据竞争，这是JVM会对这些同步锁进行锁消除
+###  偏向锁
+偏向锁的核心思想是，如果一个线程获得了锁，那么锁就进入偏向模式，此时Mark Word 的结构也变为偏向锁结构，当这个线程再次请求锁时，无需再做任何同步操作，即获取锁的过程，这样就省去了大量有关锁申请的操作，从而也就提供程序的性能。
+
+偏向锁失败后，并不会立即膨胀为重量级锁，而是先升级为轻量级锁。
+
+偏向锁的释放采用了一种只有竞争才会释放锁的机制，线程是不会主动去释放偏向锁，需要等待其他线程来竞争
+
+
+
+###  轻量级锁
+
+###  重量级锁
+
+
 ####  sychronized
 传统的synchronized锁：队列锁
 
@@ -92,6 +117,12 @@ JAVA_OPTS="-server -Djava.awt.headless=true  -XX:+PrintGCDetails -XX:+PrintGCTim
 - 能自动释放
 - 可重入 非公平 不可中断
 - 适合少量代码的同步， 有方法和代码块锁
+A: synchronized static是某个类的范围，synchronized static cSync{}防止多个线程同时访问这个类中的synchronized static 方法。它可以对类的所有对象实例起作用。
+
+B: synchronized 是某实例的范围，synchronized isSync(){}防止多个线程同时访问这个实例中的synchronized 方法。
+
+synchronized底层实现原理:
+
 
 
 ####  lock
