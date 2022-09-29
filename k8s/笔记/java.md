@@ -74,9 +74,26 @@ pstree -p 进程号 | wc -l,直接算出线程的总数过来
 JAVA_OPTS="-server -Djava.awt.headless=true  -XX:+PrintGCDetails -XX:+PrintGCTimeStamps -XX:+PrintGCDateStamps -Xloggc:gc-%t.log -XX:+HeapDumpOnOutOfMemoryError  -XX:HeapDumpPath=/home/app/oom"
 
 # 多线程
+## 线程的状态
+- 新建状态： 使用 new Thread 类或其子类建立一个线程对象后，该线程对象就处于新建状态。
+- 就绪状态：调用了start()方法之后，该线程就进入就绪状态（就绪队列中），等待JVM里线程调度器的调度
+- 运行状态：执行 run()，此时线程便处于运行状态。处于运行状态的线程最为复杂，它可以变为阻塞状态、就绪状态和死亡状态
+- 阻塞状态：如果一个线程执行了sleep（睡眠）、suspend（挂起）等方法，失去所占用资源之后，该线程就从运行状态进入阻塞状态
+- 死亡状态：一个运行状态的线程完成任务或者其他终止条件发生时，该线程就切换到终止状态
+
+
 ##  锁
+
 ####  sychronized
 传统的synchronized锁：队列锁
+
+- java内置关键字
+- 无法获取锁的状态
+- 能自动释放
+- 可重入 非公平 不可中断
+- 适合少量代码的同步， 有方法和代码块锁
+
+
 ####  lock
 Lock所是一个接口，其所有的实现类为
 
@@ -84,7 +101,10 @@ ReentrantLock(可重入锁)
 ReentrantReadWriteLock.ReadLock(可重入读写锁的读锁)
 ReentrantReadWriteLock.WriteLock(可重入读写锁的写锁)
 
+
 ####  voilate
+
+
 
 #### ThreadLocal
 1. ThreadLocal是什么
