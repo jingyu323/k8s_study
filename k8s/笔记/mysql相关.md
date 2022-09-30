@@ -137,8 +137,8 @@ mysql -hlocalhost  -uroot -p'root'  -P3306  < /home/sql/0928.sql
 格式：mysqldump -h链接ip -P(大写)端口 -u用户名 -p密码  数据库名>d:XX.sql(路径)
 
 >  示例：mysqldump -h132.72.192.432 -P3307 -uroot -p8888 htgl > bak.sql;
-
-
+>
+> 导入的时候 添加上数据库名称 就不用sql脚本 中指定了
 
 ## java 安装配置
 
