@@ -122,13 +122,19 @@ Java监听mysql的binlog详解(mysql-binlog-connector)：https://blog.csdn.net/m
 
 导入：
 
-登录linux,需要sql脚本中指定 use database
+1、导出数据和表结构：
+
+mysqldump -u用户名 -p密码 数据库名 > 数据库名.sql
+
+mysqldump -uroot -p abc > abc.sql
 
 mysql -hlocalhost  -uroot -p'root'  -P3306  < /home/sql/0928.sql
 
+加上端口和IP 可以指定数据库
+
 导出：
 
-格式：mysqldump -h链接ip -P(大写)端口 -u用户名 -p密码数据库名>d:XX.sql(路劲)
+格式：mysqldump -h链接ip -P(大写)端口 -u用户名 -p密码  数据库名>d:XX.sql(路径)
 
 >  示例：mysqldump -h132.72.192.432 -P3307 -uroot -p8888 htgl > bak.sql;
 
