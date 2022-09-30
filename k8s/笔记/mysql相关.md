@@ -71,7 +71,29 @@ systemctl disable firewalld
 
 ## 集群搭建
 
+解决虚拟机桥接之后没有网络
 
+
+
+
+
+cd /etc/sysconfig/network-scripts
+修改 ONBOOT=yes
+重启网卡
+nmcli c reload
+
+## 1、修改hosts
+
+清除残留数据库
+
+```mysql
+#卸载mariadb和mysql
+rpm -qa | grep mariadb | xargs rpm -e --nodeps
+rpm -qa | grep mysql | xargs rpm -e --nodeps
+
+```
+
+执行之后，centos8 默认是没有 mysql和mariadb
 
 ## SQL优化
 
