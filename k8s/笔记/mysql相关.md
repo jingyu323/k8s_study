@@ -71,6 +71,16 @@ systemctl disable firewalld
 
 ## 集群搭建
 
+
+
+### mysql复制主要有三种方式：
+
+1. 基于[SQL语句](https://so.csdn.net/so/search?q=SQL语句&spm=1001.2101.3001.7020)的复制(statement-based replication, SBR)
+2.  基于行的复制(row-based replication, RBR)
+3.  混合模式复制
+
+
+
 解决虚拟机桥接之后没有网络
 
 
@@ -94,6 +104,18 @@ rpm -qa | grep mysql | xargs rpm -e --nodeps
 ```
 
 执行之后，centos8 默认是没有 mysql和mariadb
+
+修改hostname
+
+hostnamectl set-hostname mysql1
+
+hostnamectl set-hostname mysql2
+
+hostnamectl set-hostname mysql3
+
+
+
+
 
 ## SQL优化
 
