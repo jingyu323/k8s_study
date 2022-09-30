@@ -73,7 +73,7 @@ systemctl disable firewalld
 
 
 
-### mysql复制主要有三种方式：
+### mysql主从复制主要有三种方式：
 
 1. 基于[SQL语句](https://so.csdn.net/so/search?q=SQL语句&spm=1001.2101.3001.7020)的复制(statement-based replication, SBR)
 2.  基于行的复制(row-based replication, RBR)
