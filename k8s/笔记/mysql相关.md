@@ -73,6 +73,50 @@ systemctl disable firewalld
 
 
 
+### mysql主从复制主要有三种方式：
+
+1. 基于[SQL语句](https://so.csdn.net/so/search?q=SQL语句&spm=1001.2101.3001.7020)的复制(statement-based replication, SBR)
+2.  基于行的复制(row-based replication, RBR)
+3.  混合模式复制
+
+
+
+解决虚拟机桥接之后没有网络
+
+
+
+
+
+cd /etc/sysconfig/network-scripts
+修改 ONBOOT=yes
+重启网卡
+nmcli c reload
+
+## 1、修改hosts
+
+清除残留数据库
+
+```mysql
+#卸载mariadb和mysql
+rpm -qa | grep mariadb | xargs rpm -e --nodeps
+rpm -qa | grep mysql | xargs rpm -e --nodeps
+
+```
+
+执行之后，centos8 默认是没有 mysql和mariadb
+
+修改hostname
+
+hostnamectl set-hostname mysql1
+
+hostnamectl set-hostname mysql2
+
+hostnamectl set-hostname mysql3
+
+
+
+
+
 ## SQL优化
 
 ## 分库分表
@@ -117,6 +161,28 @@ Canal监听mysql的binlog日志实现数据同步：https://blog.csdn.net/m0_375
 Java监听mysql的binlog详解(mysql-binlog-connector)：https://blog.csdn.net/m0_37583655/article/details/119148470 
 
 
+
+数据库表导入导出：
+
+导入：
+
+1、导出数据和表结构：
+
+mysqldump -u用户名 -p密码 数据库名 > 数据库名.sql
+
+mysqldump -uroot -p abc > abc.sql
+
+mysql -hlocalhost  -uroot -p'root'  -P3306  < /home/sql/0928.sql
+
+加上端口和IP 可以指定数据库
+
+导出：
+
+格式：mysqldump -h链接ip -P(大写)端口 -u用户名 -p密码  数据库名>d:XX.sql(路径)
+
+>  示例：mysqldump -h132.72.192.432 -P3307 -uroot -p8888 htgl > bak.sql;
+>
+> 导入的时候 添加上数据库名称 就不用sql脚本 中指定了
 
 ## java 安装配置
 
