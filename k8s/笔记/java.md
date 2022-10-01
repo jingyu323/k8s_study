@@ -125,7 +125,7 @@ synchronized底层实现原理:
 
 
 
-####  lock
+####  ReentrantLock
 Lock所是一个接口，其所有的实现类为
 
 ReentrantLock(可重入锁)
@@ -134,6 +134,15 @@ ReentrantReadWriteLock.WriteLock(可重入读写锁的写锁)
 
 
 ####  voilate
+
+### Synchronized和ReentrantLock对比
+#### 相同之处
+都是加锁方式同步，而且都是阻塞式的同步，也就是说当如果一个线程获得了对象锁，进入了同步块，其他访问该同步块的线程都必须阻塞在同步块外面等待。
+
+synchronized 与Lock都是可重入锁，同一个线程再次进入同步代码的时候.可以使用自己已经获取到的锁。
+
+####  不同之处
+
 
 
 
