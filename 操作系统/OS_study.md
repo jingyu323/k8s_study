@@ -32,7 +32,11 @@ x86:
 
   - 初始化gdt 表
   -  读取配置参数
+  -  head 系统初始化
+ ![img](images/os_head.jpg) 
+
 -  system 模块执行
+  
 
 
 - 加载操作系统
