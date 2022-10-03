@@ -29,12 +29,20 @@ x86:
 
 - 加载 setup 即日
   ![img](images/os_setup.jpg) 
-- 
+
+  - 初始化gdt 表
+  -  读取配置参数
+-  system 模块执行
+
+
 - 加载操作系统
 
 
-image
+保护模式： 
 
+ ![img](images/os_safemode.jpg) 
+
+保护模式下地址翻译,
 
 
 
