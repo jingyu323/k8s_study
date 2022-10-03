@@ -23,8 +23,12 @@ x86:
 
 - 引导扇区：
 引导扇区的代码是汇编代码，bootsect.s
+![img](images/bootsec.png)  
 
-- 加载 setup
+
+
+- 加载 setup 即日
+  ![img](images/os_setup.jpg) 
 - 
 - 加载操作系统
 
