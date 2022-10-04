@@ -60,6 +60,11 @@ GRUB 是一个引导加载程序，可以引导各种各样的操作系统
 ## 寄存器
 
 
+# 参考材料
+ 哈工大《操作系统》实验：
+https://github.com/hoverwinter/HIT-OSLab
+网易云课堂：
+https://study.163.com/series/1001245004.htm
 
 
 
