@@ -63,6 +63,8 @@ CPU 怎么切换任务，只需要切PC地址，还需要保存切换任务的�
 
 ### CPU 如何切
 
+copy_process
+![img](images/os_switch_to.jpg) 
 
 ## grub
 GRUB 是一个引导加载程序，可以引导各种各样的操作系统
