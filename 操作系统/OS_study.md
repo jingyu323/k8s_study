@@ -129,6 +129,16 @@ CPU调度算法：
 swap：
 把睡眠的进程从内存中刷到磁盘
 
+#### 分段
+
+程序在内存中是分段存储的，而不是存储在一起：
+ ![img](images/os_program_segement.jpg) 
+
+GDT： 是操作系统的段表
+LDT：是每个进程的段表
+![img](images/os_seg_gdt.jpg) 
+
+
 
 ## grub
 GRUB 是一个引导加载程序，可以引导各种各样的操作系统
