@@ -79,6 +79,10 @@ systemctl disable firewalld
 2.  基于行的复制(row-based replication, RBR)
 3.  混合模式复制
 
+### 集群架构：
+
+
+
 
 
 解决虚拟机桥接之后没有网络
