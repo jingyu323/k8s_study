@@ -80,7 +80,7 @@ response.text
 
 # 返回json对象     
 response.json()     
-```  
+```
 
 其他了解
 
@@ -120,3 +120,4 @@ F12 --> Network --> XHR --> Name --> Response
 
 ## 参考资料
 
+一些数据接口：http://doc.gopup.cn/#/data/info_data
