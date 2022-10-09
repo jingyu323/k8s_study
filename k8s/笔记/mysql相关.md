@@ -76,8 +76,19 @@ systemctl disable firewalld
 ### mysql主从复制主要有三种方式：
 
 1. 基于[SQL语句](https://so.csdn.net/so/search?q=SQL语句&spm=1001.2101.3001.7020)的复制(statement-based replication, SBR)
-2.  基于行的复制(row-based replication, RBR)
-3.  混合模式复制
+2. 基于行的复制(row-based replication, RBR)
+3. 混合模式复制
+
+### 二进制日志(bin log)
+
+```text
+#默认是关闭的，需要通过以下配置进行开启。
+log-bin=mysql-bin
+```
+
+ 其中mysql-bin是binlog日志文件的basename，binlog日志文件的完整名称：mysql-bin-000001.log
+
+binlog记录了数据库所有的ddl语句和dml语句，但不包括select语句内容，语句以事件的形式保存，描述了数据的变更顺序，binlog还包括了每个更新语句的执行时间信息。如果是DDL语句，则直接记录到binlog日志，而DML语句，必须通过事务提交才能记录到binlog日志中。 binlog主要用于实现mysql主从复制、数据备份、数据恢复。
 
 ### 集群架构：
 
