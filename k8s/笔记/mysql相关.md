@@ -52,6 +52,15 @@ rpm -ivh mysql-community-icu-data-files-8.0.28-1.el7.x86_64.rpm
 
 yum install libncurses*
 
+
+
+```
+
+
+
+
+```
+
 d. 启动mysql
 
 systemctl start mysqld
@@ -67,6 +76,15 @@ mysql -uroot -p'U!heWdF29ARl'
 set global validate_password.policy=0;
 
 alter user 'root'@'localhost' identified with mysql_native_password by 'Root@123';
+
+mysql -uroot -p'Root@123'
+
+```
+grant all privileges on *.* to 'root'@'%' with grant option;
+flush privileges;
+```
+
+
 
 vi /etc/my.cnf 去除only_full_group_by模式，文本最后一行添加sql_mode=STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION
 
@@ -114,6 +132,109 @@ binlog记录了数据库所有的ddl语句和dml语句，但不包括select语�
 
 ### Router搭建集群
 
+安装 mysqlsh
+
+```
+[root@localhost soft]# rpm -ivh mysql-shell-8.0.30-1.el8.x86_64.rpm
+warning: mysql-shell-8.0.30-1.el8.x86_64.rpm: Header V4 RSA/SHA256 Signature, key ID 3a79bd29: NOKEY
+error: Failed dependencies:
+	libpython3.9.so.1.0()(64bit) is needed by mysql-shell-8.0.30-1.el8.x86_64
+
+解决方法：
+http://rpmfind.net/linux/rpm2html/search.php  搜一下安装包
+
+实在安装不了试试 yum命令
+
+yum install mysql-shell-8.0.30-1.el8.x86_64.rpm
+Last metadata expiration check: 0:12:30 ago on Mon 10 Oct 2022 09:34:05 AM EDT.
+Dependencies resolved.
+============================================================================================================
+ Package                       Arch       Version                                    Repository        Size
+============================================================================================================
+Installing:
+ mysql-shell                   x86_64     8.0.30-1.el8                               @commandline      19 M
+Installing dependencies:
+ python39-libs                 x86_64     3.9.13-1.module_el8.7.0+1178+0ba51308      appstream        8.2 M
+ python39-pip-wheel            noarch     20.2.4-7.module_el8.7.0+1213+291b6551      appstream        1.1 M
+ python39-setuptools-wheel     noarch     50.3.2-4.module_el8.6.0+930+10acc06f       appstream        497 k
+Installing weak dependencies:
+ python39                      x86_64     3.9.13-1.module_el8.7.0+1178+0ba51308      appstream         33 k
+ python39-pip                  noarch     20.2.4-7.module_el8.7.0+1213+291b6551      appstream        1.9 M
+ python39-setuptools           noarch     50.3.2-4.module_el8.6.0+930+10acc06f       appstream        871 k
+Enabling module streams:
+ python39                                 3.9                                                              
+
+Transaction Summary
+============================================================================================================
+Install  7 Packages
+```
+
+```
+# 使用如下命令 开启mysqlshell 终端
+mysqlsh
+
+# 配置各服务器为集群模式
+shell.connect('root@node1:3306')
+dba.configureLocalInstance()
+shell.connect('root@node2:3306')
+dba.configureLocalInstance()
+shell.connect('root@node2:3306')
+dba.configureLocalInstance()
+ 
+
+
+###创建集群组，并将添加示例进集群组
+shell.connect('root@node1:3306')
+var cluster=dba.createCluster("MySQL_Cluster")
+#将另外两台实例添加至集群中
+cluster.addInstance('root@node2:3306');
+cluster.addInstance('rootr@node3:3306');
+cluster.status();         #查看集群状态
+```
+
+
+
+```
+Cluster.addInstance: Cannot add an instance with the same server UUID (200951b7-4895-11ed-a25e-000c29b1aeff) of an active member of the cluster 'node1:3306'. Please change the server UUID of the instance to add, all members must have a unique server UUID. (RuntimeError)
+
+解决方案：
+1、利用uuid函数生成新的uuid
+
+mysql> select uuid();
++--------------------------------------+
+| uuid()                               |
++--------------------------------------+
+| b33057ff-bec6-11eb-ad94-000c29af6856 |
++--------------------------------------+
+1 row in set (0.00 sec)
+2、查看配置文件目录
+
+mysql> show variables like 'datadir';
++---------------+-----------------+
+| Variable_name | Value           |
++---------------+-----------------+
+| datadir       | /var/lib/mysql/ |
++---------------+-----------------+
+1 row in set (0.03 sec)
+3、编辑配置文件目录
+
+vi /var/lib/mysql/auto.cnf
+4、uuid修改新生成的uuid
+
+server-uuid=b33057ff-bec6-11eb-ad94-000c29af6856
+5、重启服务
+
+service mysqld restart
+```
+
+
+
+安装router
+
+rpm  -ivh mysql-router-community-8.0.30-1.el8.x86_64.rpm
+
+
+
 解决虚拟机桥接之后没有网络
 
 cd /etc/sysconfig/network-scripts
@@ -141,6 +262,20 @@ hostnamectl set-hostname node1
 hostnamectl set-hostname node2
 
 hostnamectl set-hostname node3
+
+```
+ cat  >  /etc/hosts << EOF
+ 127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
+ ::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
+ 192.168.99.104  master
+ 192.168.99.112  master2
+ 192.168.99.119  master3
+ 192.168.99.150  node1
+ 192.168.99.170  node2
+ EOF
+```
+
+
 
 
 
