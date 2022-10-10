@@ -190,6 +190,52 @@ var cluster=dba.createCluster("MySQL_Cluster")
 cluster.addInstance('root@node2:3306');
 cluster.addInstance('rootr@node3:3306');
 cluster.status();         #查看集群状态
+## 查询结果如下
+{
+    "clusterName": "MySQL_Cluster", 
+    "defaultReplicaSet": {
+        "name": "default", 
+        "primary": "node1:3306", 
+        "ssl": "REQUIRED", 
+        "status": "OK", 
+        "statusText": "Cluster is ONLINE and can tolerate up to ONE failure.", 
+        "topology": {
+            "node1:3306": {
+                "address": "node1:3306", 
+                "memberRole": "PRIMARY", 
+                "mode": "R/W", 
+                "readReplicas": {}, 
+                "replicationLag": "applier_queue_applied", 
+                "role": "HA", 
+                "status": "ONLINE", 
+                "version": "8.0.30"
+            }, 
+            "node2:3306": {
+                "address": "node2:3306", 
+                "memberRole": "SECONDARY", 
+                "mode": "R/O", 
+                "readReplicas": {}, 
+                "replicationLag": "applier_queue_applied", 
+                "role": "HA", 
+                "status": "ONLINE", 
+                "version": "8.0.30"
+            }, 
+            "node3:3306": {
+                "address": "node3:3306", 
+                "memberRole": "SECONDARY", 
+                "mode": "R/O", 
+                "readReplicas": {}, 
+                "replicationLag": "applier_queue_applied", 
+                "role": "HA", 
+                "status": "ONLINE", 
+                "version": "8.0.30"
+            }
+        }, 
+        "topologyMode": "Single-Primary"
+    }, 
+    "groupInformationSourceMember": "node1:3306"
+}
+
 ```
 
 
