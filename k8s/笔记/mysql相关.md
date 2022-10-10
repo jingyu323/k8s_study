@@ -112,6 +112,8 @@ binlog记录了数据库所有的ddl语句和dml语句，但不包括select语�
 
 
 
+### Router搭建集群
+
 解决虚拟机桥接之后没有网络
 
 cd /etc/sysconfig/network-scripts
@@ -134,11 +136,15 @@ rpm -qa | grep mysql | xargs rpm -e --nodeps
 
 修改hostname
 
-hostnamectl set-hostname mysql1
+hostnamectl set-hostname node1
 
-hostnamectl set-hostname mysql2
+hostnamectl set-hostname node2
 
-hostnamectl set-hostname mysql3
+hostnamectl set-hostname node3
+
+
+
+
 
 
 
