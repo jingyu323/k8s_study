@@ -236,6 +236,9 @@ cluster.status();         #查看集群状态
     "groupInformationSourceMember": "node1:3306"
 }
 
+
+SELECT clusters.cluster_id,clusters.cluster_name from mysql_innodb_cluster_metadata.clusters;
+
 ```
 
 
@@ -393,6 +396,38 @@ canal：是数据同步中间件，需要单独部署维护，功能强大，支
 
 Canal监听mysql的binlog日志实现数据同步：https://blog.csdn.net/m0_37583655/article/details/119517336
 Java监听mysql的binlog详解(mysql-binlog-connector)：https://blog.csdn.net/m0_37583655/article/details/119148470 
+
+
+
+## MySQL Shell
+
+```
+dba.checkInstanceConfiguration("root@hostname:3306")     #检查节点配置实例，用于加入cluster之前
+ 
+dba.rebootClusterFromCompleteOutage('myCluster');        #重启
+ 
+dba.dropMetadataSchema();                                #删除schema
+ 
+var cluster = dba.getCluster('myCluster')                #获取当前集群
+ 
+cluster.checkInstanceState("root@hostname:3306")         #检查cluster里节点状态
+ 
+cluster.rejoinInstance("root@hostname:3306")             #重新加入节点，我本地测试的时候发现rejoin一直无效，每次是delete后
+ 
+addcluster.dissolve({force：true})                       #删除集群
+ 
+cluster.addInstance("root@hostname:3306")                #增加节点
+ 
+cluster.removeInstance("root@hostname:3306")             #删除节点
+ 
+cluster.removeInstance('root@host:3306',{force:true})    #强制删除节点
+ 
+cluster.dissolve({force:true})                           #解散集群
+ 
+cluster.describe();                                      #集群描述
+```
+
+
 
 
 
