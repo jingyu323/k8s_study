@@ -284,6 +284,32 @@ rpm  -ivh mysql-router-community-8.0.30-1.el8.x86_64.rpm
 
 
 
+```
+[routing:read_write]
+bind_address = 0.0.0.0
+bind_port = 7001
+mode = read-write
+destinations = node1:3306,node2:3306
+protocol=classic
+max_connections=2024
+ 
+[routing:read_only]
+bind_address = 0.0.0.0
+bind_port = 7002
+mode = read-only
+destinations = node2:3306,node3:3306
+protocol=classic
+max_connections=1024
+
+
+## 
+systemctl restart mysqlrouter
+```
+
+
+
+
+
 解决虚拟机桥接之后没有网络
 
 cd /etc/sysconfig/network-scripts
@@ -473,3 +499,6 @@ source /etc/profile 使生效  Java -version 检测安装是否安装成功
 
 
 
+## 参考资料
+
+mysql8[集群搭建](https://www.cnblogs.com/ios9/p/14843778.html)
