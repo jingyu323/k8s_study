@@ -2,6 +2,14 @@
 
 ## mysql8  centos8 安装
 
+
+
+rpm -qa | grep mariadb | xargs rpm -e --nodeps 
+
+rpm -qa | grep mysql | xargs rpm -e --nodeps
+
+
+
 安装顺序：
 
 rpm -ivh mysql-community-common-8.0.28-1.el7.x86_64.rpm
@@ -52,7 +60,13 @@ e. 查看初始密码
 
 cat /var/log/mysqld.log
 
-alter user 'root'@'localhost' identified with mysql_native_password by 'root';
+mysql -uroot -p'U!heWdF29ARl'
+
+
+
+set global validate_password.policy=0;
+
+alter user 'root'@'localhost' identified with mysql_native_password by 'Root@123';
 
 vi /etc/my.cnf 去除only_full_group_by模式，文本最后一行添加sql_mode=STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION
 
@@ -67,7 +81,9 @@ systemctl disable firewalld
 
 确认时防火墙的问题 再去开放端口即可。
 
+关闭防火墙之后还是连不上可以重启
 
+systemctl restart mysqld
 
 ## 集群搭建
 
