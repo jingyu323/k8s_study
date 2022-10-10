@@ -71,7 +71,7 @@ systemctl disable firewalld
 
 ## 集群搭建
 
-
+mysql安装包下载地址：https://dev.mysql.com/downloads/
 
 ### mysql主从复制主要有三种方式：
 
