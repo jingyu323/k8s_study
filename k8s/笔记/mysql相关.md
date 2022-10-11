@@ -13,8 +13,6 @@ nmcli c reload
 
 ## mysql8  centos8 安装
 
-
-
 ### 1、修改hosts
 
 清除残留数据库
@@ -66,7 +64,7 @@ rpm -ivh mysql-community-client-8.0.28-1.el7.x86_64.rpm
 
 rpm -ivh mysql-community-icu-data-files-8.0.28-1.el7.x86_64.rpm
 
- rpm -ivh mysql-community-server-8.0.28-1.el7.x86_64.rpm
+rpm -ivh mysql-community-server-8.0.28-1.el7.x86_64.rpm
 
 
 
@@ -146,8 +144,6 @@ systemctl restart mysqld
 
 ### 集群架构：
 
-
-
 mysql安装包下载地址：https://dev.mysql.com/downloads/
 
 ### mysql主从复制主要有三种方式：
@@ -166,10 +162,6 @@ log-bin=mysql-bin
  其中mysql-bin是binlog日志文件的basename，binlog日志文件的完整名称：mysql-bin-000001.log
 
 binlog记录了数据库所有的ddl语句和dml语句，但不包括select语句内容，语句以事件的形式保存，描述了数据的变更顺序，binlog还包括了每个更新语句的执行时间信息。如果是DDL语句，则直接记录到binlog日志，而DML语句，必须通过事务提交才能记录到binlog日志中。 binlog主要用于实现mysql主从复制、数据备份、数据恢复。
-
-
-
-
 
 ### Router搭建集群
 
@@ -344,10 +336,6 @@ systemctl restart mysqlrouter
 
 
 
-
-
-
-
 ### 主从配置：
 
 alter user 'root'@'localhost' identified  with mysql_native_password  by 'root';
@@ -485,9 +473,23 @@ show processlist;
 如果遇到：when reading data from binary log: 'Could not find first log file name in binary log index file
 flush logs;
 
+### MHA环境搭建：
 
+
+
+参考材料：
+
+https://www.jianshu.com/p/72d824fc1eaa
+
+
+
+## MySQL升级
+
+### 
 
 ## SQL优化
+
+
 
 ## 分库分表
 
