@@ -52,6 +52,18 @@ e. 查看初始密码
 
 cat /var/log/mysqld.log
 
+
+
+ --修改密码策略 ,可以不用修改，测试专用
+set global validate_password.policy=LOW;
+set global validate_password.mixed_case_count=0;
+set global validate_password.number_count=0; 
+set global validate_password.special_char_count=0; 
+set global validate_password.length=1;
+set global validate_password.check_user_name='OFF';
+
+
+
 alter user 'root'@'localhost' identified with mysql_native_password by 'root';
 
 vi /etc/my.cnf 去除only_full_group_by模式，文本最后一行添加sql_mode=STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION
@@ -102,6 +114,148 @@ cd /etc/sysconfig/network-scripts
 修改 ONBOOT=yes
 重启网卡
 nmcli c reload
+
+## 主从配置：
+
+alter user 'root'@'localhost' identified  with mysql_native_password  by 'root';
+
+
+ mysql -uroot -p'root' 
+
+
+ update user set host = "%" where  user = 'root';
+
+
+ hostnamectl set-hostname node1
+  hostnamectl set-hostname node2
+   hostnamectl set-hostname node3
+
+
+ 修之后如果登录不上，需要重启服务器，检查防火墙，我这边是测试直接停掉防火墙，如果是正式环境需要根据规则放通端口
+ systemctl restart mysqld
+
+ 
+
+ 添加之后重启报错：
+ Job for mysqld.service failed because the control process exited with error code. See "systemctl status mysqld.service" and "journalctl -xe" for details.
+由于server_id包含了字母导致的不能正常启动
+
+ 
+
+
+ ### 1.一主一备用
+CREATE USER 'copy'@'%' IDENTIFIED BY 'Copy@123456';
+alter user 'copy'@'%' identified with mysql_native_password by 'Copy@123456';
+grant all privileges on *.* to 'copy'@'%' with grant option;
+
+
+select host,user from mysql.user;
+
+
+--查看copy用户权限情况，由于上面命令给的ALL权限所以这里显示结果比较多
+show grants for 'copy'@'%';
+
+
+##### 开启二进制日志文件和添加server-id
+主节点/etc/my.cnf添加内容：
+
+##### 开启二进制日志功能
+log-bin=mysql-bin
+binlog_format=mixed
+binlog-ignore-db=mysql
+
+##### 设置二进制日志使用内存大小（事务）
+binlog_cache_size=1M
+##### 设置使用的二进制日志格式(mixed,statement,row)
+binlog_format=mixed
+##### 二进制日志过期清理时间。默认值为0，表示不自动清理。
+##### 新版8的配置
+binlog_expire_logs_seconds=604800
+##### 跳过主从复制中遇到的所有错误或指定类型的错误，避免slave端复制中断。
+##### 如：1062错误是指一些主键重复，1032错误是因为主从数据库数据不一致,
+slave-skip-errors=all
+server-id=13306
+
+从节点/etc/my.cnf添加内容:
+node2 
+server-id=23306
+slave-skip-errors=all
+binlog_format=mixed
+binlog-ignore-db=mysql
+binlog_expire_logs_seconds=604800
+
+node3
+server-id=33306
+slave-skip-errors=all
+binlog_format=mixed
+binlog-ignore-db=mysql
+binlog_expire_logs_seconds=604800
+
+##### 注意，注意，注意,只有master节点有mysql-bin配置，每个节点的server-id必须不同,只能用数字不能用字母
+
+添加完成重启mysql
+systemctl restart mysqld
+
+
+登入主节点mysql重置偏移量
+先查看状态
+show master status;
+
+--重置偏移量如果不重置，从节点也会创建copy用户
+reset master;
+show master status;
+
+show slave status;
+
+5.注册从节点
+登入所有从节点的mysql上执行以下命令:
+master_host : 主节点主机名
+master_user : 第2步创建的主从同步账户
+master_port : 主节点mysql服务的端口号，因为没有这里改过所以是 3306
+master_password : 第2步创建的主从同步账户的密码
+master_log_file : 第4步获取的二进制文件名字
+master_log_pos : 第4步获取的Position值
+
+stop slave;
+reset slave;
+
+change master to master_host='node3',master_user='copy',master_port=3306,master_password='Copy@123456',master_log_file='mysql-bin.000001',master_log_pos=155,master_connect_retry=30;
+
+
+启动 启动所有从节点的slave
+start slave;
+show slave status \G
+
+启动的时候报错：
+
+``` Last_IO_Errno: 2005  Last_IO_Error: error connecting to master 'copy@node1:3306' - retry-time: 60 retries: 1 message: Unknown MySQL server host 'node1' (2)```
+				
+
+				没有配置hosts IP映射，配置之后就好了
+
+
+执行了一段时间添加
+Last_IO_Error: Got fatal error 1236 from master when reading data from binary log: 'binlog truncated in the middle of event; consider out of disk space on master; the first event 'mysql-bin.000001' at 157, the last event read from './mysql-bin.000001' at 124, the last byte read from './mysql-bin.000001' at 574.'
+
+是由于position 已经更改，需要使用当前新的position
+change master to master_host='node1',master_user='copy',master_port=3306,master_password='Copy@123456',master_log_file='mysql-bin.000001',master_log_pos=574;
+
+
+#### 主从切换
+
+show processlist;
+直到看到状态都为 XXX has read all relay log 表示从库更新均执行完毕，则可以进行下一步。 
+
+  stop slave;  # 完全停止 slave 复制 
+  reset slave  ; # 完全清空 slave 复制信息
+  reset master; # 清空本机上 master 的位置信息
+
+如果遇到：when reading data from binary log: 'Could not find first log file name in binary log index file
+flush logs;
+
+
+
+
 
 ## 1、修改hosts
 
