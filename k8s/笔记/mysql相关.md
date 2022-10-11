@@ -52,15 +52,6 @@ rpm -ivh mysql-community-icu-data-files-8.0.28-1.el7.x86_64.rpm
 
 yum install libncurses*
 
-
-
-```
-
-
-
-
-```
-
 d. 启动mysql
 
 systemctl start mysqld
