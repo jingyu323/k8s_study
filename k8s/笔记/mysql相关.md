@@ -1,12 +1,52 @@
 # 安装
 
+
+
+解决虚拟机桥接之后没有网络
+
+cd /etc/sysconfig/network-scripts
+修改 ONBOOT=yes
+重启网卡
+nmcli c reload
+
+
+
 ## mysql8  centos8 安装
 
 
 
-rpm -qa | grep mariadb | xargs rpm -e --nodeps 
+### 1、修改hosts
 
+清除残留数据库
+
+```mysql
+#卸载mariadb和mysql
+rpm -qa | grep mariadb | xargs rpm -e --nodeps
 rpm -qa | grep mysql | xargs rpm -e --nodeps
+
+```
+
+执行之后，centos8 默认是没有 mysql和mariadb
+
+修改hostname
+
+hostnamectl set-hostname node1
+
+hostnamectl set-hostname node2
+
+hostnamectl set-hostname node3
+
+```
+ cat  >  /etc/hosts << EOF
+ 127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
+ ::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
+ 192.168.99.150  node1
+ 192.168.99.170  node2
+ 192.168.99.171  node3
+ EOF
+```
+
+
 
 
 
@@ -60,8 +100,7 @@ e. 查看初始密码
 
 cat /var/log/mysqld.log
 
-
-
+```sql
  --修改密码策略 ,生产环境不用修改，测试专用
 set global validate_password.policy=LOW;
 set global validate_password.mixed_case_count=0;
@@ -69,15 +108,12 @@ set global validate_password.number_count=0;
 set global validate_password.special_char_count=0; 
 set global validate_password.length=1;
 set global validate_password.check_user_name='OFF';
-
-
+```
 
 alter user 'root'@'localhost' identified with mysql_native_password by 'root';
 mysql -uroot -p'U!heWdF29ARl'
 
 
-
-set global validate_password.policy=0;
 
 alter user 'root'@'localhost' identified with mysql_native_password by 'Root@123';
 
@@ -108,6 +144,10 @@ systemctl restart mysqld
 
 ## 集群搭建
 
+### 集群架构：
+
+
+
 mysql安装包下载地址：https://dev.mysql.com/downloads/
 
 ### mysql主从复制主要有三种方式：
@@ -127,8 +167,6 @@ log-bin=mysql-bin
 
 binlog记录了数据库所有的ddl语句和dml语句，但不包括select语句内容，语句以事件的形式保存，描述了数据的变更顺序，binlog还包括了每个更新语句的执行时间信息。如果是DDL语句，则直接记录到binlog日志，而DML语句，必须通过事务提交才能记录到binlog日志中。 binlog主要用于实现mysql主从复制、数据备份、数据恢复。
 
-### 集群架构：
-
 
 
 
@@ -147,7 +185,6 @@ error: Failed dependencies:
 http://rpmfind.net/linux/rpm2html/search.php  搜一下安装包
 
 实在安装不了试试 yum命令
-
 yum install mysql-shell-8.0.30-1.el8.x86_64.rpm
 Last metadata expiration check: 0:12:30 ago on Mon 10 Oct 2022 09:34:05 AM EDT.
 Dependencies resolved.
@@ -184,8 +221,6 @@ dba.configureLocalInstance()
 shell.connect('root@node2:3306')
 dba.configureLocalInstance()
  
-
-
 ###创建集群组，并将添加示例进集群组
 shell.connect('root@node1:3306')
 var cluster=dba.createCluster("MySQL_Cluster")
@@ -285,8 +320,6 @@ service mysqld restart
 
 rpm  -ivh mysql-router-community-8.0.30-1.el8.x86_64.rpm
 
-
-
 ```
 [routing:read_write]
 bind_address = 0.0.0.0
@@ -313,14 +346,9 @@ systemctl restart mysqlrouter
 
 
 
-解决虚拟机桥接之后没有网络
 
-cd /etc/sysconfig/network-scripts
-修改 ONBOOT=yes
-重启网卡
-nmcli c reload
 
-## 主从配置：
+### 主从配置：
 
 alter user 'root'@'localhost' identified  with mysql_native_password  by 'root';
 
@@ -330,10 +358,9 @@ alter user 'root'@'localhost' identified  with mysql_native_password  by 'root';
 
  update user set host = "%" where  user = 'root';
 
-
  hostnamectl set-hostname node1
-  hostnamectl set-hostname node2
-   hostnamectl set-hostname node3
+ hostnamectl set-hostname node2
+ hostnamectl set-hostname node3
 
 
  修之后如果登录不上，需要重启服务器，检查防火墙，我这边是测试直接停掉防火墙，如果是正式环境需要根据规则放通端口
@@ -348,7 +375,7 @@ alter user 'root'@'localhost' identified  with mysql_native_password  by 'root';
  
 
 
- ### 1.主备复制
+ #### 1.主备复制
 CREATE USER 'copy'@'%' IDENTIFIED BY 'Copy@123456';
 alter user 'copy'@'%' identified with mysql_native_password by 'Copy@123456';
 grant all privileges on *.* to 'copy'@'%' with grant option;
@@ -460,51 +487,6 @@ flush logs;
 
 
 
-
-
-## 1、修改hosts
-
-清除残留数据库
-
-```mysql
-#卸载mariadb和mysql
-rpm -qa | grep mariadb | xargs rpm -e --nodeps
-rpm -qa | grep mysql | xargs rpm -e --nodeps
-
-```
-
-执行之后，centos8 默认是没有 mysql和mariadb
-
-修改hostname
-
-hostnamectl set-hostname node1
-
-hostnamectl set-hostname node2
-
-hostnamectl set-hostname node3
-
-```
- cat  >  /etc/hosts << EOF
- 127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
- ::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
- 192.168.99.104  master
- 192.168.99.112  master2
- 192.168.99.119  master3
- 192.168.99.150  node1
- 192.168.99.170  node2
- EOF
-```
-
-
-
-
-
-
-
-
-
-
-
 ## SQL优化
 
 ## 分库分表
@@ -524,8 +506,6 @@ hostnamectl set-hostname node3
 ### 分表
 
 侧重点不同，分区侧重提高读写性能，分表侧重提高并发性能。两者不冲突，可以配合使用。
-
-### 
 
 
 
@@ -602,7 +582,7 @@ cluster.describe();                                      #集群描述
 
 
 
-数据库表导入导出：
+## 数据库表导入导出：
 
 导入：
 
