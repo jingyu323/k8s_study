@@ -2,6 +2,14 @@
 
 ## mysql8  centos8 安装
 
+
+
+rpm -qa | grep mariadb | xargs rpm -e --nodeps 
+
+rpm -qa | grep mysql | xargs rpm -e --nodeps
+
+
+
 安装顺序：
 
 rpm -ivh mysql-community-common-8.0.28-1.el7.x86_64.rpm
@@ -44,6 +52,15 @@ rpm -ivh mysql-community-icu-data-files-8.0.28-1.el7.x86_64.rpm
 
 yum install libncurses*
 
+
+
+```
+
+
+
+
+```
+
 d. 启动mysql
 
 systemctl start mysqld
@@ -65,6 +82,21 @@ set global validate_password.check_user_name='OFF';
 
 
 alter user 'root'@'localhost' identified with mysql_native_password by 'root';
+mysql -uroot -p'U!heWdF29ARl'
+
+
+
+set global validate_password.policy=0;
+
+alter user 'root'@'localhost' identified with mysql_native_password by 'Root@123';
+
+mysql -uroot -p'Root@123'
+
+```
+grant all privileges on *.* to 'root'@'%' with grant option;
+flush privileges;
+```
+ 
 
 vi /etc/my.cnf 去除only_full_group_by模式，文本最后一行添加sql_mode=STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION
 
@@ -79,11 +111,13 @@ systemctl disable firewalld
 
 确认时防火墙的问题 再去开放端口即可。
 
+关闭防火墙之后还是连不上可以重启
 
+systemctl restart mysqld
 
 ## 集群搭建
 
-
+mysql安装包下载地址：https://dev.mysql.com/downloads/
 
 ### mysql主从复制主要有三种方式：
 
@@ -103,6 +137,186 @@ log-bin=mysql-bin
 binlog记录了数据库所有的ddl语句和dml语句，但不包括select语句内容，语句以事件的形式保存，描述了数据的变更顺序，binlog还包括了每个更新语句的执行时间信息。如果是DDL语句，则直接记录到binlog日志，而DML语句，必须通过事务提交才能记录到binlog日志中。 binlog主要用于实现mysql主从复制、数据备份、数据恢复。
 
 ### 集群架构：
+
+
+
+
+
+### Router搭建集群
+
+安装 mysqlsh
+
+```
+[root@localhost soft]# rpm -ivh mysql-shell-8.0.30-1.el8.x86_64.rpm
+warning: mysql-shell-8.0.30-1.el8.x86_64.rpm: Header V4 RSA/SHA256 Signature, key ID 3a79bd29: NOKEY
+error: Failed dependencies:
+	libpython3.9.so.1.0()(64bit) is needed by mysql-shell-8.0.30-1.el8.x86_64
+
+解决方法：
+http://rpmfind.net/linux/rpm2html/search.php  搜一下安装包
+
+实在安装不了试试 yum命令
+
+yum install mysql-shell-8.0.30-1.el8.x86_64.rpm
+Last metadata expiration check: 0:12:30 ago on Mon 10 Oct 2022 09:34:05 AM EDT.
+Dependencies resolved.
+============================================================================================================
+ Package                       Arch       Version                                    Repository        Size
+============================================================================================================
+Installing:
+ mysql-shell                   x86_64     8.0.30-1.el8                               @commandline      19 M
+Installing dependencies:
+ python39-libs                 x86_64     3.9.13-1.module_el8.7.0+1178+0ba51308      appstream        8.2 M
+ python39-pip-wheel            noarch     20.2.4-7.module_el8.7.0+1213+291b6551      appstream        1.1 M
+ python39-setuptools-wheel     noarch     50.3.2-4.module_el8.6.0+930+10acc06f       appstream        497 k
+Installing weak dependencies:
+ python39                      x86_64     3.9.13-1.module_el8.7.0+1178+0ba51308      appstream         33 k
+ python39-pip                  noarch     20.2.4-7.module_el8.7.0+1213+291b6551      appstream        1.9 M
+ python39-setuptools           noarch     50.3.2-4.module_el8.6.0+930+10acc06f       appstream        871 k
+Enabling module streams:
+ python39                                 3.9                                                              
+
+Transaction Summary
+============================================================================================================
+Install  7 Packages
+```
+
+```
+# 使用如下命令 开启mysqlshell 终端
+mysqlsh
+
+# 配置各服务器为集群模式
+shell.connect('root@node1:3306')
+dba.configureLocalInstance()
+shell.connect('root@node2:3306')
+dba.configureLocalInstance()
+shell.connect('root@node2:3306')
+dba.configureLocalInstance()
+ 
+
+
+###创建集群组，并将添加示例进集群组
+shell.connect('root@node1:3306')
+var cluster=dba.createCluster("MySQL_Cluster")
+#将另外两台实例添加至集群中
+cluster.addInstance('root@node2:3306');
+cluster.addInstance('rootr@node3:3306');
+cluster.status();         #查看集群状态
+## 查询结果如下
+{
+    "clusterName": "MySQL_Cluster", 
+    "defaultReplicaSet": {
+        "name": "default", 
+        "primary": "node1:3306", 
+        "ssl": "REQUIRED", 
+        "status": "OK", 
+        "statusText": "Cluster is ONLINE and can tolerate up to ONE failure.", 
+        "topology": {
+            "node1:3306": {
+                "address": "node1:3306", 
+                "memberRole": "PRIMARY", 
+                "mode": "R/W", 
+                "readReplicas": {}, 
+                "replicationLag": "applier_queue_applied", 
+                "role": "HA", 
+                "status": "ONLINE", 
+                "version": "8.0.30"
+            }, 
+            "node2:3306": {
+                "address": "node2:3306", 
+                "memberRole": "SECONDARY", 
+                "mode": "R/O", 
+                "readReplicas": {}, 
+                "replicationLag": "applier_queue_applied", 
+                "role": "HA", 
+                "status": "ONLINE", 
+                "version": "8.0.30"
+            }, 
+            "node3:3306": {
+                "address": "node3:3306", 
+                "memberRole": "SECONDARY", 
+                "mode": "R/O", 
+                "readReplicas": {}, 
+                "replicationLag": "applier_queue_applied", 
+                "role": "HA", 
+                "status": "ONLINE", 
+                "version": "8.0.30"
+            }
+        }, 
+        "topologyMode": "Single-Primary"
+    }, 
+    "groupInformationSourceMember": "node1:3306"
+}
+
+
+SELECT clusters.cluster_id,clusters.cluster_name from mysql_innodb_cluster_metadata.clusters;
+
+```
+
+
+
+```
+Cluster.addInstance: Cannot add an instance with the same server UUID (200951b7-4895-11ed-a25e-000c29b1aeff) of an active member of the cluster 'node1:3306'. Please change the server UUID of the instance to add, all members must have a unique server UUID. (RuntimeError)
+
+解决方案：
+1、利用uuid函数生成新的uuid
+
+mysql> select uuid();
++--------------------------------------+
+| uuid()                               |
++--------------------------------------+
+| b33057ff-bec6-11eb-ad94-000c29af6856 |
++--------------------------------------+
+1 row in set (0.00 sec)
+2、查看配置文件目录
+
+mysql> show variables like 'datadir';
++---------------+-----------------+
+| Variable_name | Value           |
++---------------+-----------------+
+| datadir       | /var/lib/mysql/ |
++---------------+-----------------+
+1 row in set (0.03 sec)
+3、编辑配置文件目录
+
+vi /var/lib/mysql/auto.cnf
+4、uuid修改新生成的uuid
+
+server-uuid=b33057ff-bec6-11eb-ad94-000c29af6856
+5、重启服务
+
+service mysqld restart
+```
+
+
+
+安装router
+
+rpm  -ivh mysql-router-community-8.0.30-1.el8.x86_64.rpm
+
+
+
+```
+[routing:read_write]
+bind_address = 0.0.0.0
+bind_port = 7001
+mode = read-write
+destinations = node1:3306,node2:3306
+protocol=classic
+max_connections=2024
+ 
+[routing:read_only]
+bind_address = 0.0.0.0
+bind_port = 7002
+mode = read-only
+destinations = node2:3306,node3:3306
+protocol=classic
+max_connections=1024
+
+
+## 
+systemctl restart mysqlrouter
+```
 
 
 
@@ -272,11 +486,29 @@ rpm -qa | grep mysql | xargs rpm -e --nodeps
 
 修改hostname
 
-hostnamectl set-hostname mysql1
+hostnamectl set-hostname node1
 
-hostnamectl set-hostname mysql2
+hostnamectl set-hostname node2
 
-hostnamectl set-hostname mysql3
+hostnamectl set-hostname node3
+
+```
+ cat  >  /etc/hosts << EOF
+ 127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
+ ::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
+ 192.168.99.104  master
+ 192.168.99.112  master2
+ 192.168.99.119  master3
+ 192.168.99.150  node1
+ 192.168.99.170  node2
+ EOF
+```
+
+
+
+
+
+
 
 
 
@@ -347,6 +579,38 @@ Java监听mysql的binlog详解(mysql-binlog-connector)：https://blog.csdn.net/m
 
 
 
+## MySQL Shell
+
+```
+dba.checkInstanceConfiguration("root@hostname:3306")     #检查节点配置实例，用于加入cluster之前
+ 
+dba.rebootClusterFromCompleteOutage('myCluster');        #重启
+ 
+dba.dropMetadataSchema();                                #删除schema
+ 
+var cluster = dba.getCluster('myCluster')                #获取当前集群
+ 
+cluster.checkInstanceState("root@hostname:3306")         #检查cluster里节点状态
+ 
+cluster.rejoinInstance("root@hostname:3306")             #重新加入节点，我本地测试的时候发现rejoin一直无效，每次是delete后
+ 
+addcluster.dissolve({force：true})                       #删除集群
+ 
+cluster.addInstance("root@hostname:3306")                #增加节点
+ 
+cluster.removeInstance("root@hostname:3306")             #删除节点
+ 
+cluster.removeInstance('root@host:3306',{force:true})    #强制删除节点
+ 
+cluster.dissolve({force:true})                           #解散集群
+ 
+cluster.describe();                                      #集群描述
+```
+
+
+
+
+
 数据库表导入导出：
 
 导入：
@@ -389,3 +653,6 @@ source /etc/profile 使生效  Java -version 检测安装是否安装成功
 
 
 
+## 参考资料
+
+mysql8[集群搭建](https://www.cnblogs.com/ios9/p/14843778.html)

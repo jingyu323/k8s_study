@@ -35,14 +35,12 @@ hostnamectl set-hostname node2
  cat  >  /etc/hosts << EOF
  127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
  ::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
- 192.168.99.104  master
- 192.168.99.112  master2
- 192.168.99.119  master3
- 192.168.99.150  node1
- 192.168.99.170  node2
- EOF
+ 192.168.182.128  node1
+ 192.168.182.130  node2
+ 192.168.182.131  node3
+EOF
  
- cat  /etc/hosts
+cat  /etc/hosts
  ```
 
 安装时间同步服务
