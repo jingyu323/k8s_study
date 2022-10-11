@@ -62,7 +62,7 @@ cat /var/log/mysqld.log
 
 
 
- --修改密码策略 ,可以不用修改，测试专用
+ --修改密码策略 ,生产环境不用修改，测试专用
 set global validate_password.policy=LOW;
 set global validate_password.mixed_case_count=0;
 set global validate_password.number_count=0; 
@@ -87,7 +87,7 @@ mysql -uroot -p'Root@123'
 grant all privileges on *.* to 'root'@'%' with grant option;
 flush privileges;
 ```
- 
+
 
 vi /etc/my.cnf 去除only_full_group_by模式，文本最后一行添加sql_mode=STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION
 
@@ -348,7 +348,7 @@ alter user 'root'@'localhost' identified  with mysql_native_password  by 'root';
  
 
 
- ### 1.一主一备用
+ ### 1.主备复制
 CREATE USER 'copy'@'%' IDENTIFIED BY 'Copy@123456';
 alter user 'copy'@'%' identified with mysql_native_password by 'Copy@123456';
 grant all privileges on *.* to 'copy'@'%' with grant option;
