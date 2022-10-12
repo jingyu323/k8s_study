@@ -154,6 +154,14 @@ LDT：是每个进程的段表
 内存实际使用多级目录查找逻辑页，来进行管理。
 多级页表提高空间使用效率，降低了时间效率
 
+
+
+添加虚拟内存作为段和页的映射
+![img](images/os_seg_page_translate.jpg) 
+
+段页存在需要重定位：
+![img](images/os_seg_page_translate.jpg) 
+
 ## grub
 GRUB 是一个引导加载程序，可以引导各种各样的操作系统
 
