@@ -183,6 +183,8 @@ tty_write -> 缓冲区-> con_write 读取字符并写
 ![img](images/os_print_flow.jpg) 
 tty_write 核心方法
 ![img](images/os_tty_write.jpg) 
+
+0x90000 是setup 初始化光标的位置
 ## grub
 GRUB 是一个引导加载程序，可以引导各种各样的操作系统
 
