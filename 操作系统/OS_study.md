@@ -162,6 +162,13 @@ LDT：是每个进程的段表
 段页存在需要重定位：
 ![img](images/os_seg_page_translate.jpg) 
 
+段页管理的实现：
+
+
+内存换入：
+![img](images/os_call_page.jpg) 
+
+
 ## grub
 GRUB 是一个引导加载程序，可以引导各种各样的操作系统
 
