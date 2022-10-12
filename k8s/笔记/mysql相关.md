@@ -117,14 +117,6 @@ alter user 'root'@'localhost' identified with mysql_native_password by 'Root@123
 
 mysql -uroot -p'Root@123'
 
-```
-grant all privileges on *.* to 'root'@'%' with grant option;
-flush privileges;
-```
-
-
-vi /etc/my.cnf 去除only_full_group_by模式，文本最后一行添加sql_mode=STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION
-
 配置远程登录：
 
 update user set host = '%' where user = 'root';
@@ -139,6 +131,16 @@ systemctl disable firewalld
 关闭防火墙之后还是连不上可以重启
 
 systemctl restart mysqld
+
+```
+grant all privileges on *.* to 'root'@'%' with grant option;
+flush privileges;
+```
+
+
+vi /etc/my.cnf 去除only_full_group_by模式，文本最后一行添加sql_mode=STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION
+
+
 
 ## 集群搭建
 
@@ -436,15 +438,15 @@ master_password : 第2步创建的主从同步账户的密码
 master_log_file : 第4步获取的二进制文件名字
 master_log_pos : 第4步获取的Position值
 
+登陆从节点执行:
 stop slave;
 reset slave;
 
-change master to master_host='node3',master_user='copy',master_port=3306,master_password='Copy@123456',master_log_file='mysql-bin.000001',master_log_pos=155,master_connect_retry=30;
+change master to master_host='node1',master_user='copy',master_port=3306,master_password='Copy@123456',master_log_file='mysql-bin.000001',master_log_pos=155,master_connect_retry=30;
 
 
 启动 启动所有从节点的slave
-start slave;
-show slave status \G
+start slave; 
 
 启动的时候报错：
 
@@ -459,6 +461,24 @@ Last_IO_Error: Got fatal error 1236 from master when reading data from binary lo
 
 是由于position 已经更改，需要使用当前新的position
 change master to master_host='node1',master_user='copy',master_port=3306,master_password='Copy@123456',master_log_file='mysql-bin.000001',master_log_pos=574;
+
+
+show slave status \G
+
+     状态都为yes  表明配置成功
+	   Slave_IO_Running: Yes
+       Slave_SQL_Running: Yes
+
+
+登陆主节点 创建测试数据库
+
+ create database test_sync;
+ 
+ 登陆从节点 查看数据库是否已经同步
+ show databases;
+ 
+ 如果已经创建test_sync 则表明主从复制配置完成。
+ 
 
 
 #### 主从切换
