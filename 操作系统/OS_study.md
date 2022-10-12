@@ -167,7 +167,13 @@ LDT：是每个进程的段表
 
 内存换入：
 ![img](images/os_call_page.jpg) 
+lru 的准确实现，使用时间戳
 
+内存换入换出
+
+![img](images/os_swap_inout.jpg) 
+
+以多进程驱动的内存分配的多进程持续推进的软件系统
 
 ## grub
 GRUB 是一个引导加载程序，可以引导各种各样的操作系统
