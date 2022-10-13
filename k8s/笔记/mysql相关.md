@@ -314,7 +314,14 @@ service mysqld restart
 
 rpm  -ivh mysql-router-community-8.0.30-1.el8.x86_64.rpm
 
+编辑/etc/mysqlrouter/mysqlrouter.conf
+
+vi /etc/mysqlrouter/mysqlrouter.conf
+
+添加如下内容：
+
 ```
+#配置读写规则
 [routing:read_write]
 bind_address = 0.0.0.0
 bind_port = 7001
@@ -323,6 +330,7 @@ destinations = node1:3306,node2:3306
 protocol=classic
 max_connections=2024
  
+ #配置负载均衡
 [routing:read_only]
 bind_address = 0.0.0.0
 bind_port = 7002
@@ -334,8 +342,19 @@ max_connections=1024
 
 ## 
 systemctl restart mysqlrouter
+## 添加开机启动
+systemctl enable mysqlrouter
 ```
 
+netstat -tnlp 
+tcp        0      0 0.0.0.0:7001            0.0.0.0:*               LISTEN      1023/mysqlrouter 
+tcp        0      0 0.0.0.0:7002            0.0.0.0:*               LISTEN      1023/mysqlrouter  
+
+即可通过router所在的服务器IP：7001登陆数据库
+即可通过router所在的服务器IP：7002登陆数据库
+
+
+登陆成功表明数据库router 配置成功
 
 
 ### 主从配置：
@@ -496,6 +515,19 @@ flush logs;
 ### MHA环境搭建：
 
 
+### 数据不一致问题处理
+
+工具下载
+https://www.percona.com/downloads/percona-toolkit/LATEST/
+
+
+```
+
+Can't locate Digest/MD5.pm in @INC (@INC contains: /usr/local/lib64/perl5 /usr/local/share/perl5 /usr/lib64/perl5/vendor_perl /usr/share/perl5/vendor_perl /usr/lib64/perl5 /usr/share/perl5 .) at ./pt-table-checksum line 788
+解决方案：
+yum -y install perl-Digest-MD5 
+
+```
 
 参考材料：
 
