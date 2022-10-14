@@ -185,6 +185,15 @@ tty_write 核心方法
 ![img](images/os_tty_write.jpg) 
 
 0x90000 是setup 初始化光标的位置
+
+外设工作原理：
+- 通过out发送指令
+- 文件形成统一的
+- 中断处理
+  
+键盘读写流程：
+![img](images/os_keyboard_read_flow.jpg) 
+
 ## grub
 GRUB 是一个引导加载程序，可以引导各种各样的操作系统
 
