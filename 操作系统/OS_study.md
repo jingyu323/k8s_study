@@ -194,6 +194,11 @@ tty_write 核心方法
 键盘读写流程：
 ![img](images/os_keyboard_read_flow.jpg) 
 
+磁盘使用：
+1.移动磁头到磁道
+2. 旋转磁盘
+3. 
+
 ## grub
 GRUB 是一个引导加载程序，可以引导各种各样的操作系统
 
