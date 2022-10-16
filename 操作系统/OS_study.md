@@ -197,7 +197,24 @@ tty_write 核心方法
 磁盘使用：
 1.移动磁头到磁道
 2. 旋转磁盘
-3. 
+
+磁盘调度：
+1. scan  调度 最终算法
+
+scan 具体实现
+![img](images/os_disk_scan.jpg) 
+
+什么是生磁盘？
+根据 扇区盘号获取磁盘扇区
+![img](images/os_raw_disk.jpg) 
+
+目录磁盘详细信息
+
+![img](images/os_raw_disk.jpg) 
+mount 就是读取超级块
+
+磁盘读取流程
+![img](images/os_disk_read_flow.jpg) 
 
 ## grub
 GRUB 是一个引导加载程序，可以引导各种各样的操作系统
@@ -219,6 +236,9 @@ https://github.com/hoverwinter/HIT-OSLab
 https://study.163.com/series/1001245004.htm
 
 
+# 相关算法
+
+## 电梯算法
 
 
 
