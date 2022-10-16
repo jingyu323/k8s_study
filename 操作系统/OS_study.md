@@ -210,12 +210,14 @@ scan 具体实现
 
 目录磁盘详细信息
 
-![img](images/os_raw_disk.jpg) 
+![img](images/os_disk_info.jpg) 
 mount 就是读取超级块
 
 磁盘读取流程
-![img](images/os_disk_read_flow.jpg) 
+![img](images/os_disk_read_flow.png) 
 
+根据文件的innode 找到PCB，在找到对对应的block，扇区
+![img](images/os_disk_read_entries.jpg) 
 ## grub
 GRUB 是一个引导加载程序，可以引导各种各样的操作系统
 
