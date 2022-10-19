@@ -1,12 +1,50 @@
 # 安装
 
+
+
+解决虚拟机桥接之后没有网络
+
+cd /etc/sysconfig/network-scripts
+修改 ONBOOT=yes
+重启网卡
+nmcli c reload
+
+
+
 ## mysql8  centos8 安装
 
+### 1、修改hosts
 
+清除残留数据库
 
-rpm -qa | grep mariadb | xargs rpm -e --nodeps 
-
+```mysql
+#卸载mariadb和mysql
+rpm -qa | grep mariadb | xargs rpm -e --nodeps
 rpm -qa | grep mysql | xargs rpm -e --nodeps
+
+```
+
+执行之后，centos8 默认是没有 mysql和mariadb
+
+修改hostname
+
+hostnamectl set-hostname node1
+
+hostnamectl set-hostname node2
+
+hostnamectl set-hostname node3
+
+```
+ cat  >  /etc/hosts << EOF
+ 127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
+ ::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
+ 192.168.99.150  node1
+ 192.168.99.170  node2
+ 192.168.99.171  node3
+ EOF
+```
+
+
 
 
 
@@ -26,7 +64,7 @@ rpm -ivh mysql-community-client-8.0.28-1.el7.x86_64.rpm
 
 rpm -ivh mysql-community-icu-data-files-8.0.28-1.el7.x86_64.rpm
 
- rpm -ivh mysql-community-server-8.0.28-1.el7.x86_64.rpm
+rpm -ivh mysql-community-server-8.0.28-1.el7.x86_64.rpm
 
 
 
@@ -52,15 +90,6 @@ rpm -ivh mysql-community-icu-data-files-8.0.28-1.el7.x86_64.rpm
 
 yum install libncurses*
 
-
-
-```
-
-
-
-
-```
-
 d. 启动mysql
 
 systemctl start mysqld
@@ -69,24 +98,24 @@ e. 查看初始密码
 
 cat /var/log/mysqld.log
 
+```sql
+ --修改密码策略 ,生产环境不用修改，测试专用
+set global validate_password.policy=LOW;
+set global validate_password.mixed_case_count=0;
+set global validate_password.number_count=0; 
+set global validate_password.special_char_count=0; 
+set global validate_password.length=1;
+set global validate_password.check_user_name='OFF';
+```
+
+alter user 'root'@'localhost' identified with mysql_native_password by 'root';
 mysql -uroot -p'U!heWdF29ARl'
 
 
 
-set global validate_password.policy=0;
-
 alter user 'root'@'localhost' identified with mysql_native_password by 'Root@123';
 
 mysql -uroot -p'Root@123'
-
-```
-grant all privileges on *.* to 'root'@'%' with grant option;
-flush privileges;
-```
-
-
-
-vi /etc/my.cnf 去除only_full_group_by模式，文本最后一行添加sql_mode=STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION
 
 配置远程登录：
 
@@ -103,7 +132,19 @@ systemctl disable firewalld
 
 systemctl restart mysqld
 
+```
+grant all privileges on *.* to 'root'@'%' with grant option;
+flush privileges;
+```
+
+
+vi /etc/my.cnf 去除only_full_group_by模式，文本最后一行添加sql_mode=STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION
+
+
+
 ## 集群搭建
+
+### 集群架构：
 
 mysql安装包下载地址：https://dev.mysql.com/downloads/
 
@@ -124,12 +165,6 @@ log-bin=mysql-bin
 
 binlog记录了数据库所有的ddl语句和dml语句，但不包括select语句内容，语句以事件的形式保存，描述了数据的变更顺序，binlog还包括了每个更新语句的执行时间信息。如果是DDL语句，则直接记录到binlog日志，而DML语句，必须通过事务提交才能记录到binlog日志中。 binlog主要用于实现mysql主从复制、数据备份、数据恢复。
 
-### 集群架构：
-
-
-
-
-
 ### Router搭建集群
 
 安装 mysqlsh
@@ -144,7 +179,6 @@ error: Failed dependencies:
 http://rpmfind.net/linux/rpm2html/search.php  搜一下安装包
 
 实在安装不了试试 yum命令
-
 yum install mysql-shell-8.0.30-1.el8.x86_64.rpm
 Last metadata expiration check: 0:12:30 ago on Mon 10 Oct 2022 09:34:05 AM EDT.
 Dependencies resolved.
@@ -181,8 +215,6 @@ dba.configureLocalInstance()
 shell.connect('root@node2:3306')
 dba.configureLocalInstance()
  
-
-
 ###创建集群组，并将添加示例进集群组
 shell.connect('root@node1:3306')
 var cluster=dba.createCluster("MySQL_Cluster")
@@ -282,9 +314,14 @@ service mysqld restart
 
 rpm  -ivh mysql-router-community-8.0.30-1.el8.x86_64.rpm
 
+编辑/etc/mysqlrouter/mysqlrouter.conf
 
+vi /etc/mysqlrouter/mysqlrouter.conf
+
+添加如下内容：
 
 ```
+#配置读写规则
 [routing:read_write]
 bind_address = 0.0.0.0
 bind_port = 7001
@@ -293,6 +330,7 @@ destinations = node1:3306,node2:3306
 protocol=classic
 max_connections=2024
  
+ #配置负载均衡
 [routing:read_only]
 bind_address = 0.0.0.0
 bind_port = 7002
@@ -304,63 +342,206 @@ max_connections=1024
 
 ## 
 systemctl restart mysqlrouter
+## 添加开机启动
+systemctl enable mysqlrouter
 ```
 
+netstat -tnlp 
+tcp        0      0 0.0.0.0:7001            0.0.0.0:*               LISTEN      1023/mysqlrouter 
+tcp        0      0 0.0.0.0:7002            0.0.0.0:*               LISTEN      1023/mysqlrouter  
+
+即可通过router所在的服务器IP：7001登陆数据库
+即可通过router所在的服务器IP：7002登陆数据库
 
 
+登陆成功表明数据库router 配置成功
 
 
-解决虚拟机桥接之后没有网络
+### 主从配置：
 
-cd /etc/sysconfig/network-scripts
-修改 ONBOOT=yes
-重启网卡
-nmcli c reload
+alter user 'root'@'localhost' identified  with mysql_native_password  by 'root';
 
-## 1、修改hosts
 
-清除残留数据库
+ mysql -uroot -p'root' 
 
-```mysql
-#卸载mariadb和mysql
-rpm -qa | grep mariadb | xargs rpm -e --nodeps
-rpm -qa | grep mysql | xargs rpm -e --nodeps
+
+ update user set host = "%" where  user = 'root';
+
+ hostnamectl set-hostname node1
+ hostnamectl set-hostname node2
+ hostnamectl set-hostname node3
+
+
+ 修之后如果登录不上，需要重启服务器，检查防火墙，我这边是测试直接停掉防火墙，如果是正式环境需要根据规则放通端口
+ systemctl restart mysqld
+
+ 
+
+ 添加之后重启报错：
+ Job for mysqld.service failed because the control process exited with error code. See "systemctl status mysqld.service" and "journalctl -xe" for details.
+由于server_id包含了字母导致的不能正常启动
+
+ 
+
+
+ #### 1.主备复制
+CREATE USER 'copy'@'%' IDENTIFIED BY 'Copy@123456';
+alter user 'copy'@'%' identified with mysql_native_password by 'Copy@123456';
+grant all privileges on *.* to 'copy'@'%' with grant option;
+
+
+select host,user from mysql.user;
+
+
+--查看copy用户权限情况，由于上面命令给的ALL权限所以这里显示结果比较多
+show grants for 'copy'@'%';
+
+
+##### 开启二进制日志文件和添加server-id
+主节点/etc/my.cnf添加内容：
+
+##### 开启二进制日志功能
+log-bin=mysql-bin
+binlog_format=mixed
+binlog-ignore-db=mysql
+
+##### 设置二进制日志使用内存大小（事务）
+binlog_cache_size=1M
+##### 设置使用的二进制日志格式(mixed,statement,row)
+binlog_format=mixed
+##### 二进制日志过期清理时间。默认值为0，表示不自动清理。
+##### 新版8的配置
+binlog_expire_logs_seconds=604800
+##### 跳过主从复制中遇到的所有错误或指定类型的错误，避免slave端复制中断。
+##### 如：1062错误是指一些主键重复，1032错误是因为主从数据库数据不一致,
+slave-skip-errors=all
+server-id=13306
+
+从节点/etc/my.cnf添加内容:
+node2 
+server-id=23306
+slave-skip-errors=all
+binlog_format=mixed
+binlog-ignore-db=mysql
+binlog_expire_logs_seconds=604800
+
+node3
+server-id=33306
+slave-skip-errors=all
+binlog_format=mixed
+binlog-ignore-db=mysql
+binlog_expire_logs_seconds=604800
+
+##### 注意，注意，注意,只有master节点有mysql-bin配置，每个节点的server-id必须不同,只能用数字不能用字母
+
+添加完成重启mysql
+systemctl restart mysqld
+
+
+登入主节点mysql重置偏移量
+先查看状态
+show master status;
+
+--重置偏移量如果不重置，从节点也会创建copy用户
+reset master;
+show master status;
+
+show slave status;
+
+5.注册从节点
+登入所有从节点的mysql上执行以下命令:
+master_host : 主节点主机名
+master_user : 第2步创建的主从同步账户
+master_port : 主节点mysql服务的端口号，因为没有这里改过所以是 3306
+master_password : 第2步创建的主从同步账户的密码
+master_log_file : 第4步获取的二进制文件名字
+master_log_pos : 第4步获取的Position值
+
+登陆从节点执行:
+stop slave;
+reset slave;
+
+change master to master_host='node1',master_user='copy',master_port=3306,master_password='Copy@123456',master_log_file='mysql-bin.000001',master_log_pos=155,master_connect_retry=30;
+
+
+启动 启动所有从节点的slave
+start slave; 
+
+启动的时候报错：
+
+``` Last_IO_Errno: 2005  Last_IO_Error: error connecting to master 'copy@node1:3306' - retry-time: 60 retries: 1 message: Unknown MySQL server host 'node1' (2)```
+				
+
+				没有配置hosts IP映射，配置之后就好了
+
+
+执行了一段时间添加
+Last_IO_Error: Got fatal error 1236 from master when reading data from binary log: 'binlog truncated in the middle of event; consider out of disk space on master; the first event 'mysql-bin.000001' at 157, the last event read from './mysql-bin.000001' at 124, the last byte read from './mysql-bin.000001' at 574.'
+
+是由于position 已经更改，需要使用当前新的position
+change master to master_host='node1',master_user='copy',master_port=3306,master_password='Copy@123456',master_log_file='mysql-bin.000001',master_log_pos=574;
+
+
+show slave status \G
+
+     状态都为yes  表明配置成功
+	   Slave_IO_Running: Yes
+       Slave_SQL_Running: Yes
+
+
+登陆主节点 创建测试数据库
+
+ create database test_sync;
+ 
+ 登陆从节点 查看数据库是否已经同步
+ show databases;
+ 
+ 如果已经创建test_sync 则表明主从复制配置完成。
+ 
+
+
+#### 主从切换
+
+show processlist;
+直到看到状态都为 XXX has read all relay log 表示从库更新均执行完毕，则可以进行下一步。 
+
+  stop slave;  # 完全停止 slave 复制 
+  reset slave  ; # 完全清空 slave 复制信息
+  reset master; # 清空本机上 master 的位置信息
+
+如果遇到：when reading data from binary log: 'Could not find first log file name in binary log index file
+flush logs;
+
+### MHA环境搭建：
+
+
+### 数据不一致问题处理
+
+工具下载
+https://www.percona.com/downloads/percona-toolkit/LATEST/
+
 
 ```
 
-执行之后，centos8 默认是没有 mysql和mariadb
-
-修改hostname
-
-hostnamectl set-hostname node1
-
-hostnamectl set-hostname node2
-
-hostnamectl set-hostname node3
+Can't locate Digest/MD5.pm in @INC (@INC contains: /usr/local/lib64/perl5 /usr/local/share/perl5 /usr/lib64/perl5/vendor_perl /usr/share/perl5/vendor_perl /usr/lib64/perl5 /usr/share/perl5 .) at ./pt-table-checksum line 788
+解决方案：
+yum -y install perl-Digest-MD5 
 
 ```
- cat  >  /etc/hosts << EOF
- 127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
- ::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
- 192.168.99.104  master
- 192.168.99.112  master2
- 192.168.99.119  master3
- 192.168.99.150  node1
- 192.168.99.170  node2
- EOF
-```
+
+参考材料：
+
+https://www.jianshu.com/p/72d824fc1eaa
 
 
 
+## MySQL升级
 
-
-
-
-
-
-
+### 
 
 ## SQL优化
+
+
 
 ## 分库分表
 
@@ -379,8 +560,6 @@ hostnamectl set-hostname node3
 ### 分表
 
 侧重点不同，分区侧重提高读写性能，分表侧重提高并发性能。两者不冲突，可以配合使用。
-
-### 
 
 
 
@@ -457,7 +636,7 @@ cluster.describe();                                      #集群描述
 
 
 
-数据库表导入导出：
+## 数据库表导入导出：
 
 导入：
 
