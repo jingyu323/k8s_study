@@ -1,5 +1,27 @@
 # java
 
+jdk 安装
+
+
+
+
+
+export JAVA_HOME=/usr/java/jdk1.8.0_231
+
+export JRE_HOME=${JAVA_HOME}/jre
+
+export CLASSPATH=.:${JAVA_HOME}/lib:${JRE_HOME}/lib
+
+export PATH=${JAVA_HOME}/bin:$PATH
+
+
+
+## 分布式Session处理方案：
+
+
+
+
+
 ## 1.校验
 
 密码必须包含字母、数字和特殊符号且长度是6-32位：
@@ -78,6 +100,14 @@ org.springframework.web.util.NestedServletException: Handler dispatch failed; ne
 ```
 解决方案：
 JAVA_OPTS="-server -Djava.awt.headless=true  -XX:+PrintGCDetails -XX:+PrintGCTimeStamps -XX:+PrintGCDateStamps -Xloggc:gc-%t.log -XX:+HeapDumpOnOutOfMemoryError  -XX:HeapDumpPath=/home/app/oom"
+
+### tomcat8 Session集群复制方案： 
+
+
+
+
+
+
 
 # 多线程
 ## 线程的状态
