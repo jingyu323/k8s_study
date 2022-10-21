@@ -41,6 +41,58 @@ public class PwdCheckUtil {
 }
 ```
 
+## 2.jar 相关
+
+
+
+执行jar
+
+nohup java -jar xxxx.jar >/dev/null 2>&1 &
+
+
+
+直接打成jar包，需要在pom中添加
+
+```
+<build>
+    <plugins>
+
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-jar-plugin</artifactId>
+            <version>2.6</version>
+            <configuration>
+                <archive>
+                    <manifest>
+                        <addClasspath>true</addClasspath>
+                        <classpathPrefix>lib/</classpathPrefix>
+                        <mainClass>TestMain</mainClass>
+                    </manifest>
+                </archive>
+            </configuration>
+        </plugin>
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-dependency-plugin</artifactId>
+            <version>2.10</version>
+            <executions>
+                <execution>
+                    <id>copy-dependencies</id>
+                    <phase>package</phase>
+                    <goals>
+                        <goal>copy-dependencies</goal>
+                    </goals>
+                    <configuration>
+                        <outputDirectory>${project.build.directory}/lib</outputDirectory>
+                    </configuration>
+                </execution>
+            </executions>
+        </plugin>
+
+    </plugins>
+</build>
+```
+
 ## jvm相关
 
 ### 1.tomcat 相关
@@ -78,6 +130,10 @@ org.springframework.web.util.NestedServletException: Handler dispatch failed; ne
 ```
 解决方案：
 JAVA_OPTS="-server -Djava.awt.headless=true  -XX:+PrintGCDetails -XX:+PrintGCTimeStamps -XX:+PrintGCDateStamps -Xloggc:gc-%t.log -XX:+HeapDumpOnOutOfMemoryError  -XX:HeapDumpPath=/home/app/oom"
+
+### tomcat自启动：
+
+
 
 # 多线程
 ## 线程的状态
@@ -155,11 +211,11 @@ synchronized 与Lock都是可重入锁，同一个线程再次进入同步代码
 #### ThreadLocal
 1. ThreadLocal是什么
    ThreadLocal叫做线程变量，意思是ThreadLocal中填充的变量属于当前线程，该变量对其他线程而言是隔离的。ThreadLocal为变量在每个线程中都创建了一个副本，那么每个线程可以访问自己内部的副本变量
-作用：
-1、在进行对象跨层传递的时候，使用ThreadLocal可以避免多次传递，打破层次间的约束。
-2、线程间数据隔离
-3、进行事务操作，用于存储线程事务信息。
-4、数据库连接，Session会话管理。
+   作用：
+   1、在进行对象跨层传递的时候，使用ThreadLocal可以避免多次传递，打破层次间的约束。
+   2、线程间数据隔离
+   3、进行事务操作，用于存储线程事务信息。
+   4、数据库连接，Session会话管理。
 
 #####  总结
 
