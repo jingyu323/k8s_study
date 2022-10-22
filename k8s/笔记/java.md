@@ -63,6 +63,85 @@ public class PwdCheckUtil {
 }
 ```
 
+
+
+## 2.jar 相关
+
+
+
+执行jar
+
+nohup java -jar xxxx.jar >/dev/null 2>&1 &
+
+
+
+直接打成jar包，需要在pom中添加，打出来的jar包以及依赖的jar独立存放
+
+```
+<build>
+    <plugins>
+
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-jar-plugin</artifactId>
+            <version>2.6</version>
+            <configuration>
+                <archive>
+                    <manifest>
+                        <addClasspath>true</addClasspath>
+                        <classpathPrefix>lib/</classpathPrefix>
+                        <mainClass>TestMain</mainClass>
+                    </manifest>
+                </archive>
+            </configuration>
+        </plugin>
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-dependency-plugin</artifactId>
+            <version>2.10</version>
+            <executions>
+                <execution>
+                    <id>copy-dependencies</id>
+                    <phase>package</phase>
+                    <goals>
+                        <goal>copy-dependencies</goal>
+                    </goals>
+                    <configuration>
+                        <outputDirectory>${project.build.directory}/lib</outputDirectory>
+                    </configuration>
+                </execution>
+            </executions>
+        </plugin>
+
+    </plugins>
+</build>
+把jar和依赖的jar都打成一个jar，这种方便以jar为执行的方式
+
+<build>
+    <plugins>
+ 
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-assembly-plugin</artifactId>
+            <version>2.5.5</version>
+            <configuration>
+                <archive>
+                    <manifest>
+                        <mainClass>TestMain</mainClass>
+                    </manifest>
+                </archive>
+                <descriptorRefs>
+                    <descriptorRef>jar-with-dependencies</descriptorRef>
+                </descriptorRefs>
+            </configuration>
+        </plugin>
+ 
+    </plugins>
+</build>
+```
+
+
+
 ## jvm相关
 
 ### 1.tomcat 相关
