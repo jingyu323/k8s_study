@@ -70,7 +70,25 @@ public class PwdCheckUtil {
 
 执行jar
 
-nohup java -jar xxxx.jar >/dev/null 2>&1 &
+nohup java -jar /home/htkj/agent/agent_test-1.0-SNAPSHOT-jar-with-dependencies.jar > /dev/null 2>&1 &
+
+
+
+监控查找进程
+
+agent_pid=`ps -ef | grep agent_test | grep v | awk '{print $2}'`
+
+if [ -z "$agent_pid" ]; then
+  systemctl start ftp_agent.service
+  echo "`date +%Y-%m-%d` `date +%H:%M:%S`,start ftp agent" >>   ftp_agent_mornitor.log
+else
+  echo "`date +%Y-%m-%d` `date +%H:%M:%S`,ftp agent is running" >>   ftp_agent_mornitor.log
+
+fi
+
+定时任务配置，每隔3分钟执行一次
+
+ */3 *  * * *  bash /home/mornitor/ftp_agent_mornitor.sh
 
 
 
