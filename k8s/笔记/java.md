@@ -132,7 +132,7 @@ fi
 
     </plugins>
 </build>
-<<<<<<< HEAD
+
 把jar和依赖的jar都打成一个jar，这种方便以jar为执行的方式
 
 <build>
@@ -155,7 +155,7 @@ fi
         </plugin>
  
     </plugins>
-=======
+
 ```
 
 ```
