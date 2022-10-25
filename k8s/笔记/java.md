@@ -72,9 +72,35 @@ public class PwdCheckUtil {
 
 nohup java -jar /home/htkj/agent/agent_test-1.0-SNAPSHOT-jar-with-dependencies.jar > /dev/null 2>&1 &
 
+```
+[Unit]
+Description= ftp_agent
+After=network.target remote-fs.target nss-lookup.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/home/htkj/agent
+ExecStart=nohup /usr/local/jdk8/bin/java -jar /home/htkj/agent/agent_test-1.0-SNAPSHOT-jar-with-dependencies.jar > /dev/null 2>&1 &
+[Install]
+WantedBy=multi-user.target
+
+
+3.设置权限
+  chmod 775  ftp_agent.service
+  systemctl daemon-reload
+4.设置自启动
+  systemctl enable ftp_agent.service
+5.启动服务
+   systemctl start ftp_agent.service
+
+```
+
 
 
 监控查找进程
+
+vim创建并保存 ftp_agent.service
 
 agent_pid=`ps -ef | grep agent_test | grep v | awk '{print $2}'`
 
