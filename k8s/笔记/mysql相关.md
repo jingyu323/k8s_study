@@ -681,3 +681,5 @@ source /etc/profile 使生效  Java -version 检测安装是否安装成功
 ## 参考资料
 
 mysql8[集群搭建](https://www.cnblogs.com/ios9/p/14843778.html)
+
+[主从](https://blog.csdn.net/z1171127310/article/details/126443223) 
