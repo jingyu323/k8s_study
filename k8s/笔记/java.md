@@ -1,5 +1,7 @@
 
 
+
+
 # java
 
 jdk 安装
@@ -26,6 +28,16 @@ export PATH=${JAVA_HOME}/bin:$PATH
 
 ```yaml
 java -jar spring-boot-config.jar --spring.config.location=F:/application.properties
+```
+
+
+
+jar 中修改参数
+
+```
+java -jar aaa.jar --server.port = 8083
+
+java -jar ftpagent-0.0.1.jar --external.devname=eno2
 ```
 
 
