@@ -35,13 +35,14 @@ hostnamectl set-hostname node2
 hostnamectl set-hostname node3
 
 ```
- cat  >  /etc/hosts << EOF
- 127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
- ::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
- 192.168.99.150  node1
- 192.168.99.170  node2
- 192.168.99.171  node3
- EOF
+cat  >  /etc/hosts << EOF
+127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
+::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
+192.168.99.137  node1
+192.168.99.125  node2
+192.168.99.188  node3
+EOF
+
 ```
 
 
@@ -118,6 +119,10 @@ alter user 'root'@'localhost' identified with mysql_native_password by 'Root@123
 mysql -uroot -p'Root@123'
 
 ```
+配置远程登录：
+
+update user set host = '%' where user = 'root';
+
 grant all privileges on *.* to 'root'@'%' with grant option;
 flush privileges;
 ```
@@ -125,9 +130,7 @@ flush privileges;
 
 vi /etc/my.cnf 去除only_full_group_by模式，文本最后一行添加sql_mode=STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION
 
-配置远程登录：
 
-update user set host = '%' where user = 'root';
 
 如果连不上注意关闭防火墙：
 
@@ -368,6 +371,8 @@ CREATE USER 'copy'@'%' IDENTIFIED BY 'Copy@123456';
 alter user 'copy'@'%' identified with mysql_native_password by 'Copy@123456';
 grant all privileges on *.* to 'copy'@'%' with grant option;
 
+flush privileges;
+
 
 select host,user from mysql.user;
 
@@ -416,7 +421,6 @@ binlog_expire_logs_seconds=604800
 添加完成重启mysql
 systemctl restart mysqld
 
-
 登入主节点mysql重置偏移量
 先查看状态
 show master status;
@@ -439,7 +443,7 @@ master_log_pos : 第4步获取的Position值
 stop slave;
 reset slave;
 
-change master to master_host='node3',master_user='copy',master_port=3306,master_password='Copy@123456',master_log_file='mysql-bin.000001',master_log_pos=155,master_connect_retry=30;
+change master to master_host='node1',master_user='copy',master_port=3306,master_password='Copy@123456',master_log_file='mysql-bin.000001',master_log_pos=155,master_connect_retry=30;
 
 
 启动 启动所有从节点的slave
@@ -480,6 +484,16 @@ flush logs;
 参考材料：
 
 https://www.jianshu.com/p/72d824fc1eaa
+
+### Cluster环境搭建：
+
+
+
+
+
+参考材料：
+
+https://cloud.tencent.com/developer/article/1508235
 
 
 

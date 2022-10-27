@@ -15,3 +15,7 @@
 ## 7.常见问题
 
 ## 8.参考资料
+
+goland 下载地址
+
+https://www.jetbrains.com/go/download/other.html
