@@ -22,6 +22,14 @@ export PATH=${JAVA_HOME}/bin:$PATH
 
 
 
+## Springboot：
+
+```yaml
+java -jar spring-boot-config.jar --spring.config.location=F:/application.properties
+```
+
+
+
 
 
 ## 1.校验
