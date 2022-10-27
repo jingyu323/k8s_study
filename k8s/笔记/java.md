@@ -1,4 +1,28 @@
+
+
 # java
+
+jdk 安装
+
+
+
+
+
+export JAVA_HOME=/usr/java/jdk1.8.0_231
+
+export JRE_HOME=${JAVA_HOME}/jre
+
+export CLASSPATH=.:${JAVA_HOME}/lib:${JRE_HOME}/lib
+
+export PATH=${JAVA_HOME}/bin:$PATH
+
+
+
+## 分布式Session处理方案：
+
+
+
+
 
 ## 1.校验
 
@@ -40,6 +64,151 @@ public class PwdCheckUtil {
     }
 }
 ```
+## 2.jar 相关
+
+
+
+执行jar
+
+nohup java -jar /home/htkj/agent/agent_test-1.0-SNAPSHOT-jar-with-dependencies.jar > /dev/null 2>&1 &
+
+```
+[Unit]
+Description= ftp_agent
+After=network.target remote-fs.target nss-lookup.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/home/htkj/agent
+ExecStart=nohup /usr/local/jdk8/bin/java -jar /home/htkj/agent/agent_test-1.0-SNAPSHOT-jar-with-dependencies.jar > /dev/null 2>&1 &
+[Install]
+WantedBy=multi-user.target
+
+
+3.设置权限
+  chmod 775  ftp_agent.service
+  systemctl daemon-reload
+4.设置自启动
+  systemctl enable ftp_agent.service
+5.启动服务
+   systemctl start ftp_agent.service
+
+```
+
+
+
+监控查找进程
+
+vim创建并保存 ftp_agent.service
+
+agent_pid=`ps -ef | grep agent_test | grep v | awk '{print $2}'`
+
+if [ -z "$agent_pid" ]; then
+  systemctl start ftp_agent.service
+  echo "`date +%Y-%m-%d` `date +%H:%M:%S`,start ftp agent" >>   ftp_agent_mornitor.log
+else
+  echo "`date +%Y-%m-%d` `date +%H:%M:%S`,ftp agent is running" >>   ftp_agent_mornitor.log
+
+fi
+
+定时任务配置，每隔3分钟执行一次
+
+ */3 *  * * *  bash /home/mornitor/ftp_agent_mornitor.sh
+
+
+
+直接打成jar包，需要在pom中添加，打出来的jar包以及依赖的jar独立存放
+
+```
+<build>
+    <plugins>
+
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-jar-plugin</artifactId>
+            <version>2.6</version>
+            <configuration>
+                <archive>
+                    <manifest>
+                        <addClasspath>true</addClasspath>
+                        <classpathPrefix>lib/</classpathPrefix>
+                        <mainClass>TestMain</mainClass>
+                    </manifest>
+                </archive>
+            </configuration>
+        </plugin>
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-dependency-plugin</artifactId>
+            <version>2.10</version>
+            <executions>
+                <execution>
+                    <id>copy-dependencies</id>
+                    <phase>package</phase>
+                    <goals>
+                        <goal>copy-dependencies</goal>
+                    </goals>
+                    <configuration>
+                        <outputDirectory>${project.build.directory}/lib</outputDirectory>
+                    </configuration>
+                </execution>
+            </executions>
+        </plugin>
+
+    </plugins>
+</build>
+
+把jar和依赖的jar都打成一个jar，这种方便以jar为执行的方式
+
+<build>
+    <plugins>
+ 
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-assembly-plugin</artifactId>
+            <version>2.5.5</version>
+            <configuration>
+                <archive>
+                    <manifest>
+                        <mainClass>TestMain</mainClass>
+                    </manifest>
+                </archive>
+                <descriptorRefs>
+                    <descriptorRef>jar-with-dependencies</descriptorRef>
+                </descriptorRefs>
+            </configuration>
+        </plugin>
+ 
+    </plugins>
+
+```
+
+```
+把jar和依赖的jar都打成一个jar，这种方便以jar为执行的方式
+
+<build>
+	<plugins>
+ 
+		<plugin>
+			<groupId>org.apache.maven.plugins</groupId>
+			<artifactId>maven-assembly-plugin</artifactId>
+			<version>2.5.5</version>
+			<configuration>
+				<archive>
+					<manifest>
+						<mainClass>TestMain</mainClass>
+					</manifest>
+				</archive>
+				<descriptorRefs>
+					<descriptorRef>jar-with-dependencies</descriptorRef>
+				</descriptorRefs>
+			</configuration>
+		</plugin>
+ 
+	</plugins>
+</build>
+```
 
 ## jvm相关
 
@@ -79,6 +248,8 @@ org.springframework.web.util.NestedServletException: Handler dispatch failed; ne
 解决方案：
 JAVA_OPTS="-server -Djava.awt.headless=true  -XX:+PrintGCDetails -XX:+PrintGCTimeStamps -XX:+PrintGCDateStamps -Xloggc:gc-%t.log -XX:+HeapDumpOnOutOfMemoryError  -XX:HeapDumpPath=/home/app/oom"
 
+
+
 # 多线程
 ## 线程的状态
 - 新建状态： 使用 new Thread 类或其子类建立一个线程对象后，该线程对象就处于新建状态。
@@ -111,6 +282,8 @@ JVM检测到不可能存在共享数据竞争，这是JVM会对这些同步锁�
 
 
 ###  轻量级锁
+
+
 
 ###  重量级锁
 
@@ -155,11 +328,11 @@ synchronized 与Lock都是可重入锁，同一个线程再次进入同步代码
 #### ThreadLocal
 1. ThreadLocal是什么
    ThreadLocal叫做线程变量，意思是ThreadLocal中填充的变量属于当前线程，该变量对其他线程而言是隔离的。ThreadLocal为变量在每个线程中都创建了一个副本，那么每个线程可以访问自己内部的副本变量
-作用：
-1、在进行对象跨层传递的时候，使用ThreadLocal可以避免多次传递，打破层次间的约束。
-2、线程间数据隔离
-3、进行事务操作，用于存储线程事务信息。
-4、数据库连接，Session会话管理。
+   作用：
+   1、在进行对象跨层传递的时候，使用ThreadLocal可以避免多次传递，打破层次间的约束。
+   2、线程间数据隔离
+   3、进行事务操作，用于存储线程事务信息。
+   4、数据库连接，Session会话管理。
 
 #####  总结
 
