@@ -476,9 +476,18 @@ public ThreadPoolExecutor(int corePoolSize, int maximumPoolSize, long keepAliveT
 
 ## 网关
 
+网关是所有服务的代理出口，鉴权、流量、限流等
+
 ### 网关是什么
+
+
 
 ### 网关实现原理
 
 ### 网关具体实现
+ 
 
+
+## 设计模式
+
+### 适配器
