@@ -470,3 +470,15 @@ public ThreadPoolExecutor(int corePoolSize, int maximumPoolSize, long keepAliveT
 
 ## springMVC初始化流程（二）
 
+
+配置加载顺序为：context-param -> listener -> filter -> servlet
+
+
+## 网关
+
+### 网关是什么
+
+### 网关实现原理
+
+### 网关具体实现
+
