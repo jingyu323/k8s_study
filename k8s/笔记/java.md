@@ -291,7 +291,7 @@ JAVA_OPTS="-server -Djava.awt.headless=true  -XX:+PrintGCDetails -XX:+PrintGCTim
 扩大加锁解锁的范围
 
 ###  锁消除
-JVM检测到不可能存在共享数据竞争，这是JVM会对这些同步锁进行锁消除
+通过对运行上下文的扫描，去除不可能存在共享资源竞争的锁，通过这种方式消除没有必要的锁，可以节省毫无意义的请求锁时间
 ###  偏向锁
 偏向锁的核心思想是，如果一个线程获得了锁，那么锁就进入偏向模式，此时Mark Word 的结构也变为偏向锁结构，当这个线程再次请求锁时，无需再做任何同步操作，即获取锁的过程，这样就省去了大量有关锁申请的操作，从而也就提供程序的性能。
 
@@ -314,6 +314,7 @@ JVM检测到不可能存在共享数据竞争，这是JVM会对这些同步锁�
 
 ###  重量级锁
 同一时间访问同一锁的场合，就会导致轻量级锁膨胀为重量级锁。
+重量级锁也就是sychronized对象锁。
 
 
 ####  sychronized
@@ -502,3 +503,8 @@ public ThreadPoolExecutor(int corePoolSize, int maximumPoolSize, long keepAliveT
 ## 设计模式
 
 ### 适配器
+
+1. 类的适配器模式
+
+
+2. 对象适配器
