@@ -337,6 +337,8 @@ synchronized底层实现原理:
 
 
 ####  ReentrantLock
+
+ReentrantLock的时候一定要手动释放锁，并且加锁次数和释放次数要一样
 Lock所是一个接口，其所有的实现类为
 
 ReentrantLock(可重入锁)
@@ -411,6 +413,8 @@ Lock:
 只有代码块锁
 使用Lock锁，JVM将花费较少的时间来调度线程，性能更好。并且具有更好的扩展性（拥有更多的子类）
 
+
+静态方法是依附于类而不是对象的，当synchronized修饰静态方法时，锁是class对象
 
 ## 线程池
 
