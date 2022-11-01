@@ -338,7 +338,7 @@ synchronized底层实现原理:
 
 ####  ReentrantLock
 
-ReentrantLock的时候一定要手动释放锁，并且加锁次数和释放次数要一样
+ReentrantLock的时候一定要手动释放锁，并且加锁次数和释放次数要一样,加锁和释放次数不一样导致的死锁
 Lock所是一个接口，其所有的实现类为
 
 ReentrantLock(可重入锁)
