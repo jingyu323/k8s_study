@@ -2,7 +2,10 @@
 
 
 
-# java
+# java 
+## java 基础
+
+将一个字符串直接转化为字节数组和将一个字符串转为十六进制字符串再转化为字节数组。字节数组是一样的
 
 jdk 安装
 
@@ -488,6 +491,8 @@ public ThreadPoolExecutor(int corePoolSize, int maximumPoolSize, long keepAliveT
 
 
 配置加载顺序为：context-param -> listener -> filter -> servlet
+
+HttpServletBean 调用init 初始化-》  initServletBean()-》initWebApplicationContext()->this.onRefresh()->initStrategies()
 
 
 ## 网关
