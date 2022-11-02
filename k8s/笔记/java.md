@@ -283,6 +283,16 @@ JAVA_OPTS="-server -Djava.awt.headless=true  -XX:+PrintGCDetails -XX:+PrintGCTim
 
 
 
+#### jvm 状态查看
+
+```
+https://blog.csdn.net/lufei0920/article/details/115196146
+```
+
+
+
+
+
 # 多线程
 ## 线程的状态
 - 新建状态： 使用 new Thread 类或其子类建立一个线程对象后，该线程对象就处于新建状态。
@@ -480,6 +490,17 @@ public ThreadPoolExecutor(int corePoolSize, int maximumPoolSize, long keepAliveT
 
 主要是堆区，
 
-
 ## springMVC初始化流程（二）
+
+
+
+
+
+## 分布式：
+
+### 分布式定时任务处理方案：
+
+
+
+
 
