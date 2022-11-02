@@ -40,7 +40,20 @@ java -jar aaa.jar --server.port = 8083
 java -jar ftpagent-0.0.1.jar --external.devname=eno2
 ```
 
+##  @Scheduled
 
+1、fixedRate
+
+例：@Scheduled(fixedRate = 5000) //上一次开始执行时间点之后5秒再执行
+
+2、fixedDelay
+
+例：@Scheduled(fixedDelay = 5000) //上一次执行完毕时间点之后5秒再执行
+
+3、cron
+
+例：@Scheduled(cron = "0 0/1 9-21 * * ?")//每天早上9点-晚上21点间执行，每次执行间隔一分钟
+ 
 
 
 
