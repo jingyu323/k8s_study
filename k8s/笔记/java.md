@@ -58,6 +58,50 @@ java -jar ftpagent-0.0.1.jar --external.devname=eno2
 例：@Scheduled(cron = "0 0/1 9-21 * * ?")//每天早上9点-晚上21点间执行，每次执行间隔一分钟
  
 
+## 线程池
+核心参数
+
+```java
+public ThreadPoolExecutor(int corePoolSize,
+                            int maximumPoolSize,
+                            long keepAliveTime,
+                            TimeUnit unit,
+                            BlockingQueue<Runnable> workQueue,	
+                            ThreadFactory threadFactory,
+                            RejectedExecutionHandler handler);
+
+```
+- 3.1 corePoolSize 线程池核心线程大小
+线程池中维护的一个最少的线程数量,即使这些线程处于空闲状态,他们也不会被销毁,除非设置了allowCoreThreadTimeOut。
+
+- 3.2 maximumPoolSize 线程池最大线程数量
+一个任务被提交到线程池之后，首先会到工作队列中，如果工作队列满了，则会创建一个新的线程，然后从工作队列中取出一个任务交给新线程处理，而将刚提交上来的任务放入到工作队列中。线程池最大的线程数量由maximunPoolSize来指定。
+
+- 3.3 keepAliveTime 空闲线程存活时间
+一个线程如果处于空闲状态，并且当前的线程数量大于corePoolSize，那么在指定的时间后，这个空闲的线程将被销毁，这个指定的时间就是keepAliveTime。
+
+- 3.4 unit 空闲线程存活时间单位
+keepAliveTime的计量单位，是一个枚举java.util.concurrent.TimeUnit。
+
+- 3.5 workQueue 工作队列
+新任务被提交之后，会先进入到此工作队列中，任务调度时再从队列中取出任务。jdk一共提供了四种工作队列。
+ArrayBlockingQueue 数组型阻塞队列：数组结构，初始化时传入大小，有界，FIFO（先进先出），使用一个重入锁，默认使用非公平锁，入队和出队共用一个锁，互斥。
+LinkedBlockingQueue 链表型阻塞队列：链表结构，默认初始化大小为Integer.MAX_VALUE，有界（近似无解），FIFO，使用两个重入锁分别控制元素的入队和出队，用Condition进行线程间的唤醒和等待。
+SynchronousQueue 同步队列：容量为0，添加任务必须等待取出任务，这个队列相当于通道，不存储元素。
+PriorityBlockingQueue 优先阻塞队列：无界，默认采用元素自然顺序升序排列。
+DelayQueue 延时队列：无界，元素有过期时间，过期的元素才能被取出。
+- 3.6 threadFactory 线程工厂
+创建新线程的时候使用的工厂，可以用来指定线程名，是否为daemon线程等等。
+
+- 3.7 handler 拒绝策略
+当工作队列中的任务已经达到了最大的限制，并且线程池中线程数量达到了最大限制，如果这时候有新任务进来，就会采取拒绝策略，jdk中提供了四种拒绝策略。
+AbortPolicy：丢弃任务并抛出RejectedExecutionException异常。
+DiscardPolicy：丢弃任务，但是不抛出异常。可能导致无法发现系统的异常状态。
+DiscardOldestPolicy：丢弃队列最前面的任务，然后重新提交被拒绝的任务。
+CallerRunsPolicy：由调用线程处理该任务。
+
+线程池线程添加策略：
+![img](images/%E7%AE%97%E6%B3%95.png) 
 
 
 ## 1.校验
