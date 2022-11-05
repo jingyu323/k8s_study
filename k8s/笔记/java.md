@@ -103,6 +103,32 @@ CallerRunsPolicy：由调用线程处理该任务。
 线程池线程添加策略：
 ![img](images/%E7%AE%97%E6%B3%95.png) 
 
+- 添加任务的方式
+  - execute 方式添加任务
+  ```java
+  newExecutorService.execute(new Runnable() {
+                @Override
+                public void run() {
+                    System.out.println("threadName;"+Thread.currentThread().getName()+",i"+temp);
+                }
+            });
+  ```
+
+ - threadPool.submit 方式添加任务
+  ```java
+  Future<Integer> result = threadPool.submit(new Callable<Integer>() {
+                @Override
+                public Integer call() throws Exception {
+                    int num=new Random().nextInt(9);
+                    System.out.println("随机数："+num);
+                    return num;
+                }
+            });
+  ```
+  execute：只能执行不带返回值的任务； 
+  submit：它可以执行有返回值的任务或者是没有返回值的任务 。
+ - shutdown执行时线程池终止接收新任务，并且会将任务队列中的任务处理完；
+ - shutdoNow执行时线程池终止接收新任务，并且会终止执行任务队列中的任务。
 
 ## 1.校验
 
