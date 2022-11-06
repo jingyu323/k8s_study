@@ -139,6 +139,7 @@ TIDYING:该状态下所有任务都已终止，将会执行terminated方法；
 TEIMINATED：执行完terminated方法之后。
 
 ### 线程池优化
+- 如果线程池中的任务执行时间比较长，长时间也就只能创建maxnumber数量的线程，
 
 
 ## 1.校验
@@ -628,3 +629,6 @@ HttpServletBean 调用init 初始化-》  initServletBean()-》initWebApplicatio
 
 
 2. 对象适配器
+
+
+## 并发
