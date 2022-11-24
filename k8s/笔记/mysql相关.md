@@ -77,7 +77,7 @@ rpm -ivh mysql-community-server-8.0.28-1.el7.x86_64.rpm
 
 解决方法：
 
- yum install compat-openssl10
+ yum install compat-openssl10  -y
 
 
 
@@ -89,7 +89,7 @@ rpm -ivh mysql-community-server-8.0.28-1.el7.x86_64.rpm
 
 解决方法：
 
-yum install libncurses*
+yum install libncurses* -y
 
 d. 启动mysql
 
