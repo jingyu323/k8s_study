@@ -71,3 +71,11 @@ systemctl status vsftpd
 
 chkconfig vsftpd on
 
+
+
+ftp 刚开始传输的时候没有速率：解决方法：
+
+了解到服务器上也有本机的DNS解析，删除了/ETC/RESOLVE.CONF文件之后访问正常，此文件为服务器DNS解析文件。或者增加一条反向解析：/etc/vsftp/vsftp.conf 下增加一条reverse_lookup_enable=NO也可解决此故障。
+
+问题由于本地服务器DNS解析表中没有网段信息，逐条匹配DNS信息后，直到DNS解析超时后，才进行FTP连接，导致的FTP登陆超时问题。
+
