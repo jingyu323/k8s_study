@@ -56,7 +56,7 @@ java -jar ftpagent-0.0.1.jar --external.devname=eno2
 3、cron
 
 例：@Scheduled(cron = "0 0/1 9-21 * * ?")//每天早上9点-晚上21点间执行，每次执行间隔一分钟
- 
+
 
 ## 线程池
 核心参数
@@ -624,7 +624,7 @@ HttpServletBean 调用init 初始化-》  initServletBean()-》initWebApplicatio
 ### 网关实现原理
 
 ### 网关具体实现
- 
+
 
 
 ## 设计模式
@@ -636,5 +636,11 @@ HttpServletBean 调用init 初始化-》  initServletBean()-》initWebApplicatio
 
 2. 对象适配器
 
-
 ## 并发
+
+
+
+
+
+## 逃逸分析
+
