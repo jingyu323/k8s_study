@@ -35,11 +35,12 @@
 ### 二层组网
 
 ## ac可靠性 
-
-### 双链路双机设备
 ![](images/wlan/AC%E5%8F%AF%E9%9D%A0%E6%80%A7.png)
+### 双链路双机设备
+![](images/wlan/%E5%8F%8C%E9%93%BE%E8%B7%AF%E5%8F%8C%E6%9C%BA%E7%83%AD%E5%A4%87.png)
 
 ## capwap隧道
 ![](images/wlan/CAPWAP.png)
 
 ![](images/wlan/capwap_chanel.png)
+## capwap隧道
