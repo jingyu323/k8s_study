@@ -84,4 +84,8 @@ public class SystemApiConfig {
 
 ## 7.常见问题
 
+## 1.RequestBody  RequestParam 
+
+**@RequestBody注解后** ，只能解析json类型的数据，
+
 ## 8.参考资料
