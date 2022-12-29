@@ -29,7 +29,7 @@ SpringBoot核心通过Maven继承依赖关系快速整合第三方框架
 
 ## 6.使用
 
-### 静态工具类的属性注入方式
+### 1.静态工具类的属性注入方式
 
 方式一：
 
@@ -70,15 +70,22 @@ public class SystemApiConfig {
         SystemApiConfig.password = password;
     }
 
-    public static String getAppid() {
-        return appid;
-    }
-
-    public void setAppid(String appid) {
-        SystemApiConfig.appid = appid;
-    }
+ 
 }
 ```
+
+### 2.Springboot 配置文件加载顺序
+
+**Springboot的application.properties配置文件的加载路径优先级（从高到低）：**
+
+- 工程根目录:./config/
+- 工程根目录：./
+- classpath:/config/
+- classpath:/
+
+当Springboot打成JAR包（不包含配置文件），读取外部配置文件application.properties时，可以选择：
+
+1. 把application.properties放在在项目名.jar的同级目录下。 
 
 
 
