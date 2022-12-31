@@ -106,7 +106,6 @@ VRP
 
 display lldp
 
-# 配置FAT AP
 
 ### AC 升级
   -  display startup  查看当前版本
@@ -121,3 +120,10 @@ display ap ver
 2. 设置更新文件 ap update filename 升级包 aptype 
 3. ap reset all  AP  重启
 4. dis ap all 查看ap 状态
+# 配置FAT AP
+
+1.切换为fat 模式
+ap-mode-switch fat
+
+2. wlan 进入wlan 视图
+3. country-code CN 
