@@ -6,7 +6,7 @@
 
 ## 3.优点
 
-    
+
 ## 4.实现原理
 
 ### 4.1 Spring Boot 原理和启动流程
@@ -29,6 +29,70 @@ SpringBoot核心通过Maven继承依赖关系快速整合第三方框架
 
 ## 6.使用
 
+### 1.静态工具类的属性注入方式
+
+方式一：
+
+使用 @Value() 注解
+通过set方法来赋值。属性是static修饰的，get方法也是static修饰的，但是set方法不能是static修饰，使用@Value()注解来修饰set方法。类头需要添加@Configuration 或者@Component 标记为spring管理否则读取不到值
+
+方式二：
+
+只要把set方法设置为非静态，那么这个配置类的静态属性就能成功注入了
+
+```java
+@Configuration
+@ConfigurationProperties(prefix = "system")
+public class SystemApiConfig {
+
+    /**账号*/
+    private static String account;
+
+    /**密码*/
+    private static String password;
+
+    /**平台三方系统分配的id*/
+    private static String appid;
+
+    public static String getAccount() {
+        return account;
+    }
+
+    public void setAccount(String account) {
+        SystemApiConfig.account = account;
+    }
+
+    public static String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        SystemApiConfig.password = password;
+    }
+
+ 
+}
+```
+
+### 2.Springboot 配置文件加载顺序
+
+**Springboot的application.properties配置文件的加载路径优先级（从高到低）：**
+
+- 工程根目录:./config/
+- 工程根目录：./
+- classpath:/config/
+- classpath:/
+
+当Springboot打成JAR包（不包含配置文件），读取外部配置文件application.properties时，可以选择：
+
+1. 把application.properties放在在项目名.jar的同级目录下。 
+
+
+
 ## 7.常见问题
+
+## 1.RequestBody  RequestParam 
+
+**@RequestBody注解后** ，只能解析json类型的数据，
 
 ## 8.参考资料
