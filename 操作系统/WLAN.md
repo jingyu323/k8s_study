@@ -127,3 +127,11 @@ ap-mode-switch fat
 
 2. wlan 进入wlan 视图
 3. country-code CN 
+
+用交换机作为dhcp 分配IP地址
+创建vlanif 为 AP分配Ip地址
+
+dhcp enable
+interface vlanif 100 
+ip address 10.1.100.1 24   设置网关 IP，一般默认使用网段第一个IP做为网关地址
+dhcp select interface 
