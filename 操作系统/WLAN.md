@@ -118,4 +118,6 @@ display ap ver
 
 升级步骤：
 1.改为AC模式：ap update mode ac-mode
-2. 设置更新文件 ap update filename 升级包
+2. 设置更新文件 ap update filename 升级包 aptype 
+3. ap reset all  AP  重启
+4. dis ap all 查看ap 状态
