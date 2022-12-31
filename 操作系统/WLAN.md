@@ -135,3 +135,11 @@ dhcp enable
 interface vlanif 100 
 ip address 10.1.100.1 24   设置网关 IP，一般默认使用网段第一个IP做为网关地址
 dhcp select interface 
+
+## 创建安全模板
+1. security-profile  name test
+2. security wap-wapa2 psk pass-phsase 密码 aes   # 设置密码加密方式
+## 设置SSID
+1.wlan
+2. ssid-profile name  test
+3. ssid test 
