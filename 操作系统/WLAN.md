@@ -30,6 +30,7 @@
 ## fat AP
 - 每个AP独立自治
 - 人工成本高
+  
 ## ac+FIT AP 
 
 ### 二层组网
@@ -106,3 +107,15 @@ VRP
 display lldp
 
 # 配置FAT AP
+
+### AC 升级
+  -  display startup  查看当前版本
+  -  startup system-software 升级包
+  -  reboot 重启之后自动版本升级
+  -  display ap all 查看所有ap 状态
+### AP 升级
+display ap ver 
+
+升级步骤：
+1.改为AC模式：ap update mode ac-mode
+2. 设置更新文件 ap update filename 升级包
