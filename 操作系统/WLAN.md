@@ -143,3 +143,12 @@ dhcp select interface
 1.wlan
 2. ssid-profile name  test
 3. ssid test 
+
+# VAP 模板
+创建摸吧
+vap-profile  name test
+
+配置wlan 业务
+ssid-profile test
+security-profile test 
+service-vlan vlanid 100
