@@ -104,3 +104,5 @@ VRP
 ![](images/wlan/VRP_user.png)
 
 display lldp
+
+# 配置FAT AP
