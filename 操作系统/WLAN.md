@@ -175,3 +175,37 @@ AAA：
 - 用于接入设备与认证服务器之间的交互。
 - AAA服务器通过对接入用户进行认证、授权和计费实现对接入用户
 访问权限的控制。
+
+## 配置开放认证
+创建安全模板
+- 创建一个安全模板并进入安全模板视图，缺省情况下，系统已经创建名称为default、default-wds和default-mesh的安全模板。
+⚫ 配置安全策略为开放认证
+-  配置安全策略为开放认证。缺省情况下，安全策略为open。
+
+• 命令：security { wpa | wpa2 | wpa-wpa2 } psk { pass-phrase | hex } key-value
+{ aes | tkip | aes-tkip }
+▫ wpa：使用WPA（Wi-Fi网络安全存取版本1）认证方式。
+▫ wpa2：使用WPA2（Wi-Fi网络安全存取版本2）认证方式。
+▫ wpa-wpa2：使用WPA和WPA2混合方式。用户终端使用WPA或WPA2都可以进
+行认证。
+▫ psk：采用PSK认证方式。
+▫ pass-phrase：密钥短语。
+▫ Hex：十六进制数。
+▫ key-value：用户口令。
+▫ aes：使用AES（对称加密算法）方式加密数据。
+▫ tkip：使用TKIP（临时密钥完整性协议）方式加密数据。
+▫ aes-tkip：使用AES和TKIP混合加密。用户终端支持AES或TKIP，认证通过后，
+即可使用支持的算法加密数据。
+
+## 配置WPA/WPA2-PPSK认证
+⚫ 创建安全模板
+⚫ 配置安全策略为WPA/WPA2-PPSK
+⚫ 配置PPSK关键参数
+ 创建PPSK用户，配置PPSK用户的密码、用户名、所属用户组、绑定的授权VLAN、过期时间、最大接入用户数、
+所属分支组、绑定的MAC地址、接入的SSID。
+[AC] wlan
+[AC-wlan-view] security-profile name profile-name
+[AC-wlan-sec-prof-wlan] security { wpa | wpa2 | wpa-wpa2 } ppsk { aes | tkip | aes-tkip }
+[AC-wlan-sec-prof-wlan] quit
+[AC-wlan-view] ppsk-user psk { pass-phrase | hex } key-value [ user-name user-name | user-group user-group | vlan vlan-id |
+expire-date expire-date [ expire-hour expire-hour ] | max-device max-device-number | branch-group branch-group | macaddress mac-address ]* ssid ssid
