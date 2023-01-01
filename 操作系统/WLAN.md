@@ -152,3 +152,26 @@ vap-profile  name test
 ssid-profile test
 security-profile test 
 service-vlan vlanid 100
+
+# WLAN 接入安全
+
+# 数据安全
+1.主要通过对报文数据进行加密，保证只有特定的设备，可以对数据进行解密
+2.wlan 加密方式：
+   - TKIP  临时秘钥完整性协议
+   -  CCMP 
+3.WPA 采用TKIP 加密算法，提供了秘钥重置机制，并增强了秘钥长度，很大程度上弥补了WEP的不足
+4. WPA2 CCMP加密协议，该加密机制使用的是AES加密算法，是一种比TYIP 更难破解的对称加密算法。
+# WLAN准入 控制
+NAC  network admission Control 网络接入控制，通过对接入网络的客户端和用户的认证保证网络的安全，是一种“端到端”的安全技术
+NAC与AAA互相配合，共同完成接入认证功能。
+• NAC：
+- 用于用户和接入设备之间的交互
+- NAC负责控制用户的接入方式（802.1X，MAC或Portal认证），接
+入过程中的各类参数和定时器
+- 确保合法用户和接入设备建立安全稳定的连接。
+
+AAA：
+- 用于接入设备与认证服务器之间的交互。
+- AAA服务器通过对接入用户进行认证、授权和计费实现对接入用户
+访问权限的控制。
