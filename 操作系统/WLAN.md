@@ -211,6 +211,7 @@ AAA：
 expire-date expire-date [ expire-hour expire-hour ] | max-device max-device-number | branch-group branch-group | macaddress mac-address ]* ssid ssid
 
 ## WLAN 业务配置
-![](images/wlan/wlan配置流程.png
 
 ![](images/wlan/wlan%E9%85%8D%E7%BD%AE%E6%B5%81%E7%A8%8B.png)
+
+### vap 模板
