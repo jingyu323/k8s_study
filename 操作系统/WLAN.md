@@ -215,3 +215,6 @@ expire-date expire-date [ expire-hour expire-hour ] | max-device max-device-numb
 ![](images/wlan/wlan%E9%85%8D%E7%BD%AE%E6%B5%81%E7%A8%8B.png)
 
 ### vap 模板
+1.vap 引入安全模板
+安全模板就是创建 密码已经加密方式
+ssid 模板就是创建用于链接的标识
