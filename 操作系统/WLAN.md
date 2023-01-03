@@ -218,3 +218,21 @@ expire-date expire-date [ expire-hour expire-hour ] | max-device max-device-numb
 1.vap 引入安全模板
 安全模板就是创建 密码已经加密方式
 ssid 模板就是创建用于链接的标识
+
+
+SW配置
+▫ [SW1] vlan batch 100 101
+▫ [SW1] interface gigabitethernet 0/0/1
+▫ [SW1-GigabitEthernet0/0/1] port link-type access
+▫ [SW1-GigabitEthernet0/0/1] port default vlan 100
+▫ [SW1-GigabitEthernet0/0/1] quit
+▫ [SW1] interface gigabitethernet 0/0/2
+▫ [SW1-GigabitEthernet0/0/2] port link-type trunk
+▫ [SW1-GigabitEthernet0/0/2] port trunk allow-pass vlan 100 101
+▫ [SW1-GigabitEthernet0/0/2] quit
+• AC配置
+▫ [AC] vlan batch 100 101
+▫ [AC] interface gigabitethernet 0/0/1
+▫ [AC-GigabitEthernet0/0/1] port link-type trunk
+▫ [AC-GigabitEthernet0/0/1] port trunk allow-pass vlan 100 101
+▫ [AC-GigabitEthernet0/0/1] quit
