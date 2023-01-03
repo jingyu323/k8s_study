@@ -236,3 +236,5 @@ SW配置
 ▫ [AC-GigabitEthernet0/0/1] port link-type trunk
 ▫ [AC-GigabitEthernet0/0/1] port trunk allow-pass vlan 100 101
 ▫ [AC-GigabitEthernet0/0/1] quit
+
+display vap ssid employee查ssid 状态
