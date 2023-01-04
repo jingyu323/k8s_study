@@ -238,3 +238,9 @@ SW配置
 ▫ [AC-GigabitEthernet0/0/1] quit
 
 display vap ssid employee查ssid 状态
+
+AC 设置dhcp
+dhcp select gloable 
+
+删除capwap 隧道
+undo capwap source ip-address 10.10.1.1
