@@ -644,3 +644,153 @@ HttpServletBean 调用init 初始化-》  initServletBean()-》initWebApplicatio
 
 ## 逃逸分析
 
+
+
+
+
+## 打包
+
+pom.xml 配置
+
+
+
+```
+
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>2.7.5</version>
+        <relativePath/> <!-- lookup parent from repository -->
+    </parent>
+    <groupId>com.rain.test</groupId>
+    <artifactId>testpackage</artifactId>
+    <version>0.0.1</version>
+    <name>testpackage</name>
+    <description>testpackage</description>
+    <properties>
+        <java.version>1.8</java.version>
+        <!-- 配置时间戳格式-->
+        <maven.build.timestamp.format>yyyyMMddHHmmss</maven.build.timestamp.format>
+    </properties>
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!-- 指定间戳，为后面zip文件名用-->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>3.3.0</version>
+                <executions>
+                    <execution>
+                        <id>timestamp-property</id>
+                        <goals>
+                            <goal>timestamp-property</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <name>build.time</name>
+                    <pattern>yyyyMMddHHmmss</pattern>
+                    <timeZone>GMT+8</timeZone>
+                    <locale>zh_CN</locale>
+                    <fileSet/>
+                    <regex/>
+                    <source/>
+                    <value/>
+                </configuration>
+            </plugin>
+            <!-- 指定打包插件 -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>3.4.2</version>
+                <configuration>
+                    <!-- 打出来的zip是否包含 package.xml 中定义的id -->
+                    <appendAssemblyId>false</appendAssemblyId>
+                    <descriptors>
+                        <descriptor>src/main/resources/deployment/package.xml</descriptor>
+                    </descriptors>
+                    <finalName>${artifactId}-${version}-${build.time}</finalName>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>make-assembly</id>
+                        <phase>package</phase> <!--this is used for inheritance merges  绑定到这个生命周期-->
+                        <goals>
+                            <goal>single</goal> <!--执行一次-->
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+        </plugins>
+    </build>
+
+</project>
+
+```
+
+package.xml
+
+```
+<assembly xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2 http://maven.apache.org/xsd/assembly-1.1.2.xsd">
+    <id>packagezip</id>
+    <formats>
+        <format>zip</format>
+    </formats>
+    <!--if auto generate a root folder-->
+    <includeBaseDirectory>false</includeBaseDirectory>
+    <fileSets>
+        <!-- 指定打包resource 下的shell 脚本-->
+        <fileSet>
+            <outputDirectory>/script</outputDirectory>
+            <directory>src/main/resources/script</directory>
+            <includes>
+                <include>**/**.sh</include>  <!--把shell脚本打进去-->
+            </includes>
+            <fileMode>755</fileMode>
+        </fileSet>
+        <!-- 指定打包resource  application.properties文件作为外置配置文件-->
+        <fileSet>
+            <outputDirectory>/</outputDirectory>
+            <directory>src/main/resources/</directory>
+            <includes>
+                <include>application.properties</include>  <!--把shell脚本打进去-->
+            </includes>
+            <fileMode>644</fileMode>
+        </fileSet>
+    </fileSets>
+
+    <!--copy the jar into the zip-->
+    <files>
+        <file>
+            <source>${project.build.directory}${file.separator}${artifactId}-${version}.jar</source>
+            <outputDirectory>/</outputDirectory>
+            <fileMode>755</fileMode>
+        </file>
+    </files>
+    <!--package the jar and figure out if contain artifact, if true there will be many dependency jars-->
+    <!--<dependencySets>
+        <dependencySet>
+            <outputDirectory>/</outputDirectory>
+            <useProjectArtifact>false</useProjectArtifact>
+        </dependencySet>
+    </dependencySets>-->
+</assembly>
+```
+
+ maven-assembly-plugin 参数详细介绍：
+
+https://www.cnblogs.com/powerwu/articles/16686555.html
