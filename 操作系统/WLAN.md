@@ -247,3 +247,13 @@ undo capwap source ip-address 10.10.1.1
 
 配置capwap
 capwap source  interface LoopBack 0
+
+创建AP组
+ap-group name huawei
+
+设置mac 认证
+ap auth-mode mac-auth
+添加认证mac
+ap-mac mac地址
+添加ap 进组
+ap-group  huawei
