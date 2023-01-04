@@ -244,3 +244,6 @@ dhcp select gloable
 
 删除capwap 隧道
 undo capwap source ip-address 10.10.1.1
+
+配置capwap
+capwap source  interface LoopBack 0
