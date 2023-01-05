@@ -17,3 +17,7 @@ sudo vmware-hgfsclient
 mkdir /mnt/hgfs
 
 sudo vmhgfs-fuse .host:/ /mnt/hgfs -o allow_other -o uid=1000 -o gid=1000 -o umask=022
+
+详细参考
+
+https://blog.csdn.net/NRWHF/article/details/127848959
