@@ -268,3 +268,8 @@ ap-group  huawei
 
 
 # tunnel 转发和直接转发 的区别？
+
+# 故障排除
+- AP 不上线原因
+  - 先查看是否有IP
+display ip pool
