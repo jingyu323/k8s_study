@@ -272,4 +272,17 @@ ap-group  huawei
 # 故障排除
 - AP 不上线原因
   - 先查看是否有IP
+  - AP认证不通过，有可能MAC地址敲错了
+  - AP 设备供电不足
+  - 检查AP状态 display ap all, AP 状态 
+    - normal 正常
+    - standby AP 在AC设备链接正常
+    - idel AP和AC连接前初始状态
+    - download 正在升级
+    - fault 上线失败
+    - commit-failed AP 上线后WLAN业务配置下发失败
+    - config-failed AP 上线过程中WLAN业务配置下发失败
+    - name-conflicted AP  名称冲突
+    - xxx-mimatch AP和AC的xxx参数不匹配
+    - unauth 未认证
 display ip pool
