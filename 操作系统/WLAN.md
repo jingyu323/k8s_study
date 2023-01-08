@@ -285,4 +285,40 @@ ap-group  huawei
     - name-conflicted AP  名称冲突
     - xxx-mimatch AP和AC的xxx参数不匹配
     - unauth 未认证
-display ip pool
+  -  管理AP是否超限 display license usage 
+  -  查看 CAPWAP 链路信息 display capwap link all 
+  -   查看AP掉线 display ap offline-record
+  -   检查用户上线失败原因
+      -   display station online-failed-record sta-mac  mac地址
+  - 查看AP 用户关联数量  display  ssid-profile name ssiid0 
+    - 修改最大在线用户数： wlan-》 ssid-profile name ssid0 -> nax-sta-number 70 
+  - 检查VAP状态是否正常
+    - 确保AP已正常上线，然后使用display vap来检查VAP状态。
+    正常创建的VAP，BSSID字段值不为全0；处于工作状态的VAP，Status字段值为ON。
+ 如果VAP未正常创建，可以通过display vap create-fail-record all查看VAP创建失败的原因，并根据原因进一步处理。
+ 如果确认配置正常，即射频下绑定了VAP，但BSSID字段值为全0，一般是由于配置下发失败。
+ 如果BSSID显示正常，但是Status字段值为OFF，一般是由于配置导致，如射频开关未打开，VAP被禁用等。   
+- 检查隐藏SSID配置
+  - display rrm-profile name default
+  - 可以在RRM模板下执行undo uac reach-access-threshold命令关闭射频达到设置的接入用户数时自动
+隐藏SSID功能。
+- 检查SSID模板配置
+  - display vap-profile name VAP-Profile-Name
+- 检查AP发送的Beacon报文
+  - display Wi-Fi radio-statistics radio 0
+  - Beacon报文丢失数量是相对于发送数量，如果Missed数量比Transmitted数量多，则STA会很
+难搜索到信号。
+ Beacon报文丢失是因为空口一直处于繁忙状态，AP竞争不到发送报文的时间。
+ 可以使用display ap traffic statistics wireless检查当前环境下的信道利用率和信道底噪。
+- 排查空口环境干扰
+  - 信道利用率是体现空口状态的一个重要因素，如果AP上业务量较小，但信道利用率比较
+高，则说明空口干扰比较严重。
+ - 排查周围环境中的其他干扰，一般需要通过扫描软件扫描周围的空口环境，常用的扫描工具有
+WirelessMon、inSSIDer、Network Stumbler等，Android手机可以使用Wi-Fi分析仪。
+  - display Wi-Fi base-info radio 0
+- 查看用户是否认证成功： 
+  - display access-user
+- 查看用户接入是否正常：
+  - display station assoc-info sta 148f-c661-b424
+- 
+display ip pool interface VLANif12
