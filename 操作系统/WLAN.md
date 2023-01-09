@@ -295,24 +295,24 @@ ap-group  huawei
   - 检查VAP状态是否正常
     - 确保AP已正常上线，然后使用display vap来检查VAP状态。
     正常创建的VAP，BSSID字段值不为全0；处于工作状态的VAP，Status字段值为ON。
- 如果VAP未正常创建，可以通过display vap create-fail-record all查看VAP创建失败的原因，并根据原因进一步处理。
- 如果确认配置正常，即射频下绑定了VAP，但BSSID字段值为全0，一般是由于配置下发失败。
- 如果BSSID显示正常，但是Status字段值为OFF，一般是由于配置导致，如射频开关未打开，VAP被禁用等。   
+     如果VAP未正常创建，可以通过display vap create-fail-record all查看VAP创建失败的原因，并根据原因进一步处理。
+     如果确认配置正常，即射频下绑定了VAP，但BSSID字段值为全0，一般是由于配置下发失败。
+     如果BSSID显示正常，但是Status字段值为OFF，一般是由于配置导致，如射频开关未打开，VAP被禁用等。   
 - 检查隐藏SSID配置
   - display rrm-profile name default
   - 可以在RRM模板下执行undo uac reach-access-threshold命令关闭射频达到设置的接入用户数时自动
-隐藏SSID功能。
+  隐藏SSID功能。
 - 检查SSID模板配置
   - display vap-profile name VAP-Profile-Name
 - 检查AP发送的Beacon报文
   - display Wi-Fi radio-statistics radio 0
   - Beacon报文丢失数量是相对于发送数量，如果Missed数量比Transmitted数量多，则STA会很
-难搜索到信号。
- Beacon报文丢失是因为空口一直处于繁忙状态，AP竞争不到发送报文的时间。
- 可以使用display ap traffic statistics wireless检查当前环境下的信道利用率和信道底噪。
+  难搜索到信号。
+   Beacon报文丢失是因为空口一直处于繁忙状态，AP竞争不到发送报文的时间。
+   可以使用display ap traffic statistics wireless检查当前环境下的信道利用率和信道底噪。
 - 排查空口环境干扰
   - 信道利用率是体现空口状态的一个重要因素，如果AP上业务量较小，但信道利用率比较
-高，则说明空口干扰比较严重。
+  高，则说明空口干扰比较严重。
  - 排查周围环境中的其他干扰，一般需要通过扫描软件扫描周围的空口环境，常用的扫描工具有
 WirelessMon、inSSIDer、Network Stumbler等，Android手机可以使用Wi-Fi分析仪。
   - display Wi-Fi base-info radio 0
@@ -338,6 +338,15 @@ WLAN规划：
 
 # WLAN 施工：
 工勘： 应该怎么做？
+
+华为材料：
+
+https://support.huawei.com/enterprise/zh/doc/DOC1000113314?section=j003
+
+
+
+https://support.huawei.com/enterprise/zh/doc/EDOC1100154882?section=j00e
+
 现场工勘采集信息表 (1)
 | 工勘收集信息  | 信息记录（例） | 备注|
 |楼层的层高 |普通室内楼层高度3 m |  获取镂空区域、大厅或者报告厅等区域的层高信息至关重要。|
@@ -355,6 +364,7 @@ GHz 25dB衰减） 获取现场建筑材质的厚度及衰减，如有条件可�
 传递勘测信息
 注：在无线网络环境中，由于障碍物对无线信号有着较强的衰减，从而影响用户的最终体验，因此在工勘过程中，需要特别关注并掌
 握对未知障碍物衰减测试的具体方法。
+
 ## 容量计算
 • 总带宽需求=总用户数*并发率*每用户带宽需求
 • AP数量=总带宽需求/每AP带宽
