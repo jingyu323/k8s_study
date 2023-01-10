@@ -700,6 +700,65 @@ source /etc/profile 使生效  Java -version 检测安装是否安装成功
 
 
 
+# mysql 日志
+
+
+
+1.错误日志（errorlog）log_error 参数控制错误日志是否写入文件及文件名称，默认情况下，错误日志被写入终端标准输出stderr
+
+```
+# 指定错误日志位置及名称
+vim ``/etc/my``.cnf 
+[mysqld] 
+log_error = ``/data/mysql/logs/error``.log
+```
+
+2.慢查询日志（slow query log）
+
+慢查询日志是用来记录执行时间超过 long_query_time 这个变量定义的时长的查询语句。通过慢查询日志，可以查找出哪些查询语句的执行效率很低，以便进行优化。
+
+与慢查询相关的几个参数如下：
+
+1. slow_query_log ：是否启用慢查询日志，默认为0，可设置为0，1。
+2. slow_query_log_file ：指定慢查询日志位置及名称，默认值为host_name-slow.log，可指定绝对路径。
+3. long_query_time ：慢查询执行时间阈值，超过此时间会记录，默认为10，单位为s。
+4. log_output ：慢查询日志输出目标，默认为file，即输出到文件。
+
+默认情况下，慢查询日志是不开启的，一般情况下建议开启，方便进行慢SQL优化。在配置文件中可以增加以下参数：
+
+```
+# 慢查询日志相关配置，可根据实际情况修改``vim /etc/my.cnf `
+`[mysqld] ``slow_query_log = 1``slow_query_log_file = /data/mysql/logs/slow.log``long_query_time = 3``log_output = FILE
+```
+
+3.一般查询日志（general log）
+
+一般查询日志又称通用查询日志，是 MySQL 中记录最详细的日志，该日志会记录 mysqld 所有相关操作，当 clients 连接或断开连接时，服务器将信息写入此日志，并记录从 clients 收到的每个 SQL 语句。当你怀疑 client 中的错误并想要确切知道 client 发送给mysqld的内容时，通用查询日志非常有用。
+
+默认情况下，general log 是关闭的，开启通用查询日志会增加很多磁盘 I/O， 所以如非出于调试排错目的，不建议开启通用查询日志。相关参数配置介绍如下：
+
+```
+# general log相关配置``vim ``/etc/my``.cnf ``[mysqld]``general_log = 0 ``//``默认值是0，即不开启，可设置为1``general_log_file = ``/data/mysql/logs/general``.log ``//``指定日志位置及名称
+```
+
+4.二进制日志（binlog）
+
+关于二进制日志，前面有篇文章做过介绍。它记录了数据库所有执行的DDL和DML语句（除了数据查询语句select、show等），以事件形式记录并保存在二进制文件中。常用于数据恢复和主从复制。
+
+与 binlog 相关的几个参数如下：
+
+- log_bin ：指定binlog是否开启及文件名称。
+- server_id ：指定服务器唯一ID，开启binlog 必须设置此参数。
+- binlog_format ：指定binlog模式，建议设置为ROW。
+- max_binlog_size ：控制单个二进制日志大小，当前日志文件大小超过此变量时，执行切换动作。
+- expire_logs_days ：控制二进制日志文件保留天数，默认值为0，表示不自动删除，可设置为0~99。
+
+binlog默认情况下是不开启的，不过一般情况下，建议开启，特别是要做主从同步时。
+
+```
+# binlog 相关配置``vim /etc/my.cnf ``[mysqld]``server-id = 1003306``log-bin = /data/mysql/logs/binlog``binlog_format = row``expire_logs_days = 15
+```
+
 
 
 ## 参考资料
