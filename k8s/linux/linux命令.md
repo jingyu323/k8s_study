@@ -12,3 +12,15 @@ netstat -naop :grep 5672          #查看端口是否呗占用
 more  xxx.log                     #查看日志信息
 ps -ef :grep 5672                 #查看进程
 systemctl stop  服务名             #停止指定的服务
+
+
+
+获取镜像源
+
+wget -O /etc/yum.repos.d/CentOS-Base.repo https://mirrors.aliyun.com/repo/Centos-8.repo
+
+安装yum
+
+yum -y clean all 
+
+如果没有提示安装yum 重启电脑，在执行
