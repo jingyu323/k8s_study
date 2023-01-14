@@ -29,6 +29,34 @@
 ### wlan 如何区分不同的AP
 
 # WLAN 网络架构
+# CAPWAP协议介绍
+
+CAPWAP（无线接入点控制和配置协议）：该协议定义
+了如何对AP进行管理、业务配置，即AC通过CAPWAP隧
+道来实现对AP的集中管理和控制。
+
+# ESS  不同的AP 切换网络 解决BSS覆盖范围有限的问题。
+• BSS的有效覆盖半径一般是10m~15m，为了覆盖更大面积，可
+以通过多个BSS实现扩展 。
+• 同时，为了消除用户对BSS变化的感知，可以让每个BSS都使用
+相同的SSID，这样不管用户移动到哪里，可以认为使用的都是
+同一个WLAN。
+• 这种扩展BSS范围的方式称为扩展服务集（Extend Service Set，
+ESS），它以BSS为单位自由组合，让WLAN部署变得极为灵活。
+• 各BSS相同的SSID成了ESS的身份标识，叫作扩展服务集标识
+（Extended Service Set Identifier，ESSID），用于对终端通告
+一个连续的WLAN。 
+
+|概念|全称|描述|
+|-|-|-|
+|BSS |基本服务集BSS |无线网络的基本服务单元，通常由一个AP和若干无线终端组成|
+|ESS |扩展服务集ESS |由多个使用相同SSID的BSS组成，解决BSS覆盖范围有限的问题|
+|SSID |服务集标识符SSID|用来区分不同的无线网络。|
+|ESSID |扩展服务集标识符ESSID|一个或一组无线网络的标识，和SSID是相同的。
+|BSSID | 基本服务集标识符BSSID|在链路层上用来区分同一个AP上的不同VAP，也可以用来区分同一
+个ESS中的BSS。
+|VAP |虚拟接入点VAP|AP设备上虚拟出来的业务功能实体。用户可以在一个AP上创建不同
+的VAP来为不同的用户群体提供无线接入服务
 
 ## 空间流
 无线电在同一时间发送多个信号，每一份信号都是空间流。
@@ -122,15 +150,81 @@ display lldp
 - 配置网络互通 
   配置DHCP服务器，为AP和STA分配IP地址，也可将AC设备配置为DHCP服务器。
 • 配置AP到DHCP服务器间的网络互通；配置AP到AC之间的网络互通。
+
+[AC]dhcp enable
+[AC]interface Vlanif 100
+[AC-Vlanif100]ip address 10.1.100.1 24
+[AC-Vlanif100]dhcp select interface
+[AC-Vlanif100]quit
+[AC]interface Vlanif 101
+[AC-Vlanif101]ip address 10.1.101.1 24
+[AC-Vlanif101]dhcp select interface
+[AC-Vlanif101]quit
 - 创建AP组 每个AP都会加入并且只能加入到一个AP组中，AP组通常用于多个AP的通用配置。
+[AC]wlan
+[AC-wlan-view]ap-group name ap-group1
+[AC-wlan-ap-group-ap-group1]quit
 - 配置AC的国家码
 （域管理模板）
 国家码用来标识AP射频所在的国家，不同国家码规定了不同的AP射频特性，包括AP
 的发送功率、支持的信道等。
+
+AC-wlan-view]regulatory-domain-profile name domain
+[AC-wlan-regulate-domain-default]country-code CN
+[AC-wlan-regulate-domain-default]quit
+[AC-wlan-view]ap-group name ap-group1
+[AC-wlan-ap-group-ap-group1]regulatory-domain-profile domain
+Warning: Modifying the country code will clear channel, power and
+antenna gain configurations of the radio and reset the AP. Continu
+e?[Y/N]:y
+[AC-wlan-ap-group-ap-group1]quit
+[AC-wlan-view]quit
+
+AC-wlan-view]ap auth-mode mac-auth
+[AC-wlan-view]ap-id 0 ap-mac 00e0-fc44-4270
+[AC-wlan-ap-0]ap-name ap1
+Warning: This operation may cause AP reset. Continue? [Y/N]:y
+[AC-wlan-ap-0]ap-group ap-group1
+Warning: This operation may cause AP reset. If the country code
+changes, it will clear channel, power and antenna gain
+configurations of the radio, Whether to continue? [Y/N]:y
+[AC-wlan-ap-0]quit
+]display ap all
 - 配置源接口或源地址
 （与AP建隧道）
 每台AC都必须唯一指定一个IP地址或接口，该AC设备下挂接的AP学习到此IP地址或
 者此接口下配置的IP地址，用于AC和AP间的通信，以及CAPWAP隧道的建立。
+capwap source interface vlanif 100
+
+创建名为“employee”的安全模板，并配置安全策略。
+• 创建名为“employee”的SSID模板，并配置SSID名称为
+“employee”。
+[AC-wlan-view]security-profile name employee
+[AC-wlan-sec-prof-employee]security wpa-wpa2 psk passphrase a1234567 aes
+[AC-wlan-sec-prof-employee]quit
+[AC-wlan-view]ssid-profile name employee
+[AC-wlan-ssid-prof-employee]ssid employee
+[AC-wlan-ssid-prof-employee]quit
+
+创建名为“employee”的VAP模板，配置业务数据转发模式、
+业务VLAN，并且引用安全模板和SSID模板。
+• 配置AP组引用VAP模板，AP上所有射频都使用VAP模板
+“employee”的配置。
+[AC-wlan-view]vap-profile name employee
+[AC-wlan-vap-prof-employee]forward-mode tunnel
+[AC-wlan-vap-prof-employee]service-vlan vlan-id 101
+[AC-wlan-vap-prof-employee]security-profile employee
+[AC-wlan-vap-prof-employee]ssid-profile employee
+[AC-wlan-vap-prof-employee]quit
+[AC-wlan-view]ap-group name ap-group1
+[AC-wlan-ap-group-ap-group1]vap-profile employee wlan 1
+radio all
+[AC-wlan-ap-group-ap-group1]quit
+
+查看VAP模板信息
+display vap ssid employee
+WLAN业务配置会自动下发给AP，配置完成后，通过执行命令display vap ssid employee查看如下信
+息，当“Status”项显示为“ON”时，表示AP对应的射频上的VAP已创建成功
 - 配置AP上线时自动升级
 （可选）
 自动升级是指AP在上线过程中自动对比自身版本与AC或SFTP或FTP服务器上配置的
