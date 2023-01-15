@@ -120,6 +120,15 @@ CAPWAP隧道实现与AC之间的交互。
 
 ![](images/wlan/capwap_chanel.png)
 ## capwap隧道
+## VLAN规划
+• WLAN中的VLAN主要分为两类：管理VLAN和业务VLAN。
+ 管理VLAN：负责传输CAPWAP隧道转发的报文，包括管理报文
+和CAPWAP隧道转发的业务数据报文。
+ 业务VLAN：负责传输业务数据报文。
+• 在进行VLAN规划需要注意以下原则。
+ 管理VLAN和业务VLAN分离。
+ 业务VLAN应根据实际业务需要与SSID匹配映射关系
+
 
 ## WLAN漫游概述
 ⚫ WLAN漫游是指STA在不同AP覆盖范围之间移动且
