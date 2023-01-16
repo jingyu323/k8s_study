@@ -19,22 +19,97 @@
 - 调幅
 - 调相
 ## 子载波
+载波：是一个特定频率的无线电波单位是hz，是一种频率、振幅、相位被调节成可以传输语言、音乐、图像等其他信号的电磁波
 ### 信道
 什么是信道？
 信息传输的通道，无线信道就是空间中无线电波传输信息的通道。
+2,4G 有14个重叠的信道 频率宽度分别是20MHZ的信道 现网常用信道是1,5,9，13
+5G信道：大量的费重叠信道 共有13个可以使用的非重叠信道
 
 ### wlan 如何区分不同的AP
 
 # WLAN 网络架构
+# CAPWAP协议介绍
 
+CAPWAP（无线接入点控制和配置协议）：该协议定义
+了如何对AP进行管理、业务配置，即AC通过CAPWAP隧
+道来实现对AP的集中管理和控制。
+
+# ESS  不同的AP 切换网络 解决BSS覆盖范围有限的问题。
+• BSS的有效覆盖半径一般是10m~15m，为了覆盖更大面积，可
+以通过多个BSS实现扩展 。
+• 同时，为了消除用户对BSS变化的感知，可以让每个BSS都使用
+相同的SSID，这样不管用户移动到哪里，可以认为使用的都是
+同一个WLAN。
+• 这种扩展BSS范围的方式称为扩展服务集（Extend Service Set，
+ESS），它以BSS为单位自由组合，让WLAN部署变得极为灵活。
+• 各BSS相同的SSID成了ESS的身份标识，叫作扩展服务集标识
+（Extended Service Set Identifier，ESSID），用于对终端通告
+一个连续的WLAN。 
+
+|概念|全称|描述|
+|-|-|-|
+|BSS |基本服务集BSS |无线网络的基本服务单元，通常由一个AP和若干无线终端组成|
+|ESS |扩展服务集ESS |由多个使用相同SSID的BSS组成，解决BSS覆盖范围有限的问题|
+|SSID |服务集标识符SSID|用来区分不同的无线网络。|
+|ESSID |扩展服务集标识符ESSID|一个或一组无线网络的标识，和SSID是相同的。
+|BSSID | 基本服务集标识符BSSID|在链路层上用来区分同一个AP上的不同VAP，也可以用来区分同一
+个ESS中的BSS。
+|VAP |虚拟接入点VAP|AP设备上虚拟出来的业务功能实体。用户可以在一个AP上创建不同
+的VAP来为不同的用户群体提供无线接入服务
+
+## 空间流
+无线电在同一时间发送多个信号，每一份信号都是空间流。
+空间流使用发射端的天线进行发送，每个空间流经过不同的路径到达接收端。通常情况下一个接收天线和一个发送天线建立一个空间流。80211.ax规定一个射频最大只能建立8个空间流。
+# WLAN组网架构
 ## fat AP
 - 每个AP独立自治
 - 人工成本高
   
+• FAT AP（胖AP）架构又称为自治式网络架构。
+• 当部署单个AP时，由于FAT AP具备较好的独立性，不需要另外部署集中控
+制设备，部署起来很方便，成本较低廉。
+• 但是，在企业中，随着WLAN覆盖面积增大，接入用户增多，需要部署的
+FAT AP数量也会增多。而每个FAT AP又是独立工作的，缺少统一的控制设
+备，因此管理、维护这些FAT AP就变得十分麻烦。
+• 所以对于企业而言，不推荐FAT AP架构，更合适的选择是下面要介绍的
+AC+FIT AP架构、云管理架构、Leader AP架构等。
 ## ac+FIT AP 
+AC负责WLAN的接入控制、转发和统计、AP的配置监控、漫游
+管理、AP的网管代理、安全控制。
+• FIT AP（瘦AP）负责802.11报文的加解密、802.11的物理层功
+能、接受AC的管理、空口的统计等简单功能。
+• AC和AP之间使用的通信协议是CAPWAP。
+• 相比于FAT AP架构，AC+FIT AP架构的优点如下。
+ 配置与部署更容易
+ 安全性更高
+ 更新与扩展容易
+
+### 二层组网和三层组网
 
 ### 二层组网
+说明：AC和FIT AP在同一个广播域，AP通过本地广播可以直接找到AC，
+组网简单，配置简单，管理简单。
+• 应用：适用于小范围组网，比如：小型企业网络等；不适合大型企业复
+杂、精细化的WLAN组网。
+### 三层组网
+说明：AC和FIT AP不在同一网段，中间网络必须保证AP和AC之间路由可
+达，需要进行额外配置才能使得AP发现AC，组网灵活、易扩展。
+• 应用：适用于中型和大型网络。以大型园区为例，每一栋楼里都会部署AP
+进行无线覆盖，AC放在核心机房进行统一控管。这样AC和FIT AP之间必须
+采用较为复杂的三层网络。
 
+## CAPWAP协议介绍
+
+CAPWAP（无线接入点控制和配置协议）：该协议定义
+了如何对AP进行管理、业务配置，即AC通过CAPWAP隧
+道来实现对AP的集中管理和控制
+### CAPWAP隧道的功能
+• AP对AC的自动发现。
+• AP与AC间的状态维护。
+• AC通过CAPWAP隧道对AP进行管理、业务配置下发。
+• 当采用隧道转发模式时，AP将STA发出的数据通过
+CAPWAP隧道实现与AC之间的交互。
 ## ac可靠性 
 ![](images/wlan/AC%E5%8F%AF%E9%9D%A0%E6%80%A7.png)
 ### 双链路双机设备
@@ -45,6 +120,15 @@
 
 ![](images/wlan/capwap_chanel.png)
 ## capwap隧道
+## VLAN规划
+• WLAN中的VLAN主要分为两类：管理VLAN和业务VLAN。
+ 管理VLAN：负责传输CAPWAP隧道转发的报文，包括管理报文
+和CAPWAP隧道转发的业务数据报文。
+ 业务VLAN：负责传输业务数据报文。
+• 在进行VLAN规划需要注意以下原则。
+ 管理VLAN和业务VLAN分离。
+ 业务VLAN应根据实际业务需要与SSID匹配映射关系
+
 
 ## WLAN漫游概述
 ⚫ WLAN漫游是指STA在不同AP覆盖范围之间移动且
@@ -76,6 +160,11 @@
     | 大带宽 | 高并发| 低时延| 低耗电|
     | :------------- | :----------: | ------------: |------------: |
     |⚫ 速率高达 9.6 Gbps ⚫ 带宽提 升 4 倍| ⚫ 每AP接入 1024 终⚫ 并发用户数提升 4 倍| ⚫ 业务时延低至 20 m s ⚫ 平均时延降低 30%|⚫目标时间唤醒机制⚫ 终端功耗降低 30%|
+
+    wifi6:
+    协议最高速率：
+    2.4Ghz 1.15Gbps
+    5GHz 9.6gbps
     
 
 ## Wi-Fi 6技术：OFDMA
@@ -106,6 +195,91 @@ VRP
 
 display lldp
 
+# 配置AP上线
+- 配置网络互通 
+  配置DHCP服务器，为AP和STA分配IP地址，也可将AC设备配置为DHCP服务器。
+• 配置AP到DHCP服务器间的网络互通；配置AP到AC之间的网络互通。
+
+[AC]dhcp enable
+[AC]interface Vlanif 100
+[AC-Vlanif100]ip address 10.1.100.1 24
+[AC-Vlanif100]dhcp select interface
+[AC-Vlanif100]quit
+[AC]interface Vlanif 101
+[AC-Vlanif101]ip address 10.1.101.1 24
+[AC-Vlanif101]dhcp select interface
+[AC-Vlanif101]quit
+- 创建AP组 每个AP都会加入并且只能加入到一个AP组中，AP组通常用于多个AP的通用配置。
+[AC]wlan
+[AC-wlan-view]ap-group name ap-group1
+[AC-wlan-ap-group-ap-group1]quit
+- 配置AC的国家码
+（域管理模板）
+国家码用来标识AP射频所在的国家，不同国家码规定了不同的AP射频特性，包括AP
+的发送功率、支持的信道等。
+
+AC-wlan-view]regulatory-domain-profile name domain
+[AC-wlan-regulate-domain-default]country-code CN
+[AC-wlan-regulate-domain-default]quit
+[AC-wlan-view]ap-group name ap-group1
+[AC-wlan-ap-group-ap-group1]regulatory-domain-profile domain
+Warning: Modifying the country code will clear channel, power and
+antenna gain configurations of the radio and reset the AP. Continu
+e?[Y/N]:y
+[AC-wlan-ap-group-ap-group1]quit
+[AC-wlan-view]quit
+
+AC-wlan-view]ap auth-mode mac-auth
+[AC-wlan-view]ap-id 0 ap-mac 00e0-fc44-4270
+[AC-wlan-ap-0]ap-name ap1
+Warning: This operation may cause AP reset. Continue? [Y/N]:y
+[AC-wlan-ap-0]ap-group ap-group1
+Warning: This operation may cause AP reset. If the country code
+changes, it will clear channel, power and antenna gain
+configurations of the radio, Whether to continue? [Y/N]:y
+[AC-wlan-ap-0]quit
+]display ap all
+- 配置源接口或源地址
+（与AP建隧道）
+每台AC都必须唯一指定一个IP地址或接口，该AC设备下挂接的AP学习到此IP地址或
+者此接口下配置的IP地址，用于AC和AP间的通信，以及CAPWAP隧道的建立。
+capwap source interface vlanif 100
+
+创建名为“employee”的安全模板，并配置安全策略。
+• 创建名为“employee”的SSID模板，并配置SSID名称为
+“employee”。
+[AC-wlan-view]security-profile name employee
+[AC-wlan-sec-prof-employee]security wpa-wpa2 psk passphrase a1234567 aes
+[AC-wlan-sec-prof-employee]quit
+[AC-wlan-view]ssid-profile name employee
+[AC-wlan-ssid-prof-employee]ssid employee
+[AC-wlan-ssid-prof-employee]quit
+
+创建名为“employee”的VAP模板，配置业务数据转发模式、
+业务VLAN，并且引用安全模板和SSID模板。
+• 配置AP组引用VAP模板，AP上所有射频都使用VAP模板
+“employee”的配置。
+[AC-wlan-view]vap-profile name employee
+[AC-wlan-vap-prof-employee]forward-mode tunnel
+[AC-wlan-vap-prof-employee]service-vlan vlan-id 101
+[AC-wlan-vap-prof-employee]security-profile employee
+[AC-wlan-vap-prof-employee]ssid-profile employee
+[AC-wlan-vap-prof-employee]quit
+[AC-wlan-view]ap-group name ap-group1
+[AC-wlan-ap-group-ap-group1]vap-profile employee wlan 1
+radio all
+[AC-wlan-ap-group-ap-group1]quit
+
+查看VAP模板信息
+display vap ssid employee
+WLAN业务配置会自动下发给AP，配置完成后，通过执行命令display vap ssid employee查看如下信
+息，当“Status”项显示为“ON”时，表示AP对应的射频上的VAP已创建成功
+- 配置AP上线时自动升级
+（可选）
+自动升级是指AP在上线过程中自动对比自身版本与AC或SFTP或FTP服务器上配置的
+AP版本是否一致，如果版本不一致，则进行升级，然后AP自动重启再重新上线。
+- 添加AP设备
+（配置AP认证模式)添加AP有三种方式：离线导入AP、自动发现AP以及手工确认未认证列表中的AP。
 
 ### AC 升级
   -  display startup  查看当前版本
@@ -335,6 +509,19 @@ WLAN规划：
 • 标清视频：2 Mbps
 • 推荐吸顶
 • POE供电网线距离不超过100米
+# CSMA/CA
+802.11无线局域网协议中，冲突的检测碰撞会浪费宝贵的传输资源，所需代价较大，因此802.11 转而使用冲突避免（CSMA/CA）机
+制。
+• CS：载波侦听，在发送数据之前进行侦听，以确保线路空闲，减少冲突的机会。
+• MA：多址访问，每个站点发送的数据，可以同时被多个站点接收。
+• CA：Collision Avoidance，冲突避免，是碰撞避免的意思，或者说，协议的设计是要尽量减少碰撞发生的概率。
+
+
+# RTS/CTS
+RTS/CTS（Request To Send/Clear To Send，请求发送/允许发送）协议是被802.11无线网络协议采用的一种用来减少节点问题所造
+成的冲突机制。
+ RTS帧的作用：预约链路使用权；其他收到该RTS的STA保持沉默。
+ CTS帧作用：用于AP 答复RTS帧；其他收到该CTS的STA保持沉默
 
 # WLAN 施工：
 工勘： 应该怎么做？
@@ -376,3 +563,7 @@ Chrome浏览器。
 
 工具和手册获取方法：https://serviceturbo-cloud-cn.huawei.com/#/toolappmarket
 • 工具名称：CloudCampus APP
+CloudCampus APP验收。
+
+WLAN Planner
+https://serviceturbo-cloud.huawei.com/serviceturbocloud/#/campusContainer?draftId=ae3aafb4-749a-4d5e-918f-bff02cb1edd2&projectId=19b71d0e-0b06-4996-b896-81df766ff638&appId=d59de9ac-e4ef-409e-bbdc-eff3d0346b42&userId=xzg323_1&projectType=0
