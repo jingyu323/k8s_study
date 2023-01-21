@@ -566,4 +566,4 @@ Chrome浏览器。
 CloudCampus APP验收。
 
 WLAN Planner
-https://serviceturbo-cloud.huawei.com/serviceturbocloud/#/campusContainer?draftId=ae3aafb4-749a-4d5e-918f-bff02cb1edd2&projectId=19b71d0e-0b06-4996-b896-81df766ff638&appId=d59de9ac-e4ef-409e-bbdc-eff3d0346b42&userId=xzg323_1&projectType=0
+https://serviceturbo-cloud.huawei.com/serviceturbocloud/#/campusContainer?draftId=ae3aafb4-749a-4d5e-918f-bff02cb1edd2&projectId=19b71d0e-0b06-4996-b896-81df766ff638&appId=d59de9ac-e4ef-409e-bbdc-eff3d0346b42&userId=xzg323_1&projectType=0  
