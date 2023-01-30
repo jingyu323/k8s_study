@@ -55,5 +55,22 @@ dirname
 dirname 文件绝对路径
 ```
 
+## 用户组
+
+1.添加用户
+
+useradd [选项] 用户名
+
+passwd [选项] 用户名 
 
 
+
+
+
+### /etc/passwd
+
+Linux 系统中的 /etc/passwd 文件，是系统用户配置文件，存储了系统中所有用户的基本信息，并且所有用户都可以对此文件执行读操作。
+
+### /etc/shadow 
+
+/etc/shadow 文件，用于存储 Linux 系统中用户的密码信息，又称为“影子文件”。
