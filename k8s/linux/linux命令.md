@@ -27,6 +27,10 @@ yum -y clean all
 
 虚拟机磁盘共享
 
+1.打开虚拟机设置，-》选项-》共享文件夹-》选择添加，设置为总是启用
+
+2.创建挂载目录  mkdir /mnt/code
+
 sudo vmhgfs-fuse .host:/ /mnt/code  -o allow_other  -o nonempty
 
 
