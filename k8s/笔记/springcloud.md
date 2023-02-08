@@ -99,6 +99,46 @@ public class SystemApiConfig {
 
 ### 8.1 熔断与服务降级
 
+Sentinel 
+
+#### @SentinelResource
+
+@SentinelResource是sentinel中非常重要的注解，提供了简单易用的功能。其中blockHandler注解是限流的处理方法，fallback是服务降级的处理方法。
+
+```
+@SentinelResource(value="edit", blockHandler="editBlock", fallback = "editFallback")
+@RequestMapping("/edit")
+public Object edit(@RequestParam(required = false) String id,
+                   @RequestParam(required = false) Integer age) throws Exception {
+    Thread.sleep(20);
+    return this.studentService.commons();
+}
+
+// 限流的处理
+public Object editBlock(String id, Integer age, BlockException ex) {
+    Map<String, Object> map = new HashMap<>();
+    map.put("msg", "限流了.");
+    return map;
+}
+
+//服务降级的处理方法
+public Object editFallback(String id, Integer age) {
+    Map<String, Object> map = new HashMap<>();
+    map.put("msg", "fallback 服务降级了.");
+    return map;
+}
+```
+
+
+
+### Feign与Sentinel的整合
+
+
+
+
+
+
+
 ### 8.2 负载均衡 
 
 1. ​	feign是基于Ribbon的另外一个负载均衡的客户端框架，只需要在接口上定义要调用的服务名即可，使用起来非常的简单。
