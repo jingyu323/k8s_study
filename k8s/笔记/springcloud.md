@@ -95,4 +95,53 @@ public class SystemApiConfig {
 
 **@RequestBody注解后** ，只能解析json类型的数据，
 
-## 8.参考资料
+## 8.Springcloud Alibaba
+
+### 8.1 熔断与服务降级
+
+### 8.2 负载均衡 
+
+1. ​	feign是基于Ribbon的另外一个负载均衡的客户端框架，只需要在接口上定义要调用的服务名即可，使用起来非常的简单。
+
+**pom.xml依赖**
+
+```
+<dependency>
+    <groupId>org.springframework.cloud</groupId>
+    <artifactId>spring-cloud-starter-openfeign</artifactId>
+</dependency>
+```
+
+**启动类配置**
+
+需要在启动类上加上@EnableFeignClients这个注解
+
+```
+@SpringBootApplication
+@EnableDiscoveryClient
+@EnableFeignClients
+public class ConsumerApplication {
+    public static void main(String[] args) {
+        SpringApplication.run(ConsumerApplication.class, args);
+    }
+}
+```
+
+**服务接口配置**
+
+```
+@FeignClient(name="alibaba-provider")
+public interface UserService {
+
+    @RequestMapping("/user")
+    public List<String> getUsers();
+}
+```
+
+
+
+
+
+
+
+## 参考资料
