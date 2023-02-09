@@ -10,7 +10,7 @@ http://nginx.org/en/download.html
 
 安装编译工具
 
-yum -y install gcc gcc-c++ kernel-devel
+yum -y install gcc gcc-c++ kernel-devel  pcre-devel openssl openssl-devel
 
 
 
@@ -52,11 +52,15 @@ Configuration summary
 
 安装遇到问题：
 
- install the PCRE library into the system
+1.  install the PCRE library into the system
 
-
-
+```
 yum -y install pcre-devel
+```
+
+
+
+
 
 
 
