@@ -63,3 +63,39 @@ MQTT 协议提供了 3 种消息服务质量等级（Quality of Service），保
 ## MQTT 桌面客户端
 
 [MQTT X](https://mqttx.app/zh) 是 EMQ 开源的一款跨平台 MQTT 5.0 客户端工具，它支持 macOS, Linux, Windows，并且支持 MQTT 消息格式转换。
+
+## IoTDB
+
+IoTDB是针对时间序列数据收集、存储与分析一体化的数据管理引擎。它具有体量轻、性能高、易使用的特点，完美对接Hadoop与Spark生态，适用于工业物联网应用中海量时间序列数据高速写入和复杂分析查询的需求
+
+
+
+规则的查询SQL Editor 如下：
+
+```
+
+SELECT
+    clientid,
+    now_timestamp('millisecond') as now_ts_ms,
+    payload.msg as msg
+FROM
+    "python/mqtt"
+```
+
+Egress 是将本地消息送至远程，需要将EMQX收到的消息存入 IoTDB 需要配置这个.
+
+Breaker Payload 内容如下
+
+```
+{
+ "device": "root.sg.${clientid}",
+ "timestamp": ${now_ts_ms},
+ "measurements": [
+   "msg"
+ ],
+ "values": [
+   ${msg}
+ ]
+}
+```
+
