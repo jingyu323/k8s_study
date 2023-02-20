@@ -358,6 +358,27 @@ ps -Lf 29295|wc -l
 
 ```
 lsof -p pid | wc -l
+查询某个进程打开的文件列表
+
+lsof | grep {pid}
+查询某个进程打开的文件数目
+
+lsof | grep {pid} | wc -l
+查询进程使用的文件描述符
+
+ls -l /proc/{pid}/fd/
+
+查询进程使用的文件描述符数目
+
+ls -l /proc/{pid}/fd/ | wc -l
+1
+查看系统文件描述符的最大设置
+
+cat /proc/sys/fs/file-max
+1
+系统当前被使用的文件描述符数目
+
+cat /proc/sys/fs/file-nr
 ```
 
 
