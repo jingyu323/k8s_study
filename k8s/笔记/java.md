@@ -354,6 +354,12 @@ ps -ef|grep tomcat
 ps -Lf 29295|wc -l
 ```
 
+3、查看该进程打开的文件数
+
+```
+lsof -p pid | wc -l
+```
+
 
 
 pstree -p 进程号，这个命令可以列出该进程的所有线程出来。
