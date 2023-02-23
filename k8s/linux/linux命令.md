@@ -216,3 +216,12 @@ test_str=block#username#password#serverIP
 
 
 echo $test_str | awk -F "#" '{print $4}'
+
+
+
+
+
+## 材料：
+
+1. Linux基础介绍 https://www.junmajinlong.com/linux/index/#systemd
+
