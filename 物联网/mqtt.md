@@ -99,3 +99,36 @@ Breaker Payload 内容如下
 }
 ```
 
+
+
+切换到安装目录
+
+启动单机模式
+
+./start-standalone.sh
+
+启动客户端
+
+./start-cli.sh
+
+
+
+(1)创建存储组 set storage group to root.1n
+
+ (2)查看存储组 show storage group
+
+(1)创建时间序列
+create timeseries root.1n.wf01.wt01.status with datatype=boolean,encoding=plain
+create timeseries root.1n.wf01.wt01.temperature with datatype=float,encoding=rle
+(2)查看时间序列
+show timeseries  
+
+
+
+插入数据时需要指定时间戳和路径后缀名称。
+
+(1)向单个时间序列中插入数据
+insert into root.1n.wf01.wt01(timestamp,status) values(100,true);
+(2)向多个时间序列中同时插入数据
+这些时间序列同属于一个时间戳：
+insert into root.1n.wf01.wt01(timestamp,status,temperature) values(200,false,20.71)
