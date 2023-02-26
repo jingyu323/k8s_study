@@ -217,7 +217,16 @@ test_str=block#username#password#serverIP
 
 echo $test_str | awk -F "#" '{print $4}'
 
+## 防火墙：
 
+```
+#查看状态
+systemctl status firewalld.service
+#停止
+systemctl stop firewalld.service
+禁止防火墙
+systemctl disable firewalld.service
+```
 
 
 
