@@ -41,8 +41,8 @@ emqx ctl admins
 admins add <Username> <Password> <Description> # Add dashboard user
 admins passwd <Username> <Password>            # Reset dashboard user password
 admins del <Username>                          # Delete dashboard user
-
-
+设置密码
+emqx ctl  admins passwd  admin admin@123
 
 http://192.168.99.179:18083/#/connections
 
