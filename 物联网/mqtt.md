@@ -111,7 +111,7 @@ Breaker Payload 内容如下
 
 ./start-cli.sh
 
-
+删除数据： drop database root.sg
 
 (1)创建存储组 set storage group to root.1n
 
@@ -132,3 +132,9 @@ insert into root.1n.wf01.wt01(timestamp,status) values(100,true);
 (2)向多个时间序列中同时插入数据
 这些时间序列同属于一个时间戳：
 insert into root.1n.wf01.wt01(timestamp,status,temperature) values(200,false,20.71)
+
+
+
+配置过程中 select * from root.sg ，直接从数据库中是查不出来数据的，需要带上client_id
+
+![image-20230227180009411](image\image-20230227180009411.png)
