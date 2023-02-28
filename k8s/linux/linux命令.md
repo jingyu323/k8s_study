@@ -59,6 +59,57 @@ dirname
 dirname 文件绝对路径
 ```
 
+
+
+查看文件句柄
+
+ lsof /
+
+
+
+## 四种Linux系统版本号的查看方式
+
+1、系统版本号的查看(cat /proc/version)
+[root@qianfeng01 ~]# cat /proc/version
+Linux version 3.10.0-1062.el7.x86_64 (mockbuild@kbuilder.bsys.centos.org) (gcc version 4.8.5 20150623 (Red Hat 4.8.5-36) (GCC) ) #1 SMP Wed Aug 7 18:08:02 UTC 2019
+2、获取内核信息 (uname -a)
+[root@qianfeng01 ~]# uname -a
+Linux qianfeng01 3.10.0-1062.el7.x86_64 #1 SMP Wed Aug 7 18:08:02 UTC 2019 x86_64 x86_64 x86_64 GNU/Linux
+3、获取系统信息 (cat /etc/os-release)
+
+[root@qianfeng01 ~]# cat /etc/os-release
+NAME="CentOS Linux"
+VERSION="7 (Core)"
+ID="centos"
+ID_LIKE="rhel fedora"
+VERSION_ID="7"
+PRETTY_NAME="CentOS Linux 7 (Core)"
+ANSI_COLOR="0;31"
+CPE_NAME="cpe:/o:centos:centos:7"
+HOME_URL="https://www.centos.org/"
+BUG_REPORT_URL="https://bugs.centos.org/"
+
+CENTOS_MANTISBT_PROJECT="CentOS-7"
+CENTOS_MANTISBT_PROJECT_VERSION="7"
+REDHAT_SUPPORT_PRODUCT="centos"
+REDHAT_SUPPORT_PRODUCT_VERSION="7"
+
+4、获取系统信息 （cat /etc/redhat-release）
+[root@qianfeng01 ~]# cat /etc/redhat-release
+CentOS Linux release 7.7.1908 (Core)
+hostnamectl
+
+[root@qianfeng01 ~]# hostnamectl
+   Static hostname: qianfeng01
+         Icon name: computer-vm
+           Chassis: vm
+        Machine ID: dce68bacb80a4cf5bca2405780aa9591
+           Boot ID: 27f089e32abf48a0a903bd5671d31586
+    Virtualization: vmware
+  Operating System: CentOS Linux 7 (Core)
+       CPE OS Name: cpe:/o:centos:centos:7
+            Kernel: Linux 3.10.0-1062.el7.x86_64 
+
 ## 用户组
 
 1.添加用户
@@ -168,6 +219,10 @@ Average:       dev8-0     34.45    781.10   9601.22    301.36      0.78     22.7
 除此之外，如果想要查看系统内存使用情况，可以执行`sar -r 5 3`命令；如果要想查看网络运行状态，可执行`sar -n DEV 5 3`命令，等等。有关其它参数的用法，这里不再给出具体实例，有兴趣的读者可自行测试，观察运行结果。
 
 #### 网络带宽
+
+查看网络进程使用端口
+
+netstat -natp 
 
 
 
