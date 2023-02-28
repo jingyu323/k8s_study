@@ -65,6 +65,14 @@ dirname 文件绝对路径
 
  lsof /
 
+查看系统进程文件限制
+
+/proc/16112/limits
+
+
+
+ulimit -a
+
 
 
 ## 四种Linux系统版本号的查看方式
@@ -268,9 +276,38 @@ sar 命令很强大，是分析系统性能的重要工具之一，通过该命�
 
 test_str=block#username#password#serverIP  
 
-
-
 echo $test_str | awk -F "#" '{print $4}'
+
+
+
+截取
+
+[root@localhost videoLink]# filename="test/2/4/HXD2B0259_成都运达_01_一端路况_20210322_074502.mp4"
+
+切割左边的，只保留最后一个/右边的数据
+
+[root@localhost videoLink]# echo ${filename## 
+[root@localhost videoLink]# name=`echo ${filename##*/}`
+
+[root@localhost videoLink]# echo $name
+HXD2B0259_成都运达_01_一端路况_20210322_074502.mp4
+[root@localhost videoLink]# echo ${name# 
+[root@localhost videoLink]# echo ${name%_*}
+HXD2B0259_成都运达_01_一端路况_20210322
+[root@localhost videoLink]# echo ${name%%_*}
+HXD2B0259
+
+总结下
+
+\#、##表示从左边删除，一个#表示从左边删除到第一个指定的字符；两个#表示从左边删除到最后一个指定的字符。
+
+
+
+% 、%%表示从右边删除，一个%表示从右边删除第一个指定的字符；两个%表示从右边删除到最后一个指定的字符。
+
+删除包括指定的字符串本身。
+
+
 
 ## 防火墙：
 
