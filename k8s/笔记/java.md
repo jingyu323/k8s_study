@@ -608,6 +608,26 @@ public ThreadPoolExecutor(int corePoolSize, int maximumPoolSize, long keepAliveT
     }
 ```
 
+#### 线程lamda表达式：
+
+```java
+       多行语句
+       new Thread(() ->{
+           String res= testComan("ssss");
+
+            System.out.println(res);
+        } ).start();
+        
+        单行语句
+         new Thread(() -> testComan("ssss")).start();
+        
+        
+```
+
+
+
+
+
 **线程池五种状态**
 
 
