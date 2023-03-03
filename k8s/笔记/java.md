@@ -618,7 +618,7 @@ public ThreadPoolExecutor(int corePoolSize, int maximumPoolSize, long keepAliveT
             System.out.println(res);
         } ).start();
         
-        单行语句
+        单行语句，直接调用方法即可
          new Thread(() -> testComan("ssss")).start();
         
         
