@@ -841,3 +841,24 @@ package.xml
  maven-assembly-plugin 参数详细介绍：
 
 https://www.cnblogs.com/powerwu/articles/16686555.html
+
+# 问题排查 
+
+## 1. tomcat 打开文件太多问题排查
+ 查看 系统文件限制
+ulimit -a 
+
+针对所有用户的设置，在/etc/security/limits.conf文件，其是可以对系统用户、组进行cpu、文件数等限制的，通过它可以针对某个用户或全部进行限制。但不能超越系统的限制；
+格式：
+#<domain>   <type> <item> <value>
+*           soft   noproc        102400
+
+
+用来查看当前pid 打开多少文件的问题
+lsof -p  pid 
+
+
+lsof -p 1305 | wc -l 
+
+ulimit -n 4096
+/proc/sys/fs/file-max
