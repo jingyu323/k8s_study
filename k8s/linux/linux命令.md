@@ -319,7 +319,7 @@ HXD2B0259
 
 获取不带后缀的文件名
 
- basename /usr/include/stdio.h .h
+basename /usr/include/stdio.h .h
 
 输出 stdio
 
