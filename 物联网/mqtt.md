@@ -68,7 +68,42 @@ MQTT 协议提供了 3 种消息服务质量等级（Quality of Service），保
 
 IoTDB是针对时间序列数据收集、存储与分析一体化的数据管理引擎。它具有体量轻、性能高、易使用的特点，完美对接Hadoop与Spark生态，适用于工业物联网应用中海量时间序列数据高速写入和复杂分析查询的需求
 
+要启用 IoTDB 的 MQTT 协议支持，需要改动 IoTDB 的配置文件 conf/iotdb-engine.properties：
 
+```
+####################
+
+### MQTT Broker Configuration
+
+####################
+
+# whether to enable the mqtt service.
+
+enable_mqtt_service=true
+
+# the mqtt service binding host.
+
+mqtt_host=0.0.0.0
+
+# the mqtt service binding port.
+
+mqtt_port=2883
+
+# the handler pool size for handing the mqtt messages.
+
+mqtt_handler_pool_size=1
+
+# the mqtt message payload formatter.
+
+mqtt_payload_formatter=json
+
+# max length of mqtt message in byte
+```
+
+
+
+mqtt_max_message_size=1048576
+其中 enable_mqtt_service 默认为 false，需要改成 true。mqtt_port 默认值是 1883，为了避免与 emqx 的端口号冲突，需要改为 2883。
 
 规则的查询SQL Editor 如下：
 
@@ -111,7 +146,7 @@ Breaker Payload 内容如下
 
 ./start-cli.sh
 
-
+删除数据： drop database root.sg
 
 创建数据库：
 
@@ -142,3 +177,9 @@ insert into root.1n.wf01.wt01(timestamp,status) values(100,true);
 (2)向多个时间序列中同时插入数据
 这些时间序列同属于一个时间戳：
 insert into root.1n.wf01.wt01(timestamp,status,temperature) values(200,false,20.71)
+
+
+
+配置过程中 select * from root.sg ，直接从数据库中是查不出来数据的，需要带上client_id
+
+![image-20230227180009411](image\image-20230227180009411.png)

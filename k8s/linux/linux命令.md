@@ -59,6 +59,90 @@ dirname
 dirname 文件绝对路径
 ```
 
+
+
+查看文件句柄
+
+ lsof /
+
+查看系统进程文件限制
+
+/proc/16112/limits
+
+
+
+这将显示该进程的所有打开文件
+
+ls -l /proc/4406/fd  | wc -l
+
+ulimit -a
+
+ulimit -n 102400
+
+最大值为655350
+
+## RAR
+
+```
+rar a  -r -ep1  -idq "${sub_dir}"  "${sub_dir}/*"
+
+a 添加文件到压缩包
+-r 递归子目录
+-ep1 不包含跟路径
+-idq  不显示压缩信息
+
+-id[c,d,p,q]
+禁用消息。
+
+参数 -idc 禁用版权字符串。
+参数 -idd 在操作结束禁止显示“完成”字符串。
+参数 -idp 禁止百分比指示。
+参数 -idq 打开安静模式, 仅错误消息和问题能被显示。
+```
+
+## 四种Linux系统版本号的查看方式
+
+1、系统版本号的查看(cat /proc/version)
+[root@qianfeng01 ~]# cat /proc/version
+Linux version 3.10.0-1062.el7.x86_64 (mockbuild@kbuilder.bsys.centos.org) (gcc version 4.8.5 20150623 (Red Hat 4.8.5-36) (GCC) ) #1 SMP Wed Aug 7 18:08:02 UTC 2019
+2、获取内核信息 (uname -a)
+[root@qianfeng01 ~]# uname -a
+Linux qianfeng01 3.10.0-1062.el7.x86_64 #1 SMP Wed Aug 7 18:08:02 UTC 2019 x86_64 x86_64 x86_64 GNU/Linux
+3、获取系统信息 (cat /etc/os-release)
+
+[root@qianfeng01 ~]# cat /etc/os-release
+NAME="CentOS Linux"
+VERSION="7 (Core)"
+ID="centos"
+ID_LIKE="rhel fedora"
+VERSION_ID="7"
+PRETTY_NAME="CentOS Linux 7 (Core)"
+ANSI_COLOR="0;31"
+CPE_NAME="cpe:/o:centos:centos:7"
+HOME_URL="https://www.centos.org/"
+BUG_REPORT_URL="https://bugs.centos.org/"
+
+CENTOS_MANTISBT_PROJECT="CentOS-7"
+CENTOS_MANTISBT_PROJECT_VERSION="7"
+REDHAT_SUPPORT_PRODUCT="centos"
+REDHAT_SUPPORT_PRODUCT_VERSION="7"
+
+4、获取系统信息 （cat /etc/redhat-release）
+[root@qianfeng01 ~]# cat /etc/redhat-release
+CentOS Linux release 7.7.1908 (Core)
+hostnamectl
+
+[root@qianfeng01 ~]# hostnamectl
+   Static hostname: qianfeng01
+         Icon name: computer-vm
+           Chassis: vm
+        Machine ID: dce68bacb80a4cf5bca2405780aa9591
+           Boot ID: 27f089e32abf48a0a903bd5671d31586
+    Virtualization: vmware
+  Operating System: CentOS Linux 7 (Core)
+       CPE OS Name: cpe:/o:centos:centos:7
+            Kernel: Linux 3.10.0-1062.el7.x86_64 
+
 ## 用户组
 
 1.添加用户
@@ -169,6 +253,10 @@ Average:       dev8-0     34.45    781.10   9601.22    301.36      0.78     22.7
 
 #### 网络带宽
 
+查看网络进程使用端口
+
+netstat -natp 
+
 
 
 分析系统性能命令
@@ -207,15 +295,52 @@ sar 命令很强大，是分析系统性能的重要工具之一，通过该命�
 
  du -sm * |  awk '{printf "%.1f\n",$1/1024}'
 
-## 字符串操作
+## 字符串操作	
 
 ### 字符串分割  
 
 test_str=block#username#password#serverIP  
 
-
-
 echo $test_str | awk -F "#" '{print $4}'
+
+
+
+截取
+
+[root@localhost videoLink]# filename="test/2/4/HXD2B0259_成都运达_01_一端路况_20210322_074502.mp4"
+
+切割左边的，只保留最后一个/右边的数据
+
+[root@localhost videoLink]# echo ${filename## 
+[root@localhost videoLink]# name=`echo ${filename##*/}`
+
+[root@localhost videoLink]# echo $name
+HXD2B0259_成都运达_01_一端路况_20210322_074502.mp4
+[root@localhost videoLink]# echo ${name# 
+[root@localhost videoLink]# echo ${name%_*}
+HXD2B0259_成都运达_01_一端路况_20210322
+[root@localhost videoLink]# echo ${name%%_*}
+HXD2B0259
+
+总结下
+
+\#、##表示从左边删除，一个#表示从左边删除到第一个指定的字符；两个#表示从左边删除到最后一个指定的字符。
+
+
+
+% 、%%表示从右边删除，一个%表示从右边删除第一个指定的字符；两个%表示从右边删除到最后一个指定的字符。
+
+删除包括指定的字符串本身。
+
+
+
+获取不带后缀的文件名
+
+basename /usr/include/stdio.h .h
+
+输出 stdio
+
+
 
 ## 防火墙：
 

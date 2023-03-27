@@ -769,6 +769,18 @@ binlog默认情况下是不开启的，不过一般情况下，建议开启，�
 # binlog 相关配置``vim /etc/my.cnf ``[mysqld]``server-id = 1003306``log-bin = /data/mysql/logs/binlog``binlog_format = row``expire_logs_days = 15
 ```
 
+## 具体问题解决
+
+1.MySQL错误Illegal mix of collations (utf8_unicode_ci,IMPLICIT) and (utf8_general_ci,IMPLICIT)
+
+解决方案：
+
+检查表的集合规则，将两张表的编码集合改为一致
+
+
+
+alter table htgw_sync_group convert to character set utf8 collate utf8mb3_unicode_ci;
+
 
 
 ## 参考资料

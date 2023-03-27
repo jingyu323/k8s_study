@@ -608,6 +608,26 @@ public ThreadPoolExecutor(int corePoolSize, int maximumPoolSize, long keepAliveT
     }
 ```
 
+#### 线程lamda表达式：
+
+```java
+       多行语句
+       new Thread(() ->{
+           String res= testComan("ssss");
+
+            System.out.println(res);
+        } ).start();
+        
+        单行语句，直接调用方法即可
+         new Thread(() -> testComan("ssss")).start();
+        
+        
+```
+
+
+
+
+
 **线程池五种状态**
 
 
@@ -821,3 +841,49 @@ package.xml
  maven-assembly-plugin 参数详细介绍：
 
 https://www.cnblogs.com/powerwu/articles/16686555.html
+
+# 问题排查 
+
+## 1. tomcat 打开文件太多问题排查
+ 查看 系统文件限制
+ulimit -a 
+
+针对所有用户的设置，在/etc/security/limits.conf文件，其是可以对系统用户、组进行cpu、文件数等限制的，通过它可以针对某个用户或全部进行限制。但不能超越系统的限制；
+格式：
+#<domain>   <type> <item> <value>
+*           soft   noproc        102400
+
+
+用来查看当前pid 打开多少文件的问题
+lsof -p  pid 
+
+
+lsof -p 1305 | wc -l 
+
+ulimit -n 4096
+/proc/sys/fs/file-max
+
+ - 针对所有用户的设置，在/etc/security/limits.conf文件，其是可以对系统用户、组进行cpu、文件数等限制的，通过它可以针对某个用户或全部进行限制。但不能超越系统的限制；
+
+        （*表示所有用户、soft表示可以超出，但只是警告；hard表示绝对不能超出，unlimited用于表示不限制）
+    
+    - 如果想对所有用户设置，也可以放在/etc/profile文件里面，下面是该文件里面的默认参数：   
+    ulimit -S -c 0 > /dev/null 2>&1
+
+    #cat /proc/sys/fs/file-max
+
+    查看系统允许打开的最大文件数
+
+#cat /proc/sys/fs/file-max
+
+查看每个用户允许打开的最大文件数
+ulimit -a
+发现系统默认的是open files (-n) 1024，问题就出现在这里。
+另外方法：
+1.使用ps -ef |grep java (java代表你程序，查看你程序进程) 查看你的进程ID，记录ID号，假设进程ID为1305
+2.使用：lsof -p 1305 | wc -l 查看当前进程id为1305的 文件操作状况
+执行该命令出现文件使用情况为 1192
+3.使用命令：ulimit -a 查看每个用户允许打开的最大文件数
+发现系统默认的是open files (-n) 1024，问题就出现在这里。
+4.然后执行：ulimit -n 4096
+将open files (-n) 1024 设置成open files (-n) 4096
