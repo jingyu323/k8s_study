@@ -113,6 +113,16 @@ Breaker Payload 内容如下
 
 
 
+创建数据库：
+
+```text
+create database root.sg
+
+
+SHOW DATABASES
+
+```
+
 (1)创建存储组 set storage group to root.1n
 
  (2)查看存储组 show storage group
