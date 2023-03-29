@@ -2,9 +2,9 @@
 
 ## 1.dataZoom介绍
 
-需要在echarts.js 中引入
+需要在echarts.js 中引入，否则会导致添加组件属性不生效
 
- require('echarts/lib/component/dataZoom');
+ require('echarts/lib/component/dataZoom'); 
 
 ```
  {
@@ -50,6 +50,24 @@
             },
 
 ```
+
+## 2.elment UI 组件添加回车键搜索
+
+el-date-picker  添加 onchange  
+
+```
+ @change="onSearch"
+```
+
+el-input  添加 enter.native
+
+```
+@keyup.enter.native="onSearch"
+```
+
+
+
+
 
 
 
