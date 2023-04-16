@@ -26,6 +26,11 @@ sudo vmhgfs-fuse .host:/ /mnt/code -o allow_other -o uid=1000 -o gid=1000 -o uma
 
 sudo vmhgfs-fuse .host:/ /mnt/code  -o allow_other  **-o nonempty** 
 
+
+windows  cmd
+
+ type  文件名 | more    分页查看
+
 详细参考
 
 https://blog.csdn.net/NRWHF/article/details/127848959
