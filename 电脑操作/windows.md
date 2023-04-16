@@ -31,6 +31,8 @@ windows  cmd
 
  type  文件名 | more    分页查看
 
+ del 删除文件
+
 详细参考
 
 https://blog.csdn.net/NRWHF/article/details/127848959
