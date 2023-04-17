@@ -37,6 +37,12 @@ windows  cmd
 shutdown  -s -t 100
 
 shutdown -a 取消
+
+copy 
+
+move  file1 file2
+
+ren 重命名
 详细参考
 
 https://blog.csdn.net/NRWHF/article/details/127848959
