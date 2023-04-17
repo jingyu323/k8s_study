@@ -50,6 +50,11 @@ taskkill /f /im *.exe
 net user  账户 密码
 
 net user  账户 密码   /add 添加用户
+
+netstat -an
+
+远程桌面协议 端口3389
+
 详细参考
 
 https://blog.csdn.net/NRWHF/article/details/127848959
