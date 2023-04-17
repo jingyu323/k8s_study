@@ -35,6 +35,8 @@ windows  cmd
 
 
 shutdown  -s -t 100
+
+shutdown -a 取消
 详细参考
 
 https://blog.csdn.net/NRWHF/article/details/127848959
