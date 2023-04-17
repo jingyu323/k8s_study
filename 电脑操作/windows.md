@@ -47,7 +47,9 @@ ren 重命名
 禁止命令
 
 taskkill /f /im *.exe  
+net user  账户 密码
 
+net user  账户 密码   /add 添加用户
 详细参考
 
 https://blog.csdn.net/NRWHF/article/details/127848959
