@@ -43,6 +43,11 @@ copy
 move  file1 file2
 
 ren 重命名
+
+禁止命令
+
+taskkill /f /im *.exe  
+
 详细参考
 
 https://blog.csdn.net/NRWHF/article/details/127848959
