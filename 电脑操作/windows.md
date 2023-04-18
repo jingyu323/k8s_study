@@ -36,7 +36,10 @@ windows  cmd
 
 shutdown  -s -t 100
 
-shutdown -a 取消
+shutdown -a 取消    
+
+
+
 
 copy 
 
@@ -53,7 +56,12 @@ net user  账户 密码   /add 添加用户
 
 netstat -an
 
+
 远程桌面协议 端口3389
+
+搭建文件共享服务器：
+
+CIFS 使用客户/服务器模式。 是windows特有的。主要内网共享
 
 详细参考
 
