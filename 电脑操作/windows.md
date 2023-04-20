@@ -75,3 +75,6 @@ https://blog.csdn.net/NRWHF/article/details/127848959
 
 
 dns  递归解析， 设置转发
+
+电脑管理：创建域
+
