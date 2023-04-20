@@ -69,3 +69,6 @@ dhcp 协议端口号 67 68
 
 https://blog.csdn.net/NRWHF/article/details/127848959
 密码 2234
+
+
+除服务器所在接口可以发送报文，管理型交换机所在接口设置禁止发offer报文 
