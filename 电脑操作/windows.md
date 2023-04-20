@@ -72,3 +72,6 @@ https://blog.csdn.net/NRWHF/article/details/127848959
 
 
 除服务器所在接口可以发送报文，管理型交换机所在接口设置禁止发offer报文 
+
+
+dns  递归解析， 设置转发
