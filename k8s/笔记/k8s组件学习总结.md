@@ -1831,9 +1831,13 @@ Kubernetes底层是通过Linux的Cgroup与Namesapce来实现底层基础资源�
 
 
 
+## Kubernetes 架构
+
+Kubernetes 项目最主要的设计思想是，从更宏观的角度，以统一的方式来定义任务之间的各种关系，并且为将来支持更多种类的关系留有余地。
 
 
 
+Kubernetes 项目的本质，是为用户提供一个具有普遍意义的容器编排工具。
 
 
 
