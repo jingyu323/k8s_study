@@ -2,6 +2,8 @@
 
 
 
+
+
 http://blog.itpub.net/70003733/viewspace-2888774/
 
 # 二进制安装Kubernetes（k8s） v1.24.0 IPv4/IPv6双栈 （三主俩从）
@@ -612,7 +614,34 @@ cd .kube
 
 # 添加worknode
 
+## Rook 作为容器持久化存储插件
+
+$ kubectl apply -f https://raw.githubusercontent.com/rook/rook/master/cluster/examples/kubernetes/ceph/common.yaml
+
+$ kubectl apply -f https://raw.githubusercontent.com/rook/rook/master/cluster/examples/kubernetes/ceph/operator.yaml
+
+$ kubectl apply -f https://raw.githubusercontent.com/rook/rook/master/cluster/examples/kubernetes/ceph/cluster.yaml
+
+$ kubectl get pods -n rook-ceph-system
+NAME                                  READY     STATUS    RESTARTS   AGE
+rook-ceph-agent-7cv62                 1/1       Running   0          15s
+rook-ceph-operator-78d498c68c-7fj72   1/1       Running   0          44s
+rook-discover-2ctcv                   1/1       Running   0          15s
+
+$ kubectl get pods -n rook-ceph
+NAME                   READY     STATUS    RESTARTS   AGE
+rook-ceph-mon0-kxnzh   1/1       Running   0          13s
+rook-ceph-mon1-7dn2t   1/1       Running   0          2s
+
+
+
+
+
 # k8s多master安装
+
+
+
+
 
 创建默认的kubeadm-config.yaml文件
 
