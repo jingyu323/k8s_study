@@ -20,7 +20,7 @@ Docker 为你提供了一种更便捷的方式，叫作 Dockerfile，如下所�
 
 namespace 隔离机制不需要额外的OS
 
-容器共享主机资源。
+容器共享主机资源。 
 
 获取 Docker 容器的进程号（PID） ：
 

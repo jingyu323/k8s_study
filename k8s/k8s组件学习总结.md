@@ -75,9 +75,47 @@ spec:
 
 ​		仅存在于特定节点上的Pod，不能通过API Server 进行管理。
 
-- ​	创建静态Pod 有两种方式：配置文件和Http方式	
+  	   创建静态Pod 有两种方式：配置文件和Http方式	
 
-  ## ConfigMap
+## Projected Volume
+
+是为容器提供预先定义好的数据。
+
+### Secret
+
+Secret 最典型的使用场景，存储账户信息，如数据库的
+
+```
+apiVersion: v1
+kind: Pod
+metadata:
+  name: test-projected-volume 
+spec:
+  containers:
+  - name: test-secret-volume
+    image: busybox
+    args:
+    - sleep
+    - "86400"
+    volumeMounts:
+    - name: mysql-cred
+      mountPath: "/projected-volume"
+      readOnly: true
+  volumes:
+  - name: mysql-cred
+    projected:
+      sources:
+      - secret:
+          name: user
+      - secret:
+          name: pass
+```
+
+
+
+
+
+### ConfigMap
 
 使用ConfigMap的限制条件：
 
@@ -91,7 +129,7 @@ spec:
 
 5. POd对ConfigMap进行挂载的时候只能挂载为目录，如果有相同的目录，则已有的目录被ConfigMap的目录覆盖。解决这种问题需要先挂载到临时目录，然后通过cp或者link的方式应用的实际配置目录下
 
-   ## Downward API
+   ### Downward API
 
 容器内部获取Pod信息
 
@@ -103,6 +141,8 @@ Pod注入信息到容器的方式：
 价值：
 
 实现节点自动发现。
+
+### ServiceAccountToken
 
 ##     健康检查
 
@@ -158,6 +198,8 @@ Pod注入信息到容器的方式：
       
       https://blog.csdn.net/qq_34857250/article/details/90259693
 
+   
+
    ### kube-scheduler 创建流程
 
    ​	![](images/20201223103750490.png)
@@ -187,7 +229,7 @@ Pod注入信息到容器的方式：
       	过滤阶段会将所有满足 Pod 调度需求的 Node 选出来。
 
    2. 打分（Priorities 优选策略）
-
+   
       ​	在过滤阶段后调度器会为 Pod 从所有可调度节点中选取一个最合适的 Node。根据当前启用的打分规则，调度器会给每一个可调度节点进行打分
 
 
