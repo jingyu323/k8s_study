@@ -1,0 +1,6 @@
+apiVersion: v1 #类型为Namespace
+kind: Namespace  #类型为Namespace
+metadata:
+  name: ssx-nginx-ns  #命名空间名称
+  labels:
+    name: lb-ssx-nginx-ns
