@@ -36,6 +36,41 @@ Docker Engine：Docker引擎，负责本机的容器创建和管理工作
 
 Pod可以有一个或者多个容器
 
+Pod 生命周期的变化，主要体现在 Pod API 对象的 Status 部分，这是它除了 Metadata 和 Spec 之外的第三个重要字段。其中，pod.status.phase，就是 Pod 的当前状态，它有如下几种可能的情况：
+
+
+
+1. Pending。这个状态意味着，Pod 的 YAML 文件已经提交给了 Kubernetes，API 对象已经被创建并保存在 Etcd 当中。但是，这个 Pod 里有些容器因为某种原因而不能被顺利创建。比如，调度不成功。
+2. Running。这个状态下，Pod 已经调度成功，跟一个具体的节点绑定。它包含的容器都已经创建成功，并且至少有一个正在运行中。
+3. Succeeded。这个状态意味着，Pod 里的所有容器都正常运行完毕，并且已经退出了。这种情况在运行一次性任务时最为常见。
+4. Failed。这个状态下，Pod 里至少有一个容器以不正常的状态（非 0 的返回码）退出**。这个状态的出现，意味着你得想办法 Debug 这个容器的应用，比如查看 Pod 的 Events 和日志。**
+5. Unknown。这是一个异常状态，意味着 Pod 的状态不能持续地被 kubelet 汇报给 kube-apiserver，这很有可能是主从节点（Master 和 Kubelet）间的通信出现了问题
+
+
+
+对hostname等的修改：
+
+HostAliases：定义了 Pod 的 hosts 文件（比如 /etc/hosts）里的内容。 
+
+```
+apiVersion: v1
+kind: Pod
+...
+spec:
+  hostAliases:
+  - ip: "10.1.2.3"
+    hostnames:
+    - "foo.remote"
+    - "bar.remote"
+...
+```
+
+凡是跟容器的 Linux Namespace 相关的属性，也一定是 Pod 级别的。Pod 的设计，就是要让它里面的容器尽可能多地共享 Linux Namespace，仅保留必要的隔离和限制能力。这样，Pod 模拟出的效果，就跟虚拟机里程序间的关系非常类似了。 如果要修改也是通过创建Pod的时候通过配置文件修改，不要手动修改。
+
+
+
+
+
 ## 	静态Pod
 
 ​		仅存在于特定节点上的Pod，不能通过API Server 进行管理。
@@ -1850,6 +1885,34 @@ Kubernetes 项目最主要的设计思想是，从更宏观的角度，以统一
 Kubernetes 项目的本质，是为用户提供一个具有普遍意义的容器编排工具。
 
 
+
+# 23 最佳实践
+
+## 23.1 Debug容器
+
+### 使用流程
+
+```
+1.将Dockerfile关联的启动脚本拷贝到测试服务器，并添加如下启动参数
+-Xdebug -Xrunjdwp:transport=dt_socket,address=9992,server=y,suspend=n
+2.启动docker，绑定映射启动脚本和端口开放，一个应用端口一个debug监听端口。
+docker run -p 8888:8888   -p 9992:9992  -v /root/start.sh  镜像名称
+3.创建远程debug连接
+-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=9992
+```
+
+
+
+# 24 问题总计
+
+## 24.1Pod（即容器）的状态是 Running，但是应用其实已经停止服务
+
+对于 Pod 状态是 Ready，实际上不能提供服务的情况能想到几个例子：
+
+1. 程序本身有 bug，本来应该返回 200，但因为代码问题，返回的是500；
+2. 程序因为内存问题，已经僵死，但进程还在，但无响应；
+3.  Dockerfile 写的不规范，应用程序不是主进程，那么主进程出了什么问题都无法发现；
+4.   程序出现死循环。
 
 
 
