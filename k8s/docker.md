@@ -18,21 +18,7 @@ https://bingohuang.gitbooks.io/docker_practice/content/install/mirror.html
 
 Docker 为你提供了一种更便捷的方式，叫作 Dockerfile，如下所示。
 
-namespace 隔离机制不需要额外的OS
-
-容器共享主机资源。 
-
-获取 Docker 容器的进程号（PID） ：
-
-$ docker inspect --format '{{ .State.Pid }}'  4ddf4638572d
-25686
-
-查看namespace 对应文件
-
-ls -l /proc/25686/ns
-
 ~~~
-
 # 使用官方提供的Python开发镜像作为基础镜像
 FROM python:2.7-slim
 

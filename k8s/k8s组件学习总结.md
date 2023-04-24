@@ -243,6 +243,43 @@ Pod如果是通过Deployment 创建的，则升级回退就是要使用Deploymen
 
 1. 只能管理无状态应用, 总结k8s中的Pod、ReplicaSet、Deployment之间的管理关系，自顶到下为：Deployment=>ReplicaSet=>Pod。
 
+1. 如何维护两个不同的版本？暂停升级任务，未升级的pod与已经升级的Pod共存从而实现新老版本共存。
+
+   
+
+   ### ReplicaSet
+
+   一个 ReplicaSet 对象，其实就是由副本数目的定义和一个 Pod 模板组成的。它的定义其实是 Deployment 的一个子集
+   
+   Deployment 控制器实际操纵的，正是这样的 ReplicaSet 对象，而不是 Pod 对象。
+
+   ```
+   
+   apiVersion: apps/v1
+   kind: ReplicaSet
+   metadata:
+     name: nginx-set
+     labels:
+       app: nginx
+   spec:
+     replicas: 3
+     selector:
+       matchLabels:
+         app: nginx
+     template:
+       metadata:
+         labels:
+           app: nginx
+       spec:
+         containers:
+         - name: nginx
+           image: nginx:1.7.9
+   ```
+
+   
+
+   
+
    ### Deployment更新方式
 
    1. kubectl set image
@@ -254,43 +291,58 @@ Pod如果是通过Deployment 创建的，则升级回退就是要使用Deploymen
    2. kubectl edit deployment 直接修改镜像
 
    3. \# 扩容    kubectl scale deployment nginx-deployment --replicas=5
-
+   
    4.   缩容   kubectl scale --current-replicas=5 --replicas=3 deployment nginx-deployment
-
+   
    5.   \# 删除deployment资源(基于yaml)    kubectl delete -f nginx.yml
-
+   
    6. ```
       查看历史deployment
       kubectl rollout history deployment nginx-deployment   
        kubectl rollout status deployment nginx-deployment
       ```
-
+   
    7.  \# 通过--to-revision指定回滚到特定的修订如：--to-revision=2    kubectl rollout undo deployment nginx-deployment
-
+   
    ### Deployment更新策略
-
+   
    1. Recreate
    2. RollingUpdate：滚动更新，为默认方式
-
    
-
+   
+   
+   
+   
+   ```subunit
+   设置版本并暂停rollout
+   kubectl set image deployment deploy-nginx nginx=nginx:1.14-alpine && kubectl rollout pause deployment deploy-nginx
+   继续更新
+   kubectl rollout resume deployment deploy-nginx
+   回退
+   kubectl rollout undo deployment/deploy-nginx --to-revision=0
+   ```
+   
+   
+   
    ### DaemonSet更新策略
-
+   
    1. OnDelete：新的Daemonset配置创建之后并不立即创建新的Pod，只有在手动删除旧的之后才创建
-
+   
    2. RollingUpdate：
-
+   
       注意：
-
+   
       1.不支持查看和管理Daemonset的更新历史记录
-
+   
       2.不能直接通过 使用kubectl rollback来实现，需要提供旧版本的配置文件
-
+   
    ### StatefuleSet
-
+   
    - 创建StorageClass，用于StatefulSet自动为各个应用申请PVC
    - 创建一个Headlesse Service用户维护Mongo DB的集群状态
    - 创建一个StatefulSet
+
+
 
 ## Pod 驱逐策略
 
@@ -1953,8 +2005,14 @@ docker run -p 8888:8888   -p 9992:9992  -v /root/start.sh  镜像名称
 
 1. 程序本身有 bug，本来应该返回 200，但因为代码问题，返回的是500；
 2. 程序因为内存问题，已经僵死，但进程还在，但无响应；
-3.  Dockerfile 写的不规范，应用程序不是主进程，那么主进程出了什么问题都无法发现；
-4.   程序出现死循环。
+3. Dockerfile 写的不规范，应用程序不是主进程，那么主进程出了什么问题都无法发现；
+4. 程序出现死循环。
+
+## 24.2你能否说出，Kubernetes 使用的这个“控制器模式”，跟我们平常所说的“事件驱动”，有什么区别和联系吗？
+
+“事件驱动”，对于控制器来说是被动，只要触发事件则执行，对执行后不负责，无论成功与否，没有对一次操作的后续进行“监控” “控制器模式”，对于控制器来说是主动的，自身在不断地获取信息，起到事后“监控”作用，知道同步完成，实际状态与期望状态一致
+
+事件往往是一次性的，如果操作失败比较难处理，但是控制器是循环一直在尝试的，更符合kubernetes申明式API，最终达到与申明一致，这样理解对吗
 
 
 
