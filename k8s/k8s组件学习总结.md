@@ -75,47 +75,9 @@ spec:
 
 ​		仅存在于特定节点上的Pod，不能通过API Server 进行管理。
 
-  	   创建静态Pod 有两种方式：配置文件和Http方式	
+- ​	创建静态Pod 有两种方式：配置文件和Http方式	
 
-## Projected Volume
-
-是为容器提供预先定义好的数据。
-
-### Secret
-
-Secret 最典型的使用场景，存储账户信息，如数据库的
-
-```
-apiVersion: v1
-kind: Pod
-metadata:
-  name: test-projected-volume 
-spec:
-  containers:
-  - name: test-secret-volume
-    image: busybox
-    args:
-    - sleep
-    - "86400"
-    volumeMounts:
-    - name: mysql-cred
-      mountPath: "/projected-volume"
-      readOnly: true
-  volumes:
-  - name: mysql-cred
-    projected:
-      sources:
-      - secret:
-          name: user
-      - secret:
-          name: pass
-```
-
-
-
-
-
-### ConfigMap
+  ## ConfigMap
 
 使用ConfigMap的限制条件：
 
@@ -129,7 +91,7 @@ spec:
 
 5. POd对ConfigMap进行挂载的时候只能挂载为目录，如果有相同的目录，则已有的目录被ConfigMap的目录覆盖。解决这种问题需要先挂载到临时目录，然后通过cp或者link的方式应用的实际配置目录下
 
-   ### Downward API
+   ## Downward API
 
 容器内部获取Pod信息
 
@@ -141,8 +103,6 @@ Pod注入信息到容器的方式：
 价值：
 
 实现节点自动发现。
-
-### ServiceAccountToken
 
 ##     健康检查
 
@@ -198,8 +158,6 @@ Pod注入信息到容器的方式：
       
       https://blog.csdn.net/qq_34857250/article/details/90259693
 
-   
-
    ### kube-scheduler 创建流程
 
    ​	![](images/20201223103750490.png)
@@ -229,7 +187,7 @@ Pod注入信息到容器的方式：
       	过滤阶段会将所有满足 Pod 调度需求的 Node 选出来。
 
    2. 打分（Priorities 优选策略）
-   
+
       ​	在过滤阶段后调度器会为 Pod 从所有可调度节点中选取一个最合适的 Node。根据当前启用的打分规则，调度器会给每一个可调度节点进行打分
 
 
@@ -243,41 +201,6 @@ Pod如果是通过Deployment 创建的，则升级回退就是要使用Deploymen
 
 1. 只能管理无状态应用, 总结k8s中的Pod、ReplicaSet、Deployment之间的管理关系，自顶到下为：Deployment=>ReplicaSet=>Pod。
 
-   
-
-   ### ReplicaSet
-
-   一个 ReplicaSet 对象，其实就是由副本数目的定义和一个 Pod 模板组成的。不难发现，它的定义其实是 Deployment 的一个子集
-   
-   Deployment 控制器实际操纵的，正是这样的 ReplicaSet 对象，而不是 Pod 对象。
-
-   ```
-   
-   apiVersion: apps/v1
-   kind: ReplicaSet
-   metadata:
-     name: nginx-set
-     labels:
-       app: nginx
-   spec:
-     replicas: 3
-     selector:
-       matchLabels:
-         app: nginx
-     template:
-       metadata:
-         labels:
-           app: nginx
-       spec:
-         containers:
-         - name: nginx
-           image: nginx:1.7.9
-   ```
-
-   
-
-   
-
    ### Deployment更新方式
 
    1. kubectl set image
@@ -289,40 +212,40 @@ Pod如果是通过Deployment 创建的，则升级回退就是要使用Deploymen
    2. kubectl edit deployment 直接修改镜像
 
    3. \# 扩容    kubectl scale deployment nginx-deployment --replicas=5
-   
+
    4.   缩容   kubectl scale --current-replicas=5 --replicas=3 deployment nginx-deployment
-   
+
    5.   \# 删除deployment资源(基于yaml)    kubectl delete -f nginx.yml
-   
+
    6. ```
       查看历史deployment
       kubectl rollout history deployment nginx-deployment   
        kubectl rollout status deployment nginx-deployment
       ```
-   
+
    7.  \# 通过--to-revision指定回滚到特定的修订如：--to-revision=2    kubectl rollout undo deployment nginx-deployment
-   
+
    ### Deployment更新策略
-   
+
    1. Recreate
    2. RollingUpdate：滚动更新，为默认方式
+
    
-   
-   
+
    ### DaemonSet更新策略
-   
+
    1. OnDelete：新的Daemonset配置创建之后并不立即创建新的Pod，只有在手动删除旧的之后才创建
-   
+
    2. RollingUpdate：
-   
+
       注意：
-   
+
       1.不支持查看和管理Daemonset的更新历史记录
-   
+
       2.不能直接通过 使用kubectl rollback来实现，需要提供旧版本的配置文件
-   
+
    ### StatefuleSet
-   
+
    - 创建StorageClass，用于StatefulSet自动为各个应用申请PVC
    - 创建一个Headlesse Service用户维护Mongo DB的集群状态
    - 创建一个StatefulSet
@@ -1988,14 +1911,8 @@ docker run -p 8888:8888   -p 9992:9992  -v /root/start.sh  镜像名称
 
 1. 程序本身有 bug，本来应该返回 200，但因为代码问题，返回的是500；
 2. 程序因为内存问题，已经僵死，但进程还在，但无响应；
-3. Dockerfile 写的不规范，应用程序不是主进程，那么主进程出了什么问题都无法发现；
-4. 程序出现死循环。
-
-## 24.2你能否说出，Kubernetes 使用的这个“控制器模式”，跟我们平常所说的“事件驱动”，有什么区别和联系吗？
-
-“事件驱动”，对于控制器来说是被动，只要触发事件则执行，对执行后不负责，无论成功与否，没有对一次操作的后续进行“监控” “控制器模式”，对于控制器来说是主动的，自身在不断地获取信息，起到事后“监控”作用，知道同步完成，实际状态与期望状态一致
-
-事件往往是一次性的，如果操作失败比较难处理，但是控制器是循环一直在尝试的，更符合kubernetes申明式API，最终达到与申明一致，这样理解对吗
+3.  Dockerfile 写的不规范，应用程序不是主进程，那么主进程出了什么问题都无法发现；
+4.   程序出现死循环。
 
 
 
