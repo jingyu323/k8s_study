@@ -337,11 +337,123 @@ Pod如果是通过Deployment 创建的，则升级回退就是要使用Deploymen
    
       2.不能直接通过 使用kubectl rollback来实现，需要提供旧版本的配置文件
    
+   
+   
+   ```
+   
+   apiVersion: apps/v1
+   kind: DaemonSet
+   metadata:
+     name: fluentd-elasticsearch
+     namespace: kube-system
+     labels:
+       k8s-app: fluentd-logging
+   spec:
+     selector:
+       matchLabels:
+         name: fluentd-elasticsearch
+     template:
+       metadata:
+         labels:
+           name: fluentd-elasticsearch
+       spec:
+         tolerations:
+         - key: node-role.kubernetes.io/master
+           effect: NoSchedule
+         containers:
+         - name: fluentd-elasticsearch
+           image: k8s.gcr.io/fluentd-elasticsearch:1.20
+           resources:
+             limits:
+               memory: 200Mi
+             requests:
+               cpu: 100m
+               memory: 200Mi
+           volumeMounts:
+           - name: varlog
+             mountPath: /var/log
+           - name: varlibdockercontainers
+             mountPath: /var/lib/docker/containers
+             readOnly: true
+         terminationGracePeriodSeconds: 30
+         volumes:
+         - name: varlog
+           hostPath:
+             path: /var/log
+         - name: varlibdockercontainers
+           hostPath:
+             path: /var/lib/docker/containers
+   ```
+   
+   DaemonSet 的“过人之处”，其实就是依靠 Toleration 实现的。
+   
+   只不过，在创建每个 Pod 的时候，DaemonSet 会自动给这个 Pod 加上一个 nodeAffinity，从而保证这个 Pod 只会在指定节点上启动。同时，它还会自动给这个 Pod 加上一个 Toleration，从而忽略节点的 unschedulable“污点”。当然，你也可以在 Pod 模板里加上更多种类的 Toleration，从而利用 DaemonSet 达到自己的目的。比如，在这个 fluentd-elasticsearch DaemonSet 里，我就给它加上了这样的 Toleration：
+   
+   ```
+   
+   tolerations:
+   - key: node-role.kubernetes.io/master
+     effect: NoSchedule
+   ```
+   
+   
+   
+    kubectl create -f fluentd-elasticsearch.yaml
+   
+   
+   
+   在 Kubernetes 项目里，ControllerRevision 其实是一个通用的版本管理对象。这样，Kubernetes 项目就巧妙地避免了每种控制器都要维护一套冗余的代码和逻辑的问题
+   
    ### StatefuleSet
    对于“有状态应用”实例的访问，你必须使用 DNS 记录或者 hostname 的方式，而绝不应该直接访问这些 Pod 的 IP 地址。
    - 创建StorageClass，用于StatefulSet自动为各个应用申请PVC
    - 创建一个Headlesse Service用户维护Mongo DB的集群状态
    - 创建一个StatefulSet
+   
+   ### Operator
+   
+   管理有状态的容器
+
+Etcd Operator 的使用方法非常简单，只需要两步即可完成：第一步，将这个 Operator 的代码 Clone 到本地：
+
+```
+
+$ git clone https://github.com/coreos/etcd-operator
+```
+
+
+
+Operator 的工作原理，实际上是利用了 Kubernetes 的自定义 API 资源（CRD），来描述我们想要部署的“有状态应用”；然后在自定义控制器里，根据自定义 API 对象的变化，来完成具体的部署和运维工作。
+
+静态集群的好处是，它不必依赖于一个额外的服务发现机制来组建集群，非常适合本地容器化部署。而它的难点，则在于你必须在部署的时候，就规划好这个集群的拓扑结构，并且能够知道这些节点固定的 IP 地址。比如下面这个例子
+
+```
+
+$ etcd --name infra0 --initial-advertise-peer-urls http://10.0.1.10:2380 \
+  --listen-peer-urls http://10.0.1.10:2380 \
+...
+  --initial-cluster-token etcd-cluster-1 \
+  --initial-cluster infra0=http://10.0.1.10:2380,infra1=http://10.0.1.11:2380,infra2=http://10.0.1.12:2380 \
+  --initial-cluster-state new
+  
+$ etcd --name infra1 --initial-advertise-peer-urls http://10.0.1.11:2380 \
+  --listen-peer-urls http://10.0.1.11:2380 \
+...
+  --initial-cluster-token etcd-cluster-1 \
+  --initial-cluster infra0=http://10.0.1.10:2380,infra1=http://10.0.1.11:2380,infra2=http://10.0.1.12:2380 \
+  --initial-cluster-state new
+  
+$ etcd --name infra2 --initial-advertise-peer-urls http://10.0.1.12:2380 \
+  --listen-peer-urls http://10.0.1.12:2380 \
+...
+  --initial-cluster-token etcd-cluster-1 \
+  --initial-cluster infra0=http://10.0.1.10:2380,infra1=http://10.0.1.11:2380,infra2=http://10.0.1.12:2380 \
+  --initial-cluster-state new
+```
+
+
+
+
 
 
 
