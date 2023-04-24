@@ -243,6 +243,8 @@ Pod如果是通过Deployment 创建的，则升级回退就是要使用Deploymen
 
 1. 只能管理无状态应用, 总结k8s中的Pod、ReplicaSet、Deployment之间的管理关系，自顶到下为：Deployment=>ReplicaSet=>Pod。
 
+1. 如何维护两个不同的版本？暂停升级任务，未升级的pod与已经升级的Pod共存从而实现新老版本共存。
+
    
 
    ### ReplicaSet
@@ -309,6 +311,19 @@ Pod如果是通过Deployment 创建的，则升级回退就是要使用Deploymen
    
    
    
+   
+   
+   ```subunit
+   设置版本并暂停rollout
+   kubectl set image deployment deploy-nginx nginx=nginx:1.14-alpine && kubectl rollout pause deployment deploy-nginx
+   继续更新
+   kubectl rollout resume deployment deploy-nginx
+   回退
+   kubectl rollout undo deployment/deploy-nginx --to-revision=0
+   ```
+   
+   
+   
    ### DaemonSet更新策略
    
    1. OnDelete：新的Daemonset配置创建之后并不立即创建新的Pod，只有在手动删除旧的之后才创建
@@ -326,6 +341,8 @@ Pod如果是通过Deployment 创建的，则升级回退就是要使用Deploymen
    - 创建StorageClass，用于StatefulSet自动为各个应用申请PVC
    - 创建一个Headlesse Service用户维护Mongo DB的集群状态
    - 创建一个StatefulSet
+
+
 
 ## Pod 驱逐策略
 
