@@ -247,7 +247,7 @@ Pod如果是通过Deployment 创建的，则升级回退就是要使用Deploymen
 
    ### ReplicaSet
 
-   一个 ReplicaSet 对象，其实就是由副本数目的定义和一个 Pod 模板组成的。不难发现，它的定义其实是 Deployment 的一个子集
+   一个 ReplicaSet 对象，其实就是由副本数目的定义和一个 Pod 模板组成的。它的定义其实是 Deployment 的一个子集
    
    Deployment 控制器实际操纵的，正是这样的 ReplicaSet 对象，而不是 Pod 对象。
 
