@@ -291,6 +291,7 @@ Pod如果是通过Deployment 创建的，则升级回退就是要使用Deploymen
    2. kubectl edit deployment 直接修改镜像
 
    3. \# 扩容    kubectl scale deployment nginx-deployment --replicas=5
+   kubectl rollout status deployment/nginx-deployment 查看扩容情况
    
    4.   缩容   kubectl scale --current-replicas=5 --replicas=3 deployment nginx-deployment
    
@@ -303,15 +304,15 @@ Pod如果是通过Deployment 创建的，则升级回退就是要使用Deploymen
       ```
    
    7.  \# 通过--to-revision指定回滚到特定的修订如：--to-revision=2    kubectl rollout undo deployment nginx-deployment
-   
+   kubectl rollout undo  回退到上一个版本
    ### Deployment更新策略
    
-   1. Recreate
-   2. RollingUpdate：滚动更新，为默认方式
-   
-   
-   
-   
+   8. Recreate
+   9.  RollingUpdate：滚动更新，为默认方式
+   Watch 功能，实时查看 StatefulSet 创建两个有状态实例的过程
+   kubectl get pods -w -l app=nginx
+
+   Deployment 对象有一个字段，叫作 spec.revisionHistoryLimit，就是 Kubernetes 为 Deployment 保留的“历史版本”个数。所以，如果把它设置为 0，你就再也不能做回滚操作了。
    
    ```subunit
    设置版本并暂停rollout
@@ -326,9 +327,9 @@ Pod如果是通过Deployment 创建的，则升级回退就是要使用Deploymen
    
    ### DaemonSet更新策略
    
-   1. OnDelete：新的Daemonset配置创建之后并不立即创建新的Pod，只有在手动删除旧的之后才创建
+   10. OnDelete：新的Daemonset配置创建之后并不立即创建新的Pod，只有在手动删除旧的之后才创建
    
-   2. RollingUpdate：
+   11. RollingUpdate：
    
       注意：
    
@@ -337,7 +338,7 @@ Pod如果是通过Deployment 创建的，则升级回退就是要使用Deploymen
       2.不能直接通过 使用kubectl rollback来实现，需要提供旧版本的配置文件
    
    ### StatefuleSet
-   
+   对于“有状态应用”实例的访问，你必须使用 DNS 记录或者 hostname 的方式，而绝不应该直接访问这些 Pod 的 IP 地址。
    - 创建StorageClass，用于StatefulSet自动为各个应用申请PVC
    - 创建一个Headlesse Service用户维护Mongo DB的集群状态
    - 创建一个StatefulSet
@@ -410,7 +411,8 @@ Pod如果是通过Deployment 创建的，则升级回退就是要使用Deploymen
    1. 先创建一个无Label Slector Service,  无法选则后端Pod
    2. 手动创建与Service同名称的Endpoint
 
-5. Headless Service 作用是不使用 Kubernetes 默认的负载均衡策略 ，clusterIP 设置为None
+5. Headless Service 作用是不使用 Kubernetes 默认的负载均衡策略 ，clusterIP 设置为None 
+   创建statefulset必须要先创建一个headless的service，分两步操作
 
 6. Cassadnra 根据Service 自动实现查找pod
 
@@ -647,6 +649,48 @@ prometheus：为prometheus系统提供采集性能指标数据的URL
 pprof：在URL路径/debug/pprof下提供运行是的西能数据
 log：对dns查询进行日志记录
 errors：对错误信息镜像日志记录
+# Volume
+## Persistent Volume Claim（PVC）
+定义PVC 
+```
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: pv-claim
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+```
+
+第二步：在应用的 Pod 中，声明使用这个 PVC：
+
+```
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pv-pod
+spec:
+  containers:
+    - name: pv-container
+      image: nginx
+      ports:
+        - containerPort: 80
+          name: "http-server"
+      volumeMounts:
+        - mountPath: "/usr/share/nginx/html"
+          name: pv-storage
+  volumes:
+    - name: pv-storage
+      persistentVolumeClaim:
+        claimName: pv-claim
+```
+
+## Persistent Volume（PV）
+
 
 # Ingress
 
