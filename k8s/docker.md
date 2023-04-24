@@ -18,10 +18,7 @@ https://bingohuang.gitbooks.io/docker_practice/content/install/mirror.html
 
 Docker 为你提供了一种更便捷的方式，叫作 Dockerfile，如下所示。
 
-
-
 ~~~
-
 # 使用官方提供的Python开发镜像作为基础镜像
 FROM python:2.7-slim
 
