@@ -691,6 +691,12 @@ spec:
 
 ## Persistent Volume（PV）
 
+## kube-proxy
+
+IPVS 模块只负责上述的负载均衡和代理功能
+
+kube-proxy 设置–proxy-mode=ipvs 来开启这个功能。它为 Kubernetes 集群规模带来的提升，还是非常巨大的。
+
 
 # Ingress
 
