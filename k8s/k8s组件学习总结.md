@@ -651,6 +651,13 @@ log：对dns查询进行日志记录
 errors：对错误信息镜像日志记录
 # Volume
 ## Persistent Volume Claim（PVC）
+
+
+
+ 
+
+PVC 描述的，则是 Pod 所希望使用的持久化存储的属性。比如，Volume 存储的大小、可读写权限等等。
+
 定义PVC 
 ```
 kind: PersistentVolumeClaim
@@ -690,6 +697,100 @@ spec:
 ```
 
 ## Persistent Volume（PV）
+
+创建的待用资源
+
+PV 描述的，是持久化存储数据卷。这个 API 对象主要定义的是一个持久化存储在宿主机上的目录，比如一个 NFS 的挂载目录。
+
+声明一个PV
+
+```
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: nfs
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteMany
+  nfs:
+    server: 10.244.1.4
+    path: "/"
+```
+
+
+
+PersistentVolumeController 会不断地查看当前每一个 PVC，是不是已经处于 Bound（已绑定），Kubernetes 就可以保证用户提交的每一个 PVC，只要有合适的 PV，就进行绑定
+
+
+
+对于“第一阶段”（Attach），Kubernetes 提供的可用参数是 nodeName，即宿主机的名字。而对于“第二阶段”（Mount），Kubernetes 提供的可用参数是 dir，即 Volume 的宿主机目录。
+
+“第一阶段”的 Attach（以及 Dettach）操作，是由 Volume Controller 负责维护的，这个控制循环的名字叫作：AttachDetachController。而它的作用，就是不断地检查每一个 Pod 对应的 PV，和这个 Pod 所在宿主机之间挂载情况。从而决定，是否需要对这个 PV 进行 Attach（或者 Dettach）操作。需要注意，作为一个 Kubernetes 内置的控制器，Volume Controller 自然是 kube-controller-manager 的一部分。所以，AttachDetachController 也一定是运行在 Master 节点上的。当然，Attach 操作只需要调用公有云或者具体存储项目的 API，并不需要在具体的宿主机上执行操作，所以这个设计没有任何问题。
+
+而“第二阶段”的 Mount（以及 Unmount）操作，必须发生在 Pod 对应的宿主机上，所以它必须是 kubelet 组件的一部分。这个控制循环的名字，叫作：VolumeManagerReconciler，它运行起来之后，是一个独立于 kubelet 主循环的 Goroutine。
+
+
+
+
+
+## StorageClass
+
+StorageClass 对象的作用，其实就是创建 PV 的模板，动态创建PV
+
+StorageClass 对象会定义如下两个部分内容：
+
+第一，PV 的属性。比如，存储类型、Volume 的大小等等。
+
+第二，创建这种 PV 需要用到的存储插件。比如，Ceph 等等。
+
+ 
+
+StorageClass 需要使用如下所示的 YAML 文件来定义：
+
+```
+
+apiVersion: ceph.rook.io/v1beta1
+kind: Pool
+metadata:
+  name: replicapool
+  namespace: rook-ceph
+spec:
+  replicated:
+    size: 3
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: block-service
+provisioner: ceph.rook.io/block
+parameters:
+  pool: replicapool
+  #The value of "clusterNamespace" MUST be the same as the one in which your rook cluster exist
+  clusterNamespace: rook-ceph
+```
+
+使用定义的storage class
+
+```
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: claim1
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: block-service
+  resources:
+    requests:
+      storage: 30Gi
+```
+
+
 
 ## kube-proxy
 
@@ -817,6 +918,12 @@ spec:
 ```
 
  Nginx Ingress Controller 是用 Nginx 实现的，那么它当然会为你返回一个 Nginx 的 404 页面。不过，Ingress Controller 也允许你通过 Pod 启动命令里的–default-backend-service 参数，设置一条默认规则，比如：–default-backend-service=nginx-default-backend。这样，任何匹配失败的请求，就都会被转发到这个名叫 nginx-default-backend 的 Service。所以，你就可以通过部署一个专门的 Pod，来为用户返回自定义的 404 页面了。
+
+
+
+可以看到，一个 Nginx Ingress Controller 为你提供的服务，其实是一个可以根据 Ingress 对象和被代理后端 Service 的变化，来自动进行更新的 Nginx 负载均衡器。
+
+
 
 ## Ingress-nginx介绍
 
