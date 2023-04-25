@@ -1366,6 +1366,13 @@ dockershim 将会从 Kubernetes 1.24 中完全移除，
    ip route list 查看当前路由表
 
   netstat -rn  查看路由表
+上述数据的传递过程在网络协议栈的不同层次，都有 Linux 内核 Netfilter 参与其中。所以，如果感兴趣的话，你可以通过打开 iptables
+
+# 在宿主机上执行
+$ iptables -t raw -A OUTPUT -p icmp -j TRACE
+$ iptables -t raw -A PREROUTING -p icmp -j TRACE
+## Overlay Network 夸主通信
+
 
 #### 		5.1 Docker 网络
 
@@ -1412,7 +1419,17 @@ dockershim 将会从 Kubernetes 1.24 中完全移除，
 
 ##### 5.4   开源网络插件
 
-## Flannel
+## Flannel 跨主通信
+
+Flannel 支持三种后端实现：
+
+- VXLAN
+
+
+
+- host-gw
+- UDP 
+  而 UDP 模式，是 Flannel 项目最早支持的一种方式，却也是性能最差的一种方式。所以，这个模式目前已经被弃用。不过，Flannel 之所以最先选择 UDP 模式，就是因为这种模式是最直接、也是最容易理解的容器跨主网络实现
 
 
 
@@ -1997,7 +2014,12 @@ Kubernetes底层是通过Linux的Cgroup与Namesapce来实现底层基础资源�
 ![](images\contaner_net.png)
 
 
+## 20.8  CNI 
+第一类，叫作 Main 插件，它是用来创建具体网络设备的二进制文件。比如，bridge（网桥设备）、ipvlan、loopback（lo 设备）、macvlan、ptp（Veth Pair 设备），以及 vlan。我在前面提到过的 Flannel、Weave 等项目，都属于“网桥”类型的 CNI 插件。所以在具体的实现中，它们往往会调用 bridge 这个二进制文件。这个流程，我马上就会详细介绍到。
 
+第二类，叫作 IPAM（IP Address Management）插件，它是负责分配 IP 地址的二进制文件。比如，dhcp，这个文件会向 DHCP 服务器发起请求；host-local，则会使用预先配置的 IP 地址段来进行分配。
+
+第三类，是由 CNI 社区维护的内置 CNI 插件。比如：flannel，就是专门为 Flannel 项目提供的 CNI 插件；tuning，是一个通过 sysctl 调整网络设备参数的二进制文件；portmap，是一个通过 iptables 配置端口映射的二进制文件；bandwidth，是一个使用 Token Bucket Filter (TBF) 来进行限流的二进制文件
 
 
 # 21: 常用命令
