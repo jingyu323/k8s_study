@@ -194,30 +194,51 @@ Pod注入信息到容器的方式：
        kubectl describe nodes k8s-node02 | grep Taints
       ```
       
+      ##### 优先级和抢占机制
+      
+      PriorityClass 的定义
+      
+      ```
+      
+      apiVersion: scheduling.k8s.io/v1beta1
+      kind: PriorityClass
+      metadata:
+        name: high-priority
+      value: 1000000
+      globalDefault: false
+      description: "This priority class should be used for high priority service pods only."
+      ```
+      
+      
+      
+      Kubernetes 规定，优先级是一个 32 bit 的整数，最大值不超过 1000000000（10 亿，1 billion），并且值越大代表优先级越高。而超出 10 亿的值，其实是被 Kubernetes 保留下来分配给系统 Pod 使用的。显然，这样做的目的，就是保证系统 Pod 不会被用户抢占掉。
+      
+      高优先级的 Pod 就可能会比低优先级的 Pod 提前出队，从而尽早完成调度过程。这个过程，就是“优先级”这个概念在 Kubernetes 里的主要体现。
+      
       
       
       https://blog.csdn.net/qq_34857250/article/details/90259693
-
    
-
+   
+   
    ### kube-scheduler 创建流程
-
+   
    ​	![](images/20201223103750490.png)
-
    
-
    
-
+   
+   
+   
    1. 用户提交pod请求：用户提交创建Pod的请求，可以通过API Server的REST API ，也可用Kubectl命令行工具，支持Json和Yaml两种格式；
-
+   
    2. API Server 处理请求：API Server 处理用户请求，存储Pod数据到Etcd；
-
+   
    3. Schedule调度pod：Schedule通过和 API Server的watch机制，查看到新的pod，按照预定的调度策略将Pod调度到相应的Node节点上；
-
+   
                         1）过滤主机：调度器用一组规则过滤掉不符合要求的主机，比如Pod指定了所需要的资源，那么就要过滤掉资源不够的主机；
-
+   
                        2）主机打分：对第一步筛选出的符合要求的主机进行打分，在主机打分阶段，调度器会考虑一些整体优化策略，比如把一个Replication Controller的副本分布到不同的主机上，使用最低负载的主机等；
-
+   
                        3）选择主机：选择打分最高的主机，进行binding操作，结果存储到Etcd中；
 
       Kubernetes 中，默认的调度策略有如下四种。
@@ -269,6 +290,16 @@ spec:
       	过滤阶段会将所有满足 Pod 调度需求的 Node 选出来。
 
    3. 打分（Priorities 优选策略）
+   
+   4. kubelet创建pod:  kubelet根据Schedule调度结果执行Pod创建操作: 调度成功后，会启动container, docker run, scheduler会调用API Server的API在etcd中创建一个bound pod对象，描述在一个工作节点上绑定运行的所有pod信息。运行在每个工作节点上的kubelet也会定期与etcd同步bound pod信息，一旦发现应该在该工作节点上运行的bound pod对象没有更新，则调用Docker API创建并启动pod内的容器。
+   
+   #### 选择node机制
+   
+   5. 过滤（Predicates 预选策略）
+   
+      	过滤阶段会将所有满足 Pod 调度需求的 Node 选出来。
+   
+   6. 打分（Priorities 优选策略）
    
       ​	在过滤阶段后调度器会为 Pod 从所有可调度节点中选取一个最合适的 Node。根据当前启用的打分规则，调度器会给每一个可调度节点进行打分
 
@@ -363,8 +394,6 @@ Pod如果是通过Deployment 创建的，则升级回退就是要使用Deploymen
    kubectl rollout undo deployment/deploy-nginx --to-revision=0
    ```
    
-   
-   
    ### DaemonSet更新策略
    
    10. OnDelete：新的Daemonset配置创建之后并不立即创建新的Pod，只有在手动删除旧的之后才创建
@@ -382,6 +411,8 @@ Pod如果是通过Deployment 创建的，则升级回退就是要使用Deploymen
    - 创建StorageClass，用于StatefulSet自动为各个应用申请PVC
    - 创建一个Headlesse Service用户维护Mongo DB的集群状态
    - 创建一个StatefulSet
+
+​		Pod 调度
 
 
 
@@ -497,8 +528,6 @@ Pod如果是通过Deployment 创建的，则升级回退就是要使用Deploymen
    Endpoint、service和pod的关系：
    
    ![](images\endpoint.png)
-   
-   
    
    ## 将服务暴露给外部客户端
 
