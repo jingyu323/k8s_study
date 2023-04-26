@@ -220,15 +220,55 @@ Pod注入信息到容器的方式：
 
                        3）选择主机：选择打分最高的主机，进行binding操作，结果存储到Etcd中；
 
-   4. kubelet创建pod:  kubelet根据Schedule调度结果执行Pod创建操作: 调度成功后，会启动container, docker run, scheduler会调用API Server的API在etcd中创建一个bound pod对象，描述在一个工作节点上绑定运行的所有pod信息。运行在每个工作节点上的kubelet也会定期与etcd同步bound pod信息，一旦发现应该在该工作节点上运行的bound pod对象没有更新，则调用Docker API创建并启动pod内的容器。
+      Kubernetes 中，默认的调度策略有如下四种。
+
+      - GeneralPredicates  
+        检查端口是否冲突  Pod 的 nodeSelector 或者 nodeAffinity 指定的节点，是否与待考察节点匹配，等等。
+
+      - Volume 相关的过滤规则。
+
+VolumeBindingPredicate 的规则。它负责检查的，是该 Pod 对应的 PV 的 nodeAffinity 字段，是否跟某个节点的标签相匹配。
+      - 第三种类型，是宿主机相关的过滤规则
+主要考察待调度 Pod 是否满足 Node 本身的某些条件
+比如，PodToleratesNodeTaints，负责检查的就是我们前面经常用到的 Node 的“污点”机制。只有当 Pod 的 Toleration 字段与 Node 的 Taint 字段能够匹配的时候，这个 Pod 才能被调度到该节点上
+
+      - 是 Pod 相关的过滤规则。
+
+PodAffinityPredicate。这个规则的作用，是检查待调度 Pod 与 Node 上的已有 Pod 之间的亲密（affinity）和反亲密（anti-affinity）关系
+
+```
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: with-pod-antiaffinity
+spec:
+  affinity:
+    podAntiAffinity: 
+      requiredDuringSchedulingIgnoredDuringExecution: 
+      - weight: 100  
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+            - key: security 
+              operator: In 
+              values:
+              - S2
+          topologyKey: kubernetes.io/hostname
+  containers:
+  - name: with-pod-affinity
+    image: docker.io/ocpqe/hello-pod
+```
+
+   1. kubelet创建pod:  kubelet根据Schedule调度结果执行Pod创建操作: 调度成功后，会启动container, docker run, scheduler会调用API Server的API在etcd中创建一个bound pod对象，描述在一个工作节点上绑定运行的所有pod信息。运行在每个工作节点上的kubelet也会定期与etcd同步bound pod信息，一旦发现应该在该工作节点上运行的bound pod对象没有更新，则调用Docker API创建并启动pod内的容器。
 
    #### 选择node机制
 
-   1. 过滤（Predicates 预选策略）
+   2. 过滤（Predicates 预选策略）
 
       	过滤阶段会将所有满足 Pod 调度需求的 Node 选出来。
 
-   2. 打分（Priorities 优选策略）
+   3. 打分（Priorities 优选策略）
    
       ​	在过滤阶段后调度器会为 Pod 从所有可调度节点中选取一个最合适的 Node。根据当前启用的打分规则，调度器会给每一个可调度节点进行打分
 
