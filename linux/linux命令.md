@@ -318,6 +318,20 @@ echo $test_str | awk -F "#" '{print $4}'
 
 
 
+# shell 以某个字符开头的判断
+
+```
+if [[$1 =~^v.* ]]; then
+   commond
+ else
+   commond
+ fi
+```
+
+
+
+
+
 截取
 
 [root@localhost videoLink]# filename="test/2/4/HXD2B0259_成都运达_01_一端路况_20210322_074502.mp4"
@@ -352,6 +366,22 @@ HXD2B0259
 basename /usr/include/stdio.h .h
 
 输出 stdio
+
+
+
+```
+
+## 去除最后一位"/"
+function remove_last_slash() {
+       local source_dir=$1
+       local source_dir_laststr=`echo ${source_dir: -1}`
+
+       if [ "${source_dir_laststr}" == "/" ]; then
+         source_dir=${source_dir%?}
+       fi
+       echo "${source_dir}"
+}
+```
 
 
 
