@@ -367,6 +367,12 @@ basename /usr/include/stdio.h .h
 
 输出 stdio
 
+替换指定字符，下文时把av3替换成空
+
+```
+${video_subDir/"av3/"/}
+```
+
 
 
 ```
