@@ -240,16 +240,66 @@ Pod注入信息到容器的方式：
                        2）主机打分：对第一步筛选出的符合要求的主机进行打分，在主机打分阶段，调度器会考虑一些整体优化策略，比如把一个Replication Controller的副本分布到不同的主机上，使用最低负载的主机等；
    
                        3）选择主机：选择打分最高的主机，进行binding操作，结果存储到Etcd中；
+
+      Kubernetes 中，默认的调度策略有如下四种。
+
+      - GeneralPredicates  
+        检查端口是否冲突  Pod 的 nodeSelector 或者 nodeAffinity 指定的节点，是否与待考察节点匹配，等等。
+
+      - Volume 相关的过滤规则。
+
+VolumeBindingPredicate 的规则。它负责检查的，是该 Pod 对应的 PV 的 nodeAffinity 字段，是否跟某个节点的标签相匹配。
+      - 第三种类型，是宿主机相关的过滤规则
+主要考察待调度 Pod 是否满足 Node 本身的某些条件
+比如，PodToleratesNodeTaints，负责检查的就是我们前面经常用到的 Node 的“污点”机制。只有当 Pod 的 Toleration 字段与 Node 的 Taint 字段能够匹配的时候，这个 Pod 才能被调度到该节点上
+
+      - 是 Pod 相关的过滤规则。
+
+PodAffinityPredicate。这个规则的作用，是检查待调度 Pod 与 Node 上的已有 Pod 之间的亲密（affinity）和反亲密（anti-affinity）关系
+
+```
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: with-pod-antiaffinity
+spec:
+  affinity:
+    podAntiAffinity: 
+      requiredDuringSchedulingIgnoredDuringExecution: 
+      - weight: 100  
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+            - key: security 
+              operator: In 
+              values:
+              - S2
+          topologyKey: kubernetes.io/hostname
+  containers:
+  - name: with-pod-affinity
+    image: docker.io/ocpqe/hello-pod
+```
+
+   1. kubelet创建pod:  kubelet根据Schedule调度结果执行Pod创建操作: 调度成功后，会启动container, docker run, scheduler会调用API Server的API在etcd中创建一个bound pod对象，描述在一个工作节点上绑定运行的所有pod信息。运行在每个工作节点上的kubelet也会定期与etcd同步bound pod信息，一旦发现应该在该工作节点上运行的bound pod对象没有更新，则调用Docker API创建并启动pod内的容器。
+
+   #### 选择node机制
+
+   2. 过滤（Predicates 预选策略）
+
+      	过滤阶段会将所有满足 Pod 调度需求的 Node 选出来。
+
+   3. 打分（Priorities 优选策略）
    
    4. kubelet创建pod:  kubelet根据Schedule调度结果执行Pod创建操作: 调度成功后，会启动container, docker run, scheduler会调用API Server的API在etcd中创建一个bound pod对象，描述在一个工作节点上绑定运行的所有pod信息。运行在每个工作节点上的kubelet也会定期与etcd同步bound pod信息，一旦发现应该在该工作节点上运行的bound pod对象没有更新，则调用Docker API创建并启动pod内的容器。
    
    #### 选择node机制
    
-   1. 过滤（Predicates 预选策略）
+   5. 过滤（Predicates 预选策略）
    
       	过滤阶段会将所有满足 Pod 调度需求的 Node 选出来。
    
-   2. 打分（Priorities 优选策略）
+   6. 打分（Priorities 优选策略）
    
       ​	在过滤阶段后调度器会为 Pod 从所有可调度节点中选取一个最合适的 Node。根据当前启用的打分规则，调度器会给每一个可调度节点进行打分
 
@@ -343,8 +393,6 @@ Pod如果是通过Deployment 创建的，则升级回退就是要使用Deploymen
    回退
    kubectl rollout undo deployment/deploy-nginx --to-revision=0
    ```
-   
-   
    
    ### DaemonSet更新策略
    
@@ -480,8 +528,6 @@ Pod如果是通过Deployment 创建的，则升级回退就是要使用Deploymen
    Endpoint、service和pod的关系：
    
    ![](images\endpoint.png)
-   
-   
    
    ## 将服务暴露给外部客户端
 
@@ -1611,6 +1657,13 @@ dockershim 将会从 Kubernetes 1.24 中完全移除，
    ip route list 查看当前路由表
 
   netstat -rn  查看路由表
+上述数据的传递过程在网络协议栈的不同层次，都有 Linux 内核 Netfilter 参与其中。所以，如果感兴趣的话，你可以通过打开 iptables
+
+# 在宿主机上执行
+$ iptables -t raw -A OUTPUT -p icmp -j TRACE
+$ iptables -t raw -A PREROUTING -p icmp -j TRACE
+## Overlay Network 夸主通信
+
 
 #### 		5.1 Docker 网络
 
@@ -1657,7 +1710,17 @@ dockershim 将会从 Kubernetes 1.24 中完全移除，
 
 ##### 5.4   开源网络插件
 
-## Flannel
+## Flannel 跨主通信
+
+Flannel 支持三种后端实现：
+
+- VXLAN
+
+
+
+- host-gw
+- UDP 
+  而 UDP 模式，是 Flannel 项目最早支持的一种方式，却也是性能最差的一种方式。所以，这个模式目前已经被弃用。不过，Flannel 之所以最先选择 UDP 模式，就是因为这种模式是最直接、也是最容易理解的容器跨主网络实现
 
 
 
@@ -2252,7 +2315,12 @@ Kubernetes底层是通过Linux的Cgroup与Namesapce来实现底层基础资源�
 ![](images\contaner_net.png)
 
 
+## 20.8  CNI 
+第一类，叫作 Main 插件，它是用来创建具体网络设备的二进制文件。比如，bridge（网桥设备）、ipvlan、loopback（lo 设备）、macvlan、ptp（Veth Pair 设备），以及 vlan。我在前面提到过的 Flannel、Weave 等项目，都属于“网桥”类型的 CNI 插件。所以在具体的实现中，它们往往会调用 bridge 这个二进制文件。这个流程，我马上就会详细介绍到。
 
+第二类，叫作 IPAM（IP Address Management）插件，它是负责分配 IP 地址的二进制文件。比如，dhcp，这个文件会向 DHCP 服务器发起请求；host-local，则会使用预先配置的 IP 地址段来进行分配。
+
+第三类，是由 CNI 社区维护的内置 CNI 插件。比如：flannel，就是专门为 Flannel 项目提供的 CNI 插件；tuning，是一个通过 sysctl 调整网络设备参数的二进制文件；portmap，是一个通过 iptables 配置端口映射的二进制文件；bandwidth，是一个使用 Token Bucket Filter (TBF) 来进行限流的二进制文件
 
 
 # 21: 常用命令
