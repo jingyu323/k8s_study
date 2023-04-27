@@ -506,6 +506,12 @@ kubectl delete pod  kube-proxy-p6q6w -n kube-system
 
 # 部署网络插件
 
+来看veth-eth映射关系
+
+ip link show 
+
+
+
 $ wget https://docs.projectcalico.org/manifests/calico.yaml --no-check-certificate
 
 # 先下载下来，然后修改IPV4的网段，修改这两行：
