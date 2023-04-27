@@ -1856,6 +1856,12 @@ dockershim 将会从 Kubernetes 1.24 中完全移除，
 
 # 5. 容器网络,网络插件优缺点使用场景 
 
+
+
+
+
+
+
 - veth 设备对
 
 - 网桥
@@ -1868,6 +1874,7 @@ dockershim 将会从 Kubernetes 1.24 中完全移除，
 # 在宿主机上执行
 $ iptables -t raw -A OUTPUT -p icmp -j TRACE
 $ iptables -t raw -A PREROUTING -p icmp -j TRACE
+
 ## Overlay Network 夸主通信
 
 
@@ -1920,11 +1927,20 @@ $ iptables -t raw -A PREROUTING -p icmp -j TRACE
 
 Flannel 支持三种后端实现：
 
-- VXLAN
+- **VXLAN  主流方案**
+
+  我们在进行系统级编程的时候，有一个非常重要的优化原则，就是要减少用户态到内核态的切换次数，并且把核心的处理逻辑都放在内核态进行
+
+VXLAN，即 Virtual Extensible LAN（虚拟可扩展局域网），是 Linux 内核本身就支持的一种网络虚似化技术。所以说，VXLAN 可以完全在内核态实现上述封装和解封装的工作，从而通过与前面相似的“隧道”机制，构建出覆盖网络（Overlay Network）。VXLAN 的覆盖网络的设计思想是：在现有的三层网络之上，“覆盖”一层虚拟的、由内核 VXLAN 模块负责维护的二层网络，使得连接在这个 VXLAN 二层网络上的“主机”（虚拟机或者容器都可以）之间，可以像在同一个局域网（LAN）里那样自由通信。当然，实际上，这些“主机”可能分布在不同的宿主机上，甚至是分布在不同的物理机房里。而为了能够在二层网络上打通“隧道”，VXLAN 会在宿主机上设置一个特殊的网络设备作为“隧道”的两端。这个设备就叫作 VTEP，即：VXLAN Tunnel End Point（虚拟隧道端点）。而 VTEP 设备的作用，其实跟前面的 flanneld 进程非常相似。只不过，它进行封装和解封装的对象，是二层数据帧（Ethernet frame）；而且这个工作的执行流程，全部是在内核里完成的（因为 VXLAN 本身就是 Linux 内核中的一个模块）。
 
 
+
+​	![img](vxlan.webp)
 
 - host-gw
+
+  
+
 - UDP 
   而 UDP 模式，是 Flannel 项目最早支持的一种方式，却也是性能最差的一种方式。所以，这个模式目前已经被弃用。不过，Flannel 之所以最先选择 UDP 模式，就是因为这种模式是最直接、也是最容易理解的容器跨主网络实现
 
