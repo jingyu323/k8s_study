@@ -292,9 +292,9 @@ spec:
    3. 打分（Priorities 优选策略）
    
    4. kubelet创建pod:  kubelet根据Schedule调度结果执行Pod创建操作: 调度成功后，会启动container, docker run, scheduler会调用API Server的API在etcd中创建一个bound pod对象，描述在一个工作节点上绑定运行的所有pod信息。运行在每个工作节点上的kubelet也会定期与etcd同步bound pod信息，一旦发现应该在该工作节点上运行的bound pod对象没有更新，则调用Docker API创建并启动pod内的容器。
-   
+
    #### 选择node机制
-   
+
    5. 过滤（Predicates 预选策略）
    
       	过滤阶段会将所有满足 Pod 调度需求的 Node 选出来。
@@ -414,7 +414,109 @@ Pod如果是通过Deployment 创建的，则升级回退就是要使用Deploymen
 
 ​		Pod 调度
 
+### Operator 
 
+相对更加灵活和编程友好的管理“有状态应用”的解决方案
+
+
+
+Etcd Operator 本身，其实就是一个 Deployment，它的 YAML 文件如下所示：
+
+```
+
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: etcd-operator
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: etcd-operator
+    spec:
+      containers:
+      - name: etcd-operator
+        image: quay.io/coreos/etcd-operator:v0.9.2
+        command:
+        - etcd-operator
+        env:
+        - name: MY_POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: MY_POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+...
+```
+
+Etcd Operator 的实现，虽然选择的也是静态集群，但这个集群具体的组建过程，是逐个节点动态添加的方式，即
+
+然后，Etcd Operator 会不断创建新的 Etcd 节点，然后将它们逐一加入到这个集群当中，直到集群的节点数等于 size。这就意味着，在生成不同角色的 Etcd Pod 时，Operator 需要能够区分种子节点与普通节点。而这两种节点的不同之处，就在于一个名叫–initial-cluster-state 的启动参数：
+
+当这个参数值设为 new 时，就代表了该节点是种子节点。而我们前面提到过，种子节点还必须通过–initial-cluster-token 声明一个独一无二的 Token。
+
+而如果这个参数值设为 existing，那就是说明这个节点是一个普通节点，Etcd Operator 需要把它加入到已有集群里。
+
+
+
+那么接下来的问题就是，每个 Etcd 节点的–initial-cluster 字段的值又是怎么生成的呢？由于这个方案要求种子节点先启动，所以对于种子节点 infra0 来说，它启动后的集群只有它自己，即：–initial-cluster=infra0=http://10.0.1.10:2380。而对于接下来要加入的节点，比如 infra1 来说，它启动后的集群就有两个节点了，所以它的–initial-cluster 参数的值应该是：infra0=http://10.0.1.10:2380,infra1=http://10.0.1.11:2380。其他节点，都以此类推。
+
+那么 Etcd Operator 生成的种子节点的启动命令，如下所示：
+
+```
+
+$ etcd
+  --data-dir=/var/etcd/data
+  --name=infra0
+  --initial-advertise-peer-urls=http://10.0.1.10:2380
+  --listen-peer-urls=http://0.0.0.0:2380
+  --listen-client-urls=http://0.0.0.0:2379
+  --advertise-client-urls=http://10.0.1.10:2379
+  --initial-cluster=infra0=http://10.0.1.10:2380
+  --initial-cluster-state=new
+  --initial-cluster-token=4b5215fa-5401-4a95-a8c6-892317c9bef8
+```
+
+我们可以把这个创建种子节点（集群）的阶段称为：Bootstrap。接下来，对于其他每一个节点，Operator 只需要执行如下两个操作即可，以 infra1 为例。
+
+```
+第一步：通过 Etcd 命令行添加一个新成员
+$ etcdctl member add infra1 http://10.0.1.11:2380
+
+第二步：为这个成员节点生成对应的启动参数，并启动它
+$ etcd
+    --data-dir=/var/etcd/data
+    --name=infra1
+    --initial-advertise-peer-urls=http://10.0.1.11:2380
+    --listen-peer-urls=http://0.0.0.0:2380
+    --listen-client-urls=http://0.0.0.0:2379
+    --advertise-client-urls=http://10.0.1.11:2379
+    --initial-cluster=infra0=http://10.0.1.10:2380,infra1=http://10.0.1.11:2380
+    --initial-cluster-state=existing
+```
+
+种子节点的容器启动命令如下所示
+
+```
+
+/usr/local/bin/etcd
+  --data-dir=/var/etcd/data
+  --name=example-etcd-cluster-mbzlg6sd56
+  --initial-advertise-peer-urls=http://example-etcd-cluster-mbzlg6sd56.example-etcd-cluster.default.svc:2380
+  --listen-peer-urls=http://0.0.0.0:2380
+  --listen-client-urls=http://0.0.0.0:2379
+  --advertise-client-urls=http://example-etcd-cluster-mbzlg6sd56.example-etcd-cluster.default.svc:2379
+  --initial-cluster=example-etcd-cluster-mbzlg6sd56=http://example-etcd-cluster-mbzlg6sd56.example-etcd-cluster.default.svc:2380
+  --initial-cluster-state=new
+  --initial-cluster-token=4b5215fa-5401-4a95-a8c6-892317c9bef8
+```
+
+
+
+这也就意味着，每个 Cluster 对象，都会事先创建一个与该 EtcdCluster 同名的 Headless Service。这样，Etcd Operator 在接下来的所有创建 Pod 的步骤里，就都可以使用 Pod 的 DNS 记录来代替它的 IP 地址了
 
 ## Pod 驱逐策略
 
@@ -1511,9 +1613,24 @@ RBAC 授权模式
 RBAC 的 API 资源对象说明
  RBAC 引入了 4个新的顶级资源对象：Role、ClusterRole、RoleBinding、ClusterRoleBinding、4种对象类型均可以通过 kubectl 与 API 操作。
 
-Role：普通角色 | ClusterRole：集群角色
+Role：普通角色 （只限定与定义的namespace）| ClusterRole：集群角色（全局有效）
 
 Rolebinding：普通角色绑定 ClusterRoleBinding：集群角色绑定 
+
+指定权限全集
+
+```
+
+verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+```
+
+
+
+
+
+
+
+
 
 ## Admission Control 准入控制
 
@@ -1584,7 +1701,96 @@ Kubernetes有User Account和Service Account两套独立的账号系统：
 
 kubectl get serviceaccount --all-namespaces
 
+接下来，我通过一个具体的实例来为你讲解一下为 ServiceAccount 分配权限的过程。首先，我们要定义一个 ServiceAccount。它的 API 对象非常简单，如下所示：
 
+```
+
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  namespace: mynamespace
+  name: example-sa
+```
+
+
+
+我们通过编写 RoleBinding 的 YAML 文件，来为这个 ServiceAccount 分配权限
+
+```
+
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: example-rolebinding
+  namespace: mynamespace
+subjects:
+- kind: ServiceAccount
+  name: example-sa
+  namespace: mynamespace
+roleRef:
+  kind: Role
+  name: example-role
+  apiGroup: rbac.authorization.k8s.io
+```
+
+可以看到，在这个 RoleBinding 对象里，subjects 字段的类型（kind），不再是一个 User，而是一个名叫 example-sa 的 ServiceAccount。而 roleRef 引用的 Role 对象，依然名叫 example-role，也就是我在这篇文章一开始定义的 Role 对象。
+
+```
+
+$ kubectl create -f svc-account.yaml
+$ kubectl create -f role-binding.yaml
+$ kubectl create -f role.yaml
+```
+
+
+
+我们来查看一下这个 ServiceAccount 的详细信息：
+
+```
+
+$ kubectl get sa -n mynamespace -o yaml
+- apiVersion: v1
+  kind: ServiceAccount
+  metadata:
+    creationTimestamp: 2018-09-08T12:59:17Z
+    name: example-sa
+    namespace: mynamespace
+    resourceVersion: "409327"
+    ...
+  secrets:
+  - name: example-sa-token-vmfg6
+```
+
+可以看到，Kubernetes 会为一个 ServiceAccount 自动创建并分配一个 Secret 对象，即：上述 ServiceAcount 定义里最下面的 secrets 字段。这个 Secret，就是这个 ServiceAccount 对应的、用来跟 APIServer 进行交互的授权文件，我们一般称它为：Token。Token 文件的内容一般是证书或者密码，它以一个 Secret 对象的方式保存在 Etcd 当中。这时候，用户的 Pod，就可以声明使用这个 ServiceAccount 了，比如下面这个例子：
+
+```
+
+apiVersion: v1
+kind: Pod
+metadata:
+  namespace: mynamespace
+  name: sa-token-test
+spec:
+  containers:
+  - name: nginx
+    image: nginx:1.7.9
+  serviceAccountName: example-sa
+```
+
+cluster-admin 角色，对应的是整个 Kubernetes 项目中的最高权限（verbs=*），如下所示
+
+```
+
+$ kubectl describe clusterrole cluster-admin -n kube-system
+Name:         cluster-admin
+Labels:       kubernetes.io/bootstrapping=rbac-defaults
+Annotations:  rbac.authorization.kubernetes.io/autoupdate=true
+PolicyRule:
+  Resources  Non-Resource URLs Resource Names  Verbs
+  ---------  -----------------  --------------  -----
+  *.*        []                 []              [*]
+             [*]                []              [*]
+```
 
 
 
