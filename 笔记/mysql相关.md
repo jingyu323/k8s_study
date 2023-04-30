@@ -784,7 +784,12 @@ binlog默认情况下是不开启的，不过一般情况下，建议开启，�
 
 
 alter table htgw_sync_group convert to character set utf8 collate utf8mb3_unicode_ci;
+##  锁
 
+### 死锁
+
+当出现死锁以后，有两种策略：一种策略是，直接进入等待，直到超时。这个超时时间可以通过参数 innodb_lock_wait_timeout 来设置。
+另一种策略是，发起死锁检测，发现死锁后，主动回滚死锁链条中的某一个事务，让其他事务得以继续执行。将参数 innodb_deadlock_detect 设置为 on，表示开启这个逻辑。
 
 
 ## 参考资料
