@@ -792,7 +792,36 @@ alter table htgw_sync_group convert to character set utf8 collate utf8mb3_unicod
 另一种策略是，发起死锁检测，发现死锁后，主动回滚死锁链条中的某一个事务，让其他事务得以继续执行。将参数 innodb_deadlock_detect 设置为 on，表示开启这个逻辑。
 
 
-show engine innodb status;
+show engine innodb status\G
+
+###  发生死锁时
+```
+SELECT
+    a.trx_id,
+    d.SQL_TEXT,
+    a.trx_state,
+    a.trx_started,
+    a.trx_query,
+    b.ID,
+    b.USER,
+    b.DB,
+    b.COMMAND,
+    b.TIME,
+    b.STATE,
+    b.INFO,
+    c.PROCESSLIST_USER,
+    c.PROCESSLIST_HOST,
+    c.PROCESSLIST_DB 
+FROM
+    information_schema.INNODB_TRX a
+    LEFT JOIN information_schema.PROCESSLIST b ON a.trx_mysql_thread_id = b.id 
+    LEFT JOIN PERFORMANCE_SCHEMA.threads c ON b.id = c.PROCESSLIST_ID
+    LEFT JOIN PERFORMANCE_SCHEMA.events_statements_current d ON d.THREAD_ID = c.THREAD_ID;
+
+2.分析锁定范围
+SELECT ENGINE,ENGINE_TRANSACTION_ID,THREAD_ID,EVENT_ID,OBJECT_SCHEMA,OBJECT_NAME,INDEX_NAME,LOCK_TYPE, LOCK_MODE,LOCK_STATUS,LOCK_DATA FROM performance_schema.data_locks;
+
+```
 
 ## 参考资料
 
