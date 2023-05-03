@@ -727,7 +727,9 @@ source /etc/profile 使生效  Java -version 检测安装是否安装成功
 5.  事务重做日志：redo log 
 6.  中继日志：relay log
 
+可以通过命令查看当前数据库中的日志使用信息：
 
+show variables like 'log_%';
 
 1.错误日志（errorlog）log_error 参数控制错误日志是否写入文件及文件名称，默认情况下，错误日志被写入终端标准输出stderr
 
@@ -760,6 +762,12 @@ log_error = ``/data/mysql/logs/error``.log
 
 一般查询日志又称通用查询日志，是 MySQL 中记录最详细的日志，该日志会记录 mysqld 所有相关操作，当 clients 连接或断开连接时，服务器将信息写入此日志，并记录从 clients 收到的每个 SQL 语句。当你怀疑 client 中的错误并想要确切知道 client 发送给mysqld的内容时，通用查询日志非常有用。
 
+查询通用查询日志变量信息
+
+```
+ show global variables like '%general_log%';
+```
+
 默认情况下，general log 是关闭的，开启通用查询日志会增加很多磁盘 I/O， 所以如非出于调试排错目的，不建议开启通用查询日志。相关参数配置介绍如下：
 
 ```
@@ -783,6 +791,8 @@ binlog默认情况下是不开启的，不过一般情况下，建议开启，�
 ```
 # binlog 相关配置``vim /etc/my.cnf ``[mysqld]``server-id = 1003306``log-bin = /data/mysql/logs/binlog``binlog_format = row``expire_logs_days = 15
 ```
+
+5. 
 
 ## 具体问题解决
 
