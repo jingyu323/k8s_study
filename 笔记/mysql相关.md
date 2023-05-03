@@ -591,11 +591,15 @@ https://cloud.tencent.com/developer/article/1508235
 
 ## 千万级别数据处理
 
+## 锁
+
+表级的锁是 MDL（metadata lock)
+- 读锁之间不互斥，因此你可以有多个线程同时对一张表增删改查。
+
+- 读写锁之间、写锁之间是互斥的，用来保证变更表结构操作的安全性。因此，如果有两个线程要同时给一个表加字段，其中一个要等另一个执行完才能开始执行。
 
 
-
-
-
+给一个表加字段，或者修改字段，或者加索引，需要扫描全表的数据。在对大表操作的时候，以免对线上服务造成影响。 行锁释放不会 立即释放，
 
 ## 数据库数据同步方案
 
@@ -780,8 +784,44 @@ binlog默认情况下是不开启的，不过一般情况下，建议开启，�
 
 
 alter table htgw_sync_group convert to character set utf8 collate utf8mb3_unicode_ci;
+##  锁
+
+### 死锁
+
+当出现死锁以后，有两种策略：一种策略是，直接进入等待，直到超时。这个超时时间可以通过参数 innodb_lock_wait_timeout 来设置。
+另一种策略是，发起死锁检测，发现死锁后，主动回滚死锁链条中的某一个事务，让其他事务得以继续执行。将参数 innodb_deadlock_detect 设置为 on，表示开启这个逻辑。
 
 
+show engine innodb status\G
+
+###  发生死锁时
+```
+SELECT
+    a.trx_id,
+    d.SQL_TEXT,
+    a.trx_state,
+    a.trx_started,
+    a.trx_query,
+    b.ID,
+    b.USER,
+    b.DB,
+    b.COMMAND,
+    b.TIME,
+    b.STATE,
+    b.INFO,
+    c.PROCESSLIST_USER,
+    c.PROCESSLIST_HOST,
+    c.PROCESSLIST_DB 
+FROM
+    information_schema.INNODB_TRX a
+    LEFT JOIN information_schema.PROCESSLIST b ON a.trx_mysql_thread_id = b.id 
+    LEFT JOIN PERFORMANCE_SCHEMA.threads c ON b.id = c.PROCESSLIST_ID
+    LEFT JOIN PERFORMANCE_SCHEMA.events_statements_current d ON d.THREAD_ID = c.THREAD_ID;
+
+2.分析锁定范围
+SELECT ENGINE,ENGINE_TRANSACTION_ID,THREAD_ID,EVENT_ID,OBJECT_SCHEMA,OBJECT_NAME,INDEX_NAME,LOCK_TYPE, LOCK_MODE,LOCK_STATUS,LOCK_DATA FROM performance_schema.data_locks;
+
+```
 
 ## 参考资料
 

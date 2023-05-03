@@ -316,15 +316,72 @@ test_str=block#username#password#serverIP
 
 echo $test_str | awk -F "#" '{print $4}'
 
+### awk命令
+
+awk将一行分成数个字段来处理
+
+```
+print	: 打印
+NF		: 统计总字段数
+$		: 取值
+结合作用:
+	$配合NF使用 : NF内存储统计文件内每行的总字段，$存储NF内的值
+	NF	：相当于 变量值	$	：相当于 变量名
+	print相当于打印 $ 内的内容
+```
 
 
-截取
+
+
+
+
+
+### sed命令
+
+sed作用于一整行的处理
+
+
+
+
+
+
+
+### shell 以某个字符开头的判断
+
+```
+if [[$1 =~^v.* ]]; then
+   commond
+ else
+   commond
+ fi
+```
+
+```
+判断包含 前边包含后边的
+${srcDir} =~ ${blockCode}
+```
+
+```
+检查连接状态ping
+ping -c 3 -w 30 $ftp_host
+result=$?
+```
+
+```
+结果查找
+$(cat  $conv_result | grep -a "Ready" | awk -F  " " '{ print $4 }')
+```
+
+```
+查看进程
+$(ps -aux | grep  tomcat | grep -v grep | awk '{print $2}')
+```
+
+### 截取
 
 [root@localhost videoLink]# filename="test/2/4/HXD2B0259_成都运达_01_一端路况_20210322_074502.mp4"
 
 切割左边的，只保留最后一个/右边的数据
-
-[root@localhost videoLink]# echo ${filename## 
 [root@localhost videoLink]# name=`echo ${filename##*/}`
 
 [root@localhost videoLink]# echo $name
@@ -352,6 +409,40 @@ HXD2B0259
 basename /usr/include/stdio.h .h
 
 输出 stdio
+
+替换指定字符，下文时把av3替换成空
+
+```
+${video_subDir/"av3/"/}
+```
+
+
+
+```
+
+## 去除最后一位"/"
+function remove_last_slash() {
+       local source_dir=$1
+       local source_dir_laststr=`echo ${source_dir: -1}`
+
+       if [ "${source_dir_laststr}" == "/" ]; then
+         source_dir=${source_dir%?}
+       fi
+       echo "${source_dir}"
+}
+```
+
+
+
+```
+定义在脚本退出时执行指定的方法，无论是正常退出还是异常退出
+trap del_flag EXIT
+```
+
+```
+转换文件编码
+iconv -c -f utf8 -t GBK  "${tmp_record_file}" -o   "${tmp_record_file}"
+```
 
 
 

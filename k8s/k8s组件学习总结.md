@@ -194,41 +194,112 @@ Pod注入信息到容器的方式：
        kubectl describe nodes k8s-node02 | grep Taints
       ```
       
+      ##### 优先级和抢占机制
+      
+      PriorityClass 的定义
+      
+      ```
+      
+      apiVersion: scheduling.k8s.io/v1beta1
+      kind: PriorityClass
+      metadata:
+        name: high-priority
+      value: 1000000
+      globalDefault: false
+      description: "This priority class should be used for high priority service pods only."
+      ```
+      
+      
+      
+      Kubernetes 规定，优先级是一个 32 bit 的整数，最大值不超过 1000000000（10 亿，1 billion），并且值越大代表优先级越高。而超出 10 亿的值，其实是被 Kubernetes 保留下来分配给系统 Pod 使用的。显然，这样做的目的，就是保证系统 Pod 不会被用户抢占掉。
+      
+      高优先级的 Pod 就可能会比低优先级的 Pod 提前出队，从而尽早完成调度过程。这个过程，就是“优先级”这个概念在 Kubernetes 里的主要体现。
+      
       
       
       https://blog.csdn.net/qq_34857250/article/details/90259693
-
    
-
+   
+   
    ### kube-scheduler 创建流程
-
+   
    ​	![](images/20201223103750490.png)
-
    
-
    
-
+   
+   
+   
    1. 用户提交pod请求：用户提交创建Pod的请求，可以通过API Server的REST API ，也可用Kubectl命令行工具，支持Json和Yaml两种格式；
-
+   
    2. API Server 处理请求：API Server 处理用户请求，存储Pod数据到Etcd；
-
+   
    3. Schedule调度pod：Schedule通过和 API Server的watch机制，查看到新的pod，按照预定的调度策略将Pod调度到相应的Node节点上；
-
+   
                         1）过滤主机：调度器用一组规则过滤掉不符合要求的主机，比如Pod指定了所需要的资源，那么就要过滤掉资源不够的主机；
-
+   
                        2）主机打分：对第一步筛选出的符合要求的主机进行打分，在主机打分阶段，调度器会考虑一些整体优化策略，比如把一个Replication Controller的副本分布到不同的主机上，使用最低负载的主机等；
-
+   
                        3）选择主机：选择打分最高的主机，进行binding操作，结果存储到Etcd中；
 
+      Kubernetes 中，默认的调度策略有如下四种。
+
+      - GeneralPredicates  
+        检查端口是否冲突  Pod 的 nodeSelector 或者 nodeAffinity 指定的节点，是否与待考察节点匹配，等等。
+
+      - Volume 相关的过滤规则。
+
+VolumeBindingPredicate 的规则。它负责检查的，是该 Pod 对应的 PV 的 nodeAffinity 字段，是否跟某个节点的标签相匹配。
+      - 第三种类型，是宿主机相关的过滤规则
+主要考察待调度 Pod 是否满足 Node 本身的某些条件
+比如，PodToleratesNodeTaints，负责检查的就是我们前面经常用到的 Node 的“污点”机制。只有当 Pod 的 Toleration 字段与 Node 的 Taint 字段能够匹配的时候，这个 Pod 才能被调度到该节点上
+
+      - 是 Pod 相关的过滤规则。
+
+PodAffinityPredicate。这个规则的作用，是检查待调度 Pod 与 Node 上的已有 Pod 之间的亲密（affinity）和反亲密（anti-affinity）关系
+
+```
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: with-pod-antiaffinity
+spec:
+  affinity:
+    podAntiAffinity: 
+      requiredDuringSchedulingIgnoredDuringExecution: 
+      - weight: 100  
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+            - key: security 
+              operator: In 
+              values:
+              - S2
+          topologyKey: kubernetes.io/hostname
+  containers:
+  - name: with-pod-affinity
+    image: docker.io/ocpqe/hello-pod
+```
+
+   1. kubelet创建pod:  kubelet根据Schedule调度结果执行Pod创建操作: 调度成功后，会启动container, docker run, scheduler会调用API Server的API在etcd中创建一个bound pod对象，描述在一个工作节点上绑定运行的所有pod信息。运行在每个工作节点上的kubelet也会定期与etcd同步bound pod信息，一旦发现应该在该工作节点上运行的bound pod对象没有更新，则调用Docker API创建并启动pod内的容器。
+
+   #### 选择node机制
+
+   2. 过滤（Predicates 预选策略）
+
+      	过滤阶段会将所有满足 Pod 调度需求的 Node 选出来。
+
+   3. 打分（Priorities 优选策略）
+   
    4. kubelet创建pod:  kubelet根据Schedule调度结果执行Pod创建操作: 调度成功后，会启动container, docker run, scheduler会调用API Server的API在etcd中创建一个bound pod对象，描述在一个工作节点上绑定运行的所有pod信息。运行在每个工作节点上的kubelet也会定期与etcd同步bound pod信息，一旦发现应该在该工作节点上运行的bound pod对象没有更新，则调用Docker API创建并启动pod内的容器。
 
    #### 选择node机制
 
-   1. 过滤（Predicates 预选策略）
-
+   5. 过滤（Predicates 预选策略）
+   
       	过滤阶段会将所有满足 Pod 调度需求的 Node 选出来。
-
-   2. 打分（Priorities 优选策略）
+   
+   6. 打分（Priorities 优选策略）
    
       ​	在过滤阶段后调度器会为 Pod 从所有可调度节点中选取一个最合适的 Node。根据当前启用的打分规则，调度器会给每一个可调度节点进行打分
 
@@ -322,8 +393,6 @@ Pod如果是通过Deployment 创建的，则升级回退就是要使用Deploymen
    回退
    kubectl rollout undo deployment/deploy-nginx --to-revision=0
    ```
-   
-   
    
    ### DaemonSet更新策略
    
@@ -455,7 +524,111 @@ $ etcd --name infra2 --initial-advertise-peer-urls http://10.0.1.12:2380 \
 
 
 
+​		Pod 调度
 
+### Operator 
+
+相对更加灵活和编程友好的管理“有状态应用”的解决方案
+
+
+
+Etcd Operator 本身，其实就是一个 Deployment，它的 YAML 文件如下所示：
+
+```
+
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: etcd-operator
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: etcd-operator
+    spec:
+      containers:
+      - name: etcd-operator
+        image: quay.io/coreos/etcd-operator:v0.9.2
+        command:
+        - etcd-operator
+        env:
+        - name: MY_POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: MY_POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+...
+```
+
+Etcd Operator 的实现，虽然选择的也是静态集群，但这个集群具体的组建过程，是逐个节点动态添加的方式，即
+
+然后，Etcd Operator 会不断创建新的 Etcd 节点，然后将它们逐一加入到这个集群当中，直到集群的节点数等于 size。这就意味着，在生成不同角色的 Etcd Pod 时，Operator 需要能够区分种子节点与普通节点。而这两种节点的不同之处，就在于一个名叫–initial-cluster-state 的启动参数：
+
+当这个参数值设为 new 时，就代表了该节点是种子节点。而我们前面提到过，种子节点还必须通过–initial-cluster-token 声明一个独一无二的 Token。
+
+而如果这个参数值设为 existing，那就是说明这个节点是一个普通节点，Etcd Operator 需要把它加入到已有集群里。
+
+
+
+那么接下来的问题就是，每个 Etcd 节点的–initial-cluster 字段的值又是怎么生成的呢？由于这个方案要求种子节点先启动，所以对于种子节点 infra0 来说，它启动后的集群只有它自己，即：–initial-cluster=infra0=http://10.0.1.10:2380。而对于接下来要加入的节点，比如 infra1 来说，它启动后的集群就有两个节点了，所以它的–initial-cluster 参数的值应该是：infra0=http://10.0.1.10:2380,infra1=http://10.0.1.11:2380。其他节点，都以此类推。
+
+那么 Etcd Operator 生成的种子节点的启动命令，如下所示：
+
+```
+
+$ etcd
+  --data-dir=/var/etcd/data
+  --name=infra0
+  --initial-advertise-peer-urls=http://10.0.1.10:2380
+  --listen-peer-urls=http://0.0.0.0:2380
+  --listen-client-urls=http://0.0.0.0:2379
+  --advertise-client-urls=http://10.0.1.10:2379
+  --initial-cluster=infra0=http://10.0.1.10:2380
+  --initial-cluster-state=new
+  --initial-cluster-token=4b5215fa-5401-4a95-a8c6-892317c9bef8
+```
+
+我们可以把这个创建种子节点（集群）的阶段称为：Bootstrap。接下来，对于其他每一个节点，Operator 只需要执行如下两个操作即可，以 infra1 为例。
+
+```
+第一步：通过 Etcd 命令行添加一个新成员
+$ etcdctl member add infra1 http://10.0.1.11:2380
+
+第二步：为这个成员节点生成对应的启动参数，并启动它
+$ etcd
+    --data-dir=/var/etcd/data
+    --name=infra1
+    --initial-advertise-peer-urls=http://10.0.1.11:2380
+    --listen-peer-urls=http://0.0.0.0:2380
+    --listen-client-urls=http://0.0.0.0:2379
+    --advertise-client-urls=http://10.0.1.11:2379
+    --initial-cluster=infra0=http://10.0.1.10:2380,infra1=http://10.0.1.11:2380
+    --initial-cluster-state=existing
+```
+
+种子节点的容器启动命令如下所示
+
+```
+
+/usr/local/bin/etcd
+  --data-dir=/var/etcd/data
+  --name=example-etcd-cluster-mbzlg6sd56
+  --initial-advertise-peer-urls=http://example-etcd-cluster-mbzlg6sd56.example-etcd-cluster.default.svc:2380
+  --listen-peer-urls=http://0.0.0.0:2380
+  --listen-client-urls=http://0.0.0.0:2379
+  --advertise-client-urls=http://example-etcd-cluster-mbzlg6sd56.example-etcd-cluster.default.svc:2379
+  --initial-cluster=example-etcd-cluster-mbzlg6sd56=http://example-etcd-cluster-mbzlg6sd56.example-etcd-cluster.default.svc:2380
+  --initial-cluster-state=new
+  --initial-cluster-token=4b5215fa-5401-4a95-a8c6-892317c9bef8
+```
+
+
+
+这也就意味着，每个 Cluster 对象，都会事先创建一个与该 EtcdCluster 同名的 Headless Service。这样，Etcd Operator 在接下来的所有创建 Pod 的步骤里，就都可以使用 Pod 的 DNS 记录来代替它的 IP 地址了
 
 ## Pod 驱逐策略
 
@@ -569,8 +742,6 @@ $ etcd --name infra2 --initial-advertise-peer-urls http://10.0.1.12:2380 \
    Endpoint、service和pod的关系：
    
    ![](images\endpoint.png)
-   
-   
    
    ## 将服务暴露给外部客户端
 
@@ -763,6 +934,13 @@ log：对dns查询进行日志记录
 errors：对错误信息镜像日志记录
 # Volume
 ## Persistent Volume Claim（PVC）
+
+
+
+ 
+
+PVC 描述的，则是 Pod 所希望使用的持久化存储的属性。比如，Volume 存储的大小、可读写权限等等。
+
 定义PVC 
 ```
 kind: PersistentVolumeClaim
@@ -803,6 +981,106 @@ spec:
 
 ## Persistent Volume（PV）
 
+创建的待用资源
+
+PV 描述的，是持久化存储数据卷。这个 API 对象主要定义的是一个持久化存储在宿主机上的目录，比如一个 NFS 的挂载目录。
+
+声明一个PV
+
+```
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: nfs
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteMany
+  nfs:
+    server: 10.244.1.4
+    path: "/"
+```
+
+
+
+PersistentVolumeController 会不断地查看当前每一个 PVC，是不是已经处于 Bound（已绑定），Kubernetes 就可以保证用户提交的每一个 PVC，只要有合适的 PV，就进行绑定
+
+
+
+对于“第一阶段”（Attach），Kubernetes 提供的可用参数是 nodeName，即宿主机的名字。而对于“第二阶段”（Mount），Kubernetes 提供的可用参数是 dir，即 Volume 的宿主机目录。
+
+“第一阶段”的 Attach（以及 Dettach）操作，是由 Volume Controller 负责维护的，这个控制循环的名字叫作：AttachDetachController。而它的作用，就是不断地检查每一个 Pod 对应的 PV，和这个 Pod 所在宿主机之间挂载情况。从而决定，是否需要对这个 PV 进行 Attach（或者 Dettach）操作。需要注意，作为一个 Kubernetes 内置的控制器，Volume Controller 自然是 kube-controller-manager 的一部分。所以，AttachDetachController 也一定是运行在 Master 节点上的。当然，Attach 操作只需要调用公有云或者具体存储项目的 API，并不需要在具体的宿主机上执行操作，所以这个设计没有任何问题。
+
+而“第二阶段”的 Mount（以及 Unmount）操作，必须发生在 Pod 对应的宿主机上，所以它必须是 kubelet 组件的一部分。这个控制循环的名字，叫作：VolumeManagerReconciler，它运行起来之后，是一个独立于 kubelet 主循环的 Goroutine。
+
+
+
+
+
+## StorageClass
+
+StorageClass 对象的作用，其实就是创建 PV 的模板，动态创建PV
+
+StorageClass 对象会定义如下两个部分内容：
+
+第一，PV 的属性。比如，存储类型、Volume 的大小等等。
+
+第二，创建这种 PV 需要用到的存储插件。比如，Ceph 等等。
+
+ 
+
+StorageClass 需要使用如下所示的 YAML 文件来定义：
+
+```
+
+apiVersion: ceph.rook.io/v1beta1
+kind: Pool
+metadata:
+  name: replicapool
+  namespace: rook-ceph
+spec:
+  replicated:
+    size: 3
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: block-service
+provisioner: ceph.rook.io/block
+parameters:
+  pool: replicapool
+  #The value of "clusterNamespace" MUST be the same as the one in which your rook cluster exist
+  clusterNamespace: rook-ceph
+```
+
+使用定义的storage class
+
+```
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: claim1
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: block-service
+  resources:
+    requests:
+      storage: 30Gi
+```
+
+
+
+## kube-proxy
+
+IPVS 模块只负责上述的负载均衡和代理功能
+
+kube-proxy 设置–proxy-mode=ipvs 来开启这个功能。它为 Kubernetes 集群规模带来的提升，还是非常巨大的。
+
 
 # Ingress
 
@@ -810,10 +1088,125 @@ spec:
 
  用于将不同的URL 访问转发到后端不同的Service，解决的是外部客户端访问一组服务的问题。
 
-ngress相当于一个7层的负载均衡器，是Kubernetes对反向代理的一个抽象，它的工作原理类似于Nginx，可以理解成在Ingress里建立诸多映射规则，Ingress Controller通过监听这些配置规则并转化成Nginx的反向代理配置 , 然后对外部提供服务。在这里有两个核心概念：
+ingress相当于一个7层的负载均衡器，是Kubernetes对反向代理的一个抽象，它的工作原理类似于Nginx，可以理解成在Ingress里建立诸多映射规则，Ingress Controller通过监听这些配置规则并转化成Nginx的反向代理配置 , 然后对外部提供服务。在这里有两个核心概念：
 
 Ingress：Kubernetes中的一个对象，作用是定义请求如何转发到Service的规则
 Ingress Controller：具体实现反向代理及负载均衡的程序，对Ingress定义的规则进行解析，根据配置的规则来实现请求转发，实现方式有很多，比如Nginx、Haproxy 
+
+ingress 定义根据不同的路径访问不同的服务
+
+```
+
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: cafe-ingress
+spec:
+  tls:
+  - hosts:
+    - cafe.example.com
+    secretName: cafe-secret
+  rules:
+  - host: cafe.example.com
+    http:
+      paths:
+      - path: /tea
+        backend:
+          serviceName: tea-svc
+          servicePort: 80
+      - path: /coffee
+        backend:
+          serviceName: coffee-svc
+          servicePort: 80
+```
+
+
+
+## Nginx Ingress Controller
+
+这个 Ingress Controller 会根据你定义的 Ingress 对象，提供对应的代理能力。目前，业界常用的各种反向代理项目，比如 Nginx、HAProxy、Envoy、Traefik 等，都已经为 Kubernetes 专门维护了对应的 Ingress Controller
+
+```
+
+$ kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/mandatory.yaml
+```
+
+在mandatory.yaml这个文件里，正是 Nginx 官方为你维护的 Ingress Controller 的定义。
+
+```
+
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: nginx-configuration
+  namespace: ingress-nginx
+  labels:
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: nginx-ingress-controller
+  namespace: ingress-nginx
+  labels:
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: ingress-nginx
+      app.kubernetes.io/part-of: ingress-nginx
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: ingress-nginx
+        app.kubernetes.io/part-of: ingress-nginx
+      annotations:
+        ...
+    spec:
+      serviceAccountName: nginx-ingress-serviceaccount
+      containers:
+        - name: nginx-ingress-controller
+          image: quay.io/kubernetes-ingress-controller/nginx-ingress-controller:0.20.0
+          args:
+            - /nginx-ingress-controller
+            - --configmap=$(POD_NAMESPACE)/nginx-configuration
+            - --publish-service=$(POD_NAMESPACE)/ingress-nginx
+            - --annotations-prefix=nginx.ingress.kubernetes.io
+          securityContext:
+            capabilities:
+              drop:
+                - ALL
+              add:
+                - NET_BIND_SERVICE
+            # www-data -> 33
+            runAsUser: 33
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: POD_NAMESPACE
+            - name: http
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+          ports:
+            - name: http
+              containerPort: 80
+            - name: https
+              containerPort: 443
+```
+
+ Nginx Ingress Controller 是用 Nginx 实现的，那么它当然会为你返回一个 Nginx 的 404 页面。不过，Ingress Controller 也允许你通过 Pod 启动命令里的–default-backend-service 参数，设置一条默认规则，比如：–default-backend-service=nginx-default-backend。这样，任何匹配失败的请求，就都会被转发到这个名叫 nginx-default-backend 的 Service。所以，你就可以通过部署一个专门的 Pod，来为用户返回自定义的 404 页面了。
+
+
+
+可以看到，一个 Nginx Ingress Controller 为你提供的服务，其实是一个可以根据 Ingress 对象和被代理后端 Service 的变化，来自动进行更新的 Nginx 负载均衡器。
+
+
 
 ## Ingress-nginx介绍
 
@@ -1332,9 +1725,24 @@ RBAC 授权模式
 RBAC 的 API 资源对象说明
  RBAC 引入了 4个新的顶级资源对象：Role、ClusterRole、RoleBinding、ClusterRoleBinding、4种对象类型均可以通过 kubectl 与 API 操作。
 
-Role：普通角色 | ClusterRole：集群角色
+Role：普通角色 （只限定与定义的namespace）| ClusterRole：集群角色（全局有效）
 
 Rolebinding：普通角色绑定 ClusterRoleBinding：集群角色绑定 
+
+指定权限全集
+
+```
+
+verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+```
+
+
+
+
+
+
+
+
 
 ## Admission Control 准入控制
 
@@ -1405,7 +1813,96 @@ Kubernetes有User Account和Service Account两套独立的账号系统：
 
 kubectl get serviceaccount --all-namespaces
 
+接下来，我通过一个具体的实例来为你讲解一下为 ServiceAccount 分配权限的过程。首先，我们要定义一个 ServiceAccount。它的 API 对象非常简单，如下所示：
 
+```
+
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  namespace: mynamespace
+  name: example-sa
+```
+
+
+
+我们通过编写 RoleBinding 的 YAML 文件，来为这个 ServiceAccount 分配权限
+
+```
+
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: example-rolebinding
+  namespace: mynamespace
+subjects:
+- kind: ServiceAccount
+  name: example-sa
+  namespace: mynamespace
+roleRef:
+  kind: Role
+  name: example-role
+  apiGroup: rbac.authorization.k8s.io
+```
+
+可以看到，在这个 RoleBinding 对象里，subjects 字段的类型（kind），不再是一个 User，而是一个名叫 example-sa 的 ServiceAccount。而 roleRef 引用的 Role 对象，依然名叫 example-role，也就是我在这篇文章一开始定义的 Role 对象。
+
+```
+
+$ kubectl create -f svc-account.yaml
+$ kubectl create -f role-binding.yaml
+$ kubectl create -f role.yaml
+```
+
+
+
+我们来查看一下这个 ServiceAccount 的详细信息：
+
+```
+
+$ kubectl get sa -n mynamespace -o yaml
+- apiVersion: v1
+  kind: ServiceAccount
+  metadata:
+    creationTimestamp: 2018-09-08T12:59:17Z
+    name: example-sa
+    namespace: mynamespace
+    resourceVersion: "409327"
+    ...
+  secrets:
+  - name: example-sa-token-vmfg6
+```
+
+可以看到，Kubernetes 会为一个 ServiceAccount 自动创建并分配一个 Secret 对象，即：上述 ServiceAcount 定义里最下面的 secrets 字段。这个 Secret，就是这个 ServiceAccount 对应的、用来跟 APIServer 进行交互的授权文件，我们一般称它为：Token。Token 文件的内容一般是证书或者密码，它以一个 Secret 对象的方式保存在 Etcd 当中。这时候，用户的 Pod，就可以声明使用这个 ServiceAccount 了，比如下面这个例子：
+
+```
+
+apiVersion: v1
+kind: Pod
+metadata:
+  namespace: mynamespace
+  name: sa-token-test
+spec:
+  containers:
+  - name: nginx
+    image: nginx:1.7.9
+  serviceAccountName: example-sa
+```
+
+cluster-admin 角色，对应的是整个 Kubernetes 项目中的最高权限（verbs=*），如下所示
+
+```
+
+$ kubectl describe clusterrole cluster-admin -n kube-system
+Name:         cluster-admin
+Labels:       kubernetes.io/bootstrapping=rbac-defaults
+Annotations:  rbac.authorization.kubernetes.io/autoupdate=true
+PolicyRule:
+  Resources  Non-Resource URLs Resource Names  Verbs
+  ---------  -----------------  --------------  -----
+  *.*        []                 []              [*]
+             [*]                []              [*]
+```
 
 
 
@@ -1471,6 +1968,12 @@ dockershim 将会从 Kubernetes 1.24 中完全移除，
 
 # 5. 容器网络,网络插件优缺点使用场景 
 
+
+
+
+
+
+
 - veth 设备对
 
 - 网桥
@@ -1478,6 +1981,14 @@ dockershim 将会从 Kubernetes 1.24 中完全移除，
    ip route list 查看当前路由表
 
   netstat -rn  查看路由表
+上述数据的传递过程在网络协议栈的不同层次，都有 Linux 内核 Netfilter 参与其中。所以，如果感兴趣的话，你可以通过打开 iptables
+
+# 在宿主机上执行
+$ iptables -t raw -A OUTPUT -p icmp -j TRACE
+$ iptables -t raw -A PREROUTING -p icmp -j TRACE
+
+## Overlay Network 夸主通信
+
 
 #### 		5.1 Docker 网络
 
@@ -1524,7 +2035,26 @@ dockershim 将会从 Kubernetes 1.24 中完全移除，
 
 ##### 5.4   开源网络插件
 
-## Flannel
+## Flannel 跨主通信
+
+Flannel 支持三种后端实现：
+
+- **VXLAN  主流方案**
+
+  我们在进行系统级编程的时候，有一个非常重要的优化原则，就是要减少用户态到内核态的切换次数，并且把核心的处理逻辑都放在内核态进行
+
+VXLAN，即 Virtual Extensible LAN（虚拟可扩展局域网），是 Linux 内核本身就支持的一种网络虚似化技术。所以说，VXLAN 可以完全在内核态实现上述封装和解封装的工作，从而通过与前面相似的“隧道”机制，构建出覆盖网络（Overlay Network）。VXLAN 的覆盖网络的设计思想是：在现有的三层网络之上，“覆盖”一层虚拟的、由内核 VXLAN 模块负责维护的二层网络，使得连接在这个 VXLAN 二层网络上的“主机”（虚拟机或者容器都可以）之间，可以像在同一个局域网（LAN）里那样自由通信。当然，实际上，这些“主机”可能分布在不同的宿主机上，甚至是分布在不同的物理机房里。而为了能够在二层网络上打通“隧道”，VXLAN 会在宿主机上设置一个特殊的网络设备作为“隧道”的两端。这个设备就叫作 VTEP，即：VXLAN Tunnel End Point（虚拟隧道端点）。而 VTEP 设备的作用，其实跟前面的 flanneld 进程非常相似。只不过，它进行封装和解封装的对象，是二层数据帧（Ethernet frame）；而且这个工作的执行流程，全部是在内核里完成的（因为 VXLAN 本身就是 Linux 内核中的一个模块）。
+
+
+
+​	![img](vxlan.webp)
+
+- host-gw
+
+  
+
+- UDP 
+  而 UDP 模式，是 Flannel 项目最早支持的一种方式，却也是性能最差的一种方式。所以，这个模式目前已经被弃用。不过，Flannel 之所以最先选择 UDP 模式，就是因为这种模式是最直接、也是最容易理解的容器跨主网络实现
 
 
 
@@ -1632,6 +2162,14 @@ tunl0设备，是一个IP隧道（IP tunnel）设备。宿主机网络栈从Veth
 
 宿主机二层互通场景
 calico插件与fannel的host-gw模式不同之处就是，**它不会在宿主机上创建类似docker0、cni0这样的网桥设备，**Veth Pair在宿主机的一端的接口直接暴露在宿主机上，并通过设置路由规则，将容器IP暴露到宿主机的通信路由上 
+在了解了 BGP 之后，
+
+Calico 项目的架构就非常容易理解了。它由三个部分组成：Calico 的 CNI 插件。这是 Calico 与 Kubernetes 对接的部分。我已经在上一篇文章中，和你详细分享了 CNI 插件的工作原理，这里就不再赘述了。
+Felix。它是一个 DaemonSet，负责在宿主机上插入路由规则（即：写入 Linux 内核的 FIB 转发信息库），以及维护 Calico 所需的网络设备等工作。
+BIRD。它就是 BGP 的客户端，专门负责在集群里分发路由规则信息。
+
+使用一个或多个独立组件负责搜集整个集群里的所有路由信息，然后通过 BGP 协议同步给网关。而我们前面提到，在大规模集群中，Calico 本身就推荐使用 Route Reflector 节点的方式进行组网。所以，这里负责跟宿主机网关进行沟通的独立组件，直接由 Route Reflector 兼任即可。更重要的是，这种情况下网关的 BGP Peer 个数是有限并且固定的。所以我们就可以直接把这些独立组件配置成路由器的 BGP Peer，而无需 Dynamic Neighbors 的支持。
+当然，这些独立组件的工作原理也很简单：它们只需要 WATCH Etcd 里的宿主机和对应网段的变化信息，然后把这些信息通过 BGP 协议分发给网关即可。
 
 
 
@@ -1662,6 +2200,16 @@ BGP网络：
 适用网络类型：适用于互相访问的pod在同一个网段，适用于大型网络。
 
 效率：原生hostGW，效率高 
+
+
+
+而在 Calico 项目中，它已经为你提供了两种将宿主机网关设置成 BGP Peer 的解决方案。
+
+第一种方案，就是所有宿主机都跟宿主机网关建立 BGP Peer 关系。
+
+第二种方案：Route Reflector 
+
+是使用一个或多个独立组件负责搜集整个集群里的所有路由信息，然后通过 BGP 协议同步给网关。而我们前面提到，在大规模集群中，Calico 本身就推荐使用 Route Reflector 节点的方式进行组网。所以，这里负责跟宿主机网关进行沟通的独立组件，直接由 Route Reflector 兼任即可。
 
 ## Calico和Flannel对比
 
@@ -2115,7 +2663,12 @@ Kubernetes底层是通过Linux的Cgroup与Namesapce来实现底层基础资源�
 ![](images\contaner_net.png)
 
 
+## 20.8  CNI 
+第一类，叫作 Main 插件，它是用来创建具体网络设备的二进制文件。比如，bridge（网桥设备）、ipvlan、loopback（lo 设备）、macvlan、ptp（Veth Pair 设备），以及 vlan。我在前面提到过的 Flannel、Weave 等项目，都属于“网桥”类型的 CNI 插件。所以在具体的实现中，它们往往会调用 bridge 这个二进制文件。这个流程，我马上就会详细介绍到。
 
+第二类，叫作 IPAM（IP Address Management）插件，它是负责分配 IP 地址的二进制文件。比如，dhcp，这个文件会向 DHCP 服务器发起请求；host-local，则会使用预先配置的 IP 地址段来进行分配。
+
+第三类，是由 CNI 社区维护的内置 CNI 插件。比如：flannel，就是专门为 Flannel 项目提供的 CNI 插件；tuning，是一个通过 sysctl 调整网络设备参数的二进制文件；portmap，是一个通过 iptables 配置端口映射的二进制文件；bandwidth，是一个使用 Token Bucket Filter (TBF) 来进行限流的二进制文件
 
 
 # 21: 常用命令
@@ -2127,8 +2680,6 @@ kubectl apply -f nginx-deployment.yaml
 删除应用
 
 kubectl delete -f nginx-deployment.yaml
-
-
 
 
 
@@ -2177,7 +2728,13 @@ docker run -p 8888:8888   -p 9992:9992  -v /root/start.sh  镜像名称
 事件往往是一次性的，如果操作失败比较难处理，但是控制器是循环一直在尝试的，更符合kubernetes申明式API，最终达到与申明一致，这样理解对吗
 
 
-
+## 24.3 你能否能总结一下三层网络方案和“隧道模式”的异同，以及各自的优缺点？
+三层和隧道的异同：
+相同之处是都实现了跨主机容器的三层互通，而且都是通过对目的 MAC 地址的操作来实现的；不同之处是三层通过配置下一条主机的路由规则来实现互通，隧道则是通过通过在 IP 包外再封装一层 MAC 包头来实现。
+三层的优点：少了封包和解包的过程，性能肯定是更高的。
+三层的缺点：需要自己想办法维护路由规则。
+隧道的优点：简单，原因是大部分工作都是由 Linux 内核的模块实现了，应用层面工作量较少。
+隧道的缺点：主要的问题就是性能低。
 
 
 
