@@ -718,6 +718,17 @@ source /etc/profile 使生效  Java -version 检测安装是否安装成功
 
 
 
+常用日志文件如下： 
+
+1. 错误日志：/var/log/mysql-error.log 
+2.  二进制日志：/var/lib/mysql/mysql-bin  
+3.  查询日志：
+4.   慢查询日志：slow_query_log.log 
+5.  事务重做日志：redo log 
+6.  中继日志：relay log
+
+
+
 1.错误日志（errorlog）log_error 参数控制错误日志是否写入文件及文件名称，默认情况下，错误日志被写入终端标准输出stderr
 
 ```
