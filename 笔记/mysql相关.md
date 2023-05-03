@@ -696,22 +696,6 @@ mysql -hlocalhost  -uroot -p'root'  -P3306  < /home/sql/0928.sql
 >
 > 导入的时候 添加上数据库名称 就不用sql脚本 中指定了
 
-## java 安装配置
-
-vi /etc/profile
-
-JAVA_HOME=/usr/local/jdk1.8.0_231
-JRE_HOME=$JAVA_HOME/jre
-CLASS_PATH=.:$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar:$JRE_HOME/lib
-PATH=$PATH:$JAVA_HOME/bin:$JRE_HOME/bin
-export JAVA_HOME JRE_HOME CLASS_PATH PATH
-
-source /etc/profile 使生效  Java -version 检测安装是否安装成功
-
-
-
-## tomcat 配置
-
 
 
 # mysql 日志
