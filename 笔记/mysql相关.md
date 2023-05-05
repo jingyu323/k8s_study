@@ -782,6 +782,12 @@ binlog默认情况下是不开启的，不过一般情况下，建议开启，�
    - Redo 日志落盘
      事务提交的时候写日志到磁盘
 
+7. checkpoint 
+ 通过 checkpoint 进行赃页落盘
+ 双写机制保证数据完整性 安全性，防止写入磁盘的时候部分写入失败的情况
+ #### 什么是赃页？
+
+
 ## 具体问题解决
 
 1.MySQL错误Illegal mix of collations (utf8_unicode_ci,IMPLICIT) and (utf8_general_ci,IMPLICIT)
