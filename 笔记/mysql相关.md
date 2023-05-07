@@ -872,6 +872,21 @@ FROM
 SELECT ENGINE,ENGINE_TRANSACTION_ID,THREAD_ID,EVENT_ID,OBJECT_SCHEMA,OBJECT_NAME,INDEX_NAME,LOCK_TYPE, LOCK_MODE,LOCK_STATUS,LOCK_DATA FROM performance_schema.data_locks;
 
 ```
+## 事务
+### 事务并发问题
+
+- 脏读 ： 一个事务读到了另一个事务未提交的数据
+- 不可重复读 ：一个事务读到了领一个事务已经更新的数据，引发事务中多次查询结果不一致
+- 幻读 ： 一个事务读到了另一个事务已经插入的数据，导致事务查询结果不一致
+### 隔离级别
+- 读未提交  一个事务读到了另一个事务未提交的数据
+  -  存在3个问题：脏读、不可重复读、幻读
+- 读已提交 一个事务读到了另一个事务已经提交的数据
+  - 存在问题： 不可重复读、幻读
+- 可重复读 一个事务读到的数据始终保持一致，无论另一个事务是否提交
+  - 存在问题： 幻读
+- 串行 同一时刻只能执行一个事务
+
 
 ## 参考资料
 
