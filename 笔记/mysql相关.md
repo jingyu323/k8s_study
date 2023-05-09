@@ -918,6 +918,16 @@ SELECT ENGINE,ENGINE_TRANSACTION_ID,THREAD_ID,EVENT_ID,OBJECT_SCHEMA,OBJECT_NAME
 ### MVCC 读不加锁，读写不冲突
 实现原理，不同的事务访问快照中不同的版本的数据
 
+#### 什么是ReadView?
+ReadView是张存储事务id的表，主要包含当前系统中有哪些活跃的读写事务，把它们的事务id放到一个
+列表中。结合Undo日志的默认字段【事务trx_id】来控制那个版本的Undo日志可被其他事务看见。 四个列:
+m_ids:表示在生成ReadView时，当前系统中活跃的读写事务id列表 m_low_limit_id:事务id下限，表示当前系统中活跃的读写事务中最小的事务id，m_ids事务列表 中的最小事务id m_up_limit_id:事务id上限，表示生成ReadView时，系统中应该分配给下一个事务的id值
+1 2 3
+# 事务2:
+update tab_user set name='雄雄',age=18 where id=10;
+# 当事务2使用Update语句修改该行数据时，会首先使用写锁锁定目标行，将该行当前的值复制到Undo 中，然后再真正地修改当前行的值，最后填写事务ID，使用回滚指针指向Undo中修改前的行。
+m_creator_trx_id:表示生成该ReadView的事务的事务id
+
 ## 参考资料
 
 mysql8[集群搭建](https://www.cnblogs.com/ios9/p/14843778.html)
