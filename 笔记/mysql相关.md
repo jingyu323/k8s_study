@@ -912,6 +912,11 @@ SELECT ENGINE,ENGINE_TRANSACTION_ID,THREAD_ID,EVENT_ID,OBJECT_SCHEMA,OBJECT_NAME
 - 可重复读 一个事务读到的数据始终保持一致，无论另一个事务是否提交
   - 存在问题： 幻读
 - 串行 同一时刻只能执行一个事务
+
+常见数据库的默认隔离级别：
+MySql： repeatable read
+Oracle： read committed
+
 ### 更新丢失
 - 基于版本控制
 - 数据枷锁
