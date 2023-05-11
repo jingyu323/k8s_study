@@ -954,7 +954,9 @@ SELECT @@transaction_isolation;
 set session transaction isolation level read committed; SELECT * FROM tab_user; # 默认是刘备
 # Transaction 100
 BEGIN;
-UPDATE tab_user SET name = '关羽' WHERE id = 1; UPDATE tab_user SET name = '张飞' WHERE id = 1; COMMIT;
+UPDATE tab_user SET name = '关羽' WHERE id = 1; 
+UPDATE tab_user SET name = '张飞' WHERE id = 1; 
+COMMIT;
 
 ```
 
@@ -988,6 +990,14 @@ SELECT * FROM tab_user WHERE id = 1; # 得到的列c的值为'刘备'
 SELECT * FROM tab_user WHERE id = 1; # 得到的列c的值为'诸葛亮' COMMIT;
 ```
 
+
+## 一些命令
+
+```
+sudo vi /etc/profile
+export PATH=${PATH}:/usr/local/mysql/bin
+
+```
 
 ## 参考资料
 
