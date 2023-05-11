@@ -933,6 +933,62 @@ update tab_user set name='雄雄',age=18 where id=10;
 # 当事务2使用Update语句修改该行数据时，会首先使用写锁锁定目标行，将该行当前的值复制到Undo 中，然后再真正地修改当前行的值，最后填写事务ID，使用回滚指针指向Undo中修改前的行。
 m_creator_trx_id:表示生成该ReadView的事务的事务id
 
+MySQL 8.0
+```
+CREATE TABLE `tab_user` (
+  `id` int(11) NOT NULL,
+  `name` varchar(100) DEFAULT NULL,
+  `age` int(11) NOT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB;
+Insert into tab_user(id,name,age,address) values (1,'刘备',18,'蜀国');
+```
+
+```
+# 事务01
+-- 查询事务隔离级别:
+#select @@tx_isolation;
+SELECT @@transaction_isolation;
+-- 设置数据库的隔离级别
+set session transaction isolation level read committed; SELECT * FROM tab_user; # 默认是刘备
+# Transaction 100
+BEGIN;
+UPDATE tab_user SET name = '关羽' WHERE id = 1; UPDATE tab_user SET name = '张飞' WHERE id = 1; COMMIT;
+
+```
+
+```
+# 事务02
+-- 查询事务隔离级别:
+#select @@tx_isolation;
+SELECT @@transaction_isolation;
+-- 设置数据库的隔离级别
+set session transaction isolation level read committed;
+# Transaction 200
+BEGIN;
+# 更新了一些别的表的记录
+...
+UPDATE tab_user SET name = '赵云' WHERE id = 1;
+UPDATE tab_user SET name = '诸葛亮' WHERE id = 1; COMMIT;
+```
+
+```
+# 事务03
+-- 查询事务隔离级别:
+#select @@tx_isolation;
+SELECT @@transaction_isolation;
+-- 设置数据库的隔离级别
+set session transaction isolation level read committed;
+BEGIN;
+# SELECT01:Transaction 100、200未提交
+SELECT * FROM tab_user WHERE id = 1; # 得到的列c的值为'刘备'
+# SELECT02:Transaction 100提交，Transaction 200未提交 SELECT * FROM tab_user WHERE id = 1; # 得到的列c的值为'张飞'
+# SELECT03:Transaction 100、200提交
+SELECT * FROM tab_user WHERE id = 1; # 得到的列c的值为'诸葛亮' COMMIT;
+```
+
+
 ## 参考资料
 
 mysql8[集群搭建](https://www.cnblogs.com/ios9/p/14843778.html)
