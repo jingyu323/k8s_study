@@ -989,7 +989,9 @@ SELECT * FROM tab_user WHERE id = 1; # 得到的列c的值为'刘备'
 # SELECT03:Transaction 100、200提交
 SELECT * FROM tab_user WHERE id = 1; # 得到的列c的值为'诸葛亮' COMMIT;
 ```
+## update
 
+数据库更新的时候，更新先找到一条记录然后枷锁，更新完成之后再找下一条记录
 
 ## 一些命令
 
