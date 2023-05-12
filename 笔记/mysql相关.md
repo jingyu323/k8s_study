@@ -857,8 +857,6 @@ Fuzzy checkpoint：四种检查点。
 
 检查表的集合规则，将两张表的编码集合改为一致
 
-
-
 alter table htgw_sync_group convert to character set utf8 collate utf8mb3_unicode_ci;
 ##  锁
 
@@ -930,7 +928,7 @@ m_ids:表示在生成ReadView时，当前系统中活跃的读写事务id列表 
 1 2 3
 # 事务2:
 update tab_user set name='雄雄',age=18 where id=10;
-# 当事务2使用Update语句修改该行数据时，会首先使用写锁锁定目标行，将该行当前的值复制到Undo 中，然后再真正地修改当前行的值，最后填写事务ID，使用回滚指针指向Undo中修改前的行。
+##### 当事务2使用Update语句修改该行数据时，会首先使用写锁锁定目标行，将该行当前的值复制到Undo 中，然后再真正地修改当前行的值，最后填写事务ID，使用回滚指针指向Undo中修改前的行。
 m_creator_trx_id:表示生成该ReadView的事务的事务id
 
 MySQL 8.0
@@ -991,6 +989,9 @@ SELECT * FROM tab_user WHERE id = 1; # 得到的列c的值为'诸葛亮' COMMIT;
 ```
 
 
+
+
+
 ## 一些命令
 
 ```
@@ -998,6 +999,12 @@ sudo vi /etc/profile
 export PATH=${PATH}:/usr/local/mysql/bin
 
 ```
+
+## 最佳实践：
+
+### 1.执行计划
+
+
 
 ## 参考资料
 
