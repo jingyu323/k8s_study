@@ -6,6 +6,19 @@ cp  -r -f 强制覆盖
 
 cp -rn  cp -rn directory Destination Path
 
+"xargs  使用"
+
+```
+
+
+查找tomcat 进程并杀死
+
+ls *.txt | xargs -i cp {} /tmp/ 
+ls *.tar |xargs -i docker load -i {}	*#逐个导入镜像*
+
+ ps -ef | grep tomcat | grep v | awk -F " " '{print $2}' | xargs  kill -9
+```
+
 
 
 netstat -naop :grep 5672          #查看端口是否呗占用
