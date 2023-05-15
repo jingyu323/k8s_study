@@ -1080,7 +1080,7 @@ ALTER TABLE table_name ADD INDEX index_name (column1,column2);
 
 
 全文索引：
-  
+
 ### 优势 劣势
 降低IO频次，降低数据排序成本，提高数据检索效率
 劣势，多占用磁盘空间
@@ -1165,6 +1165,25 @@ sudo vi /etc/profile
 export PATH=${PATH}:/usr/local/mysql/bin
 
 ```
+
+## MySQL 语句：
+
+### 1.使用select批量更新数据
+
+```
+update htgw_sync_main a INNER JOIN 
+(SELECT sync_id,com_file_size,time, CONVERT(com_file_size/1221*8, UNSIGNED)  as "newtime",start_time,end_time,sync_state 
+from  htgw_sync_main where time > 3000 and start_time >="2023-05-09 00:00:00") as b
+on a.sync_id = b.sync_id 
+SET a.time = b.newtime 
+where a.sync_id = b.sync_id 
+```
+
+
+
+
+
+
 
 ## 最佳实践：
 

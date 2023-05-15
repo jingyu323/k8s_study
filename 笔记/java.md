@@ -413,6 +413,40 @@ https://blog.csdn.net/lufei0920/article/details/115196146
 
 
 
+## maven 打包
+
+### maven 中执行 shell 脚本
+
+
+
+```
+<build>
+        <finalName>demo</finalName>
+        <plugins>
+            <plugin>
+                <artifactId>exec-maven-plugin</artifactId>
+                <groupId>org.codehaus.mojo</groupId>
+                <executions>
+                    <execution>
+                        <id>uncompress</id>
+                        <phase>install</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <executable>${basedir}/../check-style/test.sh</executable>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+```
+
+
+
+
+
 # 多线程
 ## 线程的状态
 - 新建状态： 使用 new Thread 类或其子类建立一个线程对象后，该线程对象就处于新建状态。
@@ -868,7 +902,7 @@ ulimit -n 4096
  - 针对所有用户的设置，在/etc/security/limits.conf文件，其是可以对系统用户、组进行cpu、文件数等限制的，通过它可以针对某个用户或全部进行限制。但不能超越系统的限制；
 
         （*表示所有用户、soft表示可以超出，但只是警告；hard表示绝对不能超出，unlimited用于表示不限制）
-        
+     
     - 如果想对所有用户设置，也可以放在/etc/profile文件里面，下面是该文件里面的默认参数：   
     ulimit -S -c 0 > /dev/null 2>&1
 
