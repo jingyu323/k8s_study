@@ -932,7 +932,9 @@ alter table htgw_sync_group convert to character set utf8 collate utf8mb3_unicod
 另一种策略是，发起死锁检测，发现死锁后，主动回滚死锁链条中的某一个事务，让其他事务得以继续执行。将参数 innodb_deadlock_detect 设置为 on，表示开启这个逻辑。
 
 
+查看db状态
 show engine innodb status\G
+
 
 ###  发生死锁时
 ```
