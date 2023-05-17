@@ -544,7 +544,7 @@ synchronized 与Lock都是可重入锁，同一个线程再次进入同步代码
    2、线程间数据隔离
    3、进行事务操作，用于存储线程事务信息。
    4、数据库连接，Session会话管理。
-
+threadLocals属性对应在ThreadLocal中定义的ThreadLocalMap对象。 
 #####  总结
 
 （1）每个Thread维护着一个ThreadLocalMap的引用
