@@ -672,7 +672,14 @@ public ThreadPoolExecutor(int corePoolSize, int maximumPoolSize, long keepAliveT
 
 用于协调多个线程同步执行操作的场合，所有线程等待完成,然后一起做事情( 相互之间都准备好,然后一起做事情 )
 
+CyclicBarrier
 
+可以循环使用
+工作线程之间必须等到同一个点才能执行
+CountDownLacth
+
+CountDownLacth 不能reset
+工作线程之间彼此不关心
 
 ## 垃圾回收
 
