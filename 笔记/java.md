@@ -670,6 +670,8 @@ public ThreadPoolExecutor(int corePoolSize, int maximumPoolSize, long keepAliveT
 
 ##### CyclicBarrier
 
+用于协调多个线程同步执行操作的场合，所有线程等待完成,然后一起做事情( 相互之间都准备好,然后一起做事情 )
+
 
 
 ## 垃圾回收
