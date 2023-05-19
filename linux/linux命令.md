@@ -26,6 +26,13 @@ more  xxx.log                     #查看日志信息
 ps -ef :grep 5672                 #查看进程
 systemctl stop  服务名             #停止指定的服务
 
+文件转码
+
+```
+ convmv -f GBK -t UTF-8 -r --notest  文件名/目录
+
+```
+
 
 
 获取镜像源
