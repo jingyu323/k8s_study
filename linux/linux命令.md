@@ -32,7 +32,8 @@ systemctl stop  服务名             #停止指定的服务
  convmv -f GBK -t UTF-8 -r --notest  文件名/目录
 
 
-|sed 's/司机室/SJS/g'
+全局替换字符串
+sed 's/司机室/SJS/g'
 
 
 ```
