@@ -37,7 +37,8 @@ iconv -c -f utf8 -t GBK  "sourcefile" -o   "targetfile"
 全局替换字符串
 sed 's/司机室/SJS/g'
 
-
+rar 压缩文件
+ rar a  -r   -idq "${sub_dir}"  "${sub_dir}/*"
 ```
 
 
