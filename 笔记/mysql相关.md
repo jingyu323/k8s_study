@@ -53,8 +53,6 @@ EOF
 
 rpm -ivh mysql-community-common-8.0.28-1.el7.x86_64.rpm
 
-rpm -ivh mysql-community-libs-8.0.28-1.el7.x86_64.rpm
-
 pm -ivh mysql-community-libs-compat-8.0.28-1.el7.x86_64.rpm 
 
 rpm -ivh mysql-community-client-plugins-8.0.28-1.el7.x86_64.rpm
