@@ -117,6 +117,14 @@ alter user 'root'@'localhost' identified with mysql_native_password by 'Root@123
 mysql -uroot -p'Root@123'
 
 
+
+
+
+alter user 'root'@'localhost' identified with mysql_native_password by 'Root@123';
+
+mysql -uroot -p'root'
+
+
 ```
 配置远程登录：
 

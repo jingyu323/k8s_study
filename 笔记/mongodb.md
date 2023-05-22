@@ -101,6 +101,25 @@ db.system.users.remove({user:"user"})
 
 ```
 
+###  6.2 数据库操作
+
+```
+切换数据库，有则切换，没有则创建，
+use DATABASE_NAME
+查看所有的db，有些没有数据的DB是查询不到的
+show dbs
+查看当前DB名称
+db
+删除数据库
+db.dropDatabase();
+
+创建集合
+db.createCollection("raintest")
+查看集合
+show tables
+
+```
+
 
 
 ## 7.常见问题
@@ -110,3 +129,7 @@ db.system.users.remove({user:"user"})
 操作方法
 
 https://www.mongodb.com/docs/manual/reference/method/db.collection.find/
+
+简单介绍
+
+https://blog.csdn.net/qq_15138049/article/details/127244575
