@@ -593,6 +593,13 @@ https://cloud.tencent.com/developer/article/1508235
 
 ### 执行计划
 
+type字段的结果值，从好到坏依次是：system > const > eq_ref > ref > fulltext > ref_or_null > index_merge > unique_subquery > index_subquery > range > index > ALL
+一般来说，好的sql查询至少达到range级别，最好能达到ref
+
+
+
+
+
 
 
 
@@ -692,7 +699,7 @@ Innodb_row_lock_current_waits:当前正在等待锁定的数量;
 
 
 
- 
+
 ## 数据库数据同步方案
 
 ## 索引
@@ -1133,7 +1140,7 @@ select中列数据如果可以直接在辅助索引树上全部获取，也就�
 1. 单表索引不能太多
 2. 频繁更新的资源不建议建立索引。 频繁更新字段引发页分裂和页合并
 3. 区分度低的字段，不建议建索引:比如性别，男，女;比如状态。区分度太低时，会导致扫描行数过多，再加上回表查询的消耗。
-  如果使用索引，比全表扫描的性能还要差。这些字段一般会用在组合索引中。
+    如果使用索引，比全表扫描的性能还要差。这些字段一般会用在组合索引中。
 
 4.  在InnoDB存储引擎中，主键索引建议使用自增的长整型，避免使用很长的字段:
 5. 不建议用无序的值作为索引
@@ -1179,7 +1186,44 @@ SET a.time = b.newtime
 where a.sync_id = b.sync_id 
 ```
 
+### 2. **库空间以及索引空间大小:**
 
+```
+select TABLE_SCHEMA, concat(truncate(sum(data_length)/1024/1024,2),' MB') as data_size,
+    concat(truncate(sum(index_length)/1024/1024,2),'MB') as index_size
+     from information_schema.tables
+     group by TABLE_SCHEMA
+     order by data_length desc;
+     
+查询某个数据库内每张表的大小：
+
+SELECT TABLE_NAME,CONCAT(TRUNCATE(SUM(data_length)/1024/1024,2),' MB') AS data_size,
+     CONCAT(TRUNCATE(index_length/1024/1024,2),' MB') AS index_size
+     FROM information_schema.tables WHERE TABLE_SCHEMA = 'rain_test'
+     GROUP BY TABLE_NAME;
+     
+ 查看数据库中所有表的信息  
+SELECT CONCAT(table_schema,'.',table_name) AS 'Table Name', 
+CONCAT(TRUNCATE(table_rows/1000000,2),'M') AS 'Number of Rows', 
+CONCAT(TRUNCATE(data_length/(1024*1024*1024),2),'G') AS 'Data Size', 
+CONCAT(TRUNCATE(index_length/(1024*1024*1024),2),'G') AS 'Index Size' , 
+CONCAT(TRUNCATE((data_length+index_length)/(1024*1024*1024),2),'G') AS  'Total' 
+FROM information_schema.TABLES WHERE table_schema LIKE 'rain_test'; 
+     
+```
+
+### 3.  批量
+
+添加`rewriteBatchedStatements=true`后，`executeBatch批量提交到mysql的sql语句还是一条insert语句插入一条记录`。
+`插入10000条数据耗时1289ms`，[批量插入](https://so.csdn.net/so/search?q=批量插入&spm=1001.2101.3001.7020)的效率得到大幅提升。 效率比不加提升50%
+
+
+
+```
+批量更新设置为false 30000条从18秒变为2秒
+connect.setAutoCommit(false);
+
+```
 
 
 
