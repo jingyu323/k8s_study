@@ -544,7 +544,7 @@ synchronized 与Lock都是可重入锁，同一个线程再次进入同步代码
    2、线程间数据隔离
    3、进行事务操作，用于存储线程事务信息。
    4、数据库连接，Session会话管理。
-
+threadLocals属性对应在ThreadLocal中定义的ThreadLocalMap对象。 
 #####  总结
 
 （1）每个Thread维护着一个ThreadLocalMap的引用
@@ -670,7 +670,16 @@ public ThreadPoolExecutor(int corePoolSize, int maximumPoolSize, long keepAliveT
 
 ##### CyclicBarrier
 
+用于协调多个线程同步执行操作的场合，所有线程等待完成,然后一起做事情( 相互之间都准备好,然后一起做事情 )
 
+CyclicBarrier
+
+可以循环使用
+工作线程之间必须等到同一个点才能执行
+CountDownLacth
+
+CountDownLacth 不能reset
+工作线程之间彼此不关心
 
 ## 垃圾回收
 
