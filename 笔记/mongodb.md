@@ -106,3 +106,7 @@ db.system.users.remove({user:"user"})
 ## 7.常见问题
 
 ## 参考资料
+
+操作方法
+
+https://www.mongodb.com/docs/manual/reference/method/db.collection.find/
