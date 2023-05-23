@@ -53,8 +53,6 @@ EOF
 
 rpm -ivh mysql-community-common-8.0.28-1.el7.x86_64.rpm
 
-rpm -ivh mysql-community-libs-8.0.28-1.el7.x86_64.rpm
-
 pm -ivh mysql-community-libs-compat-8.0.28-1.el7.x86_64.rpm 
 
 rpm -ivh mysql-community-client-plugins-8.0.28-1.el7.x86_64.rpm
@@ -119,6 +117,14 @@ alter user 'root'@'localhost' identified with mysql_native_password by 'Root@123
 mysql -uroot -p'Root@123'
 
 
+
+
+
+alter user 'root'@'localhost' identified with mysql_native_password by 'Root@123';
+
+mysql -uroot -p'root'
+
+
 ```
 配置远程登录：
 
@@ -153,7 +159,7 @@ flush privileges;
 
 vi /etc/my.cnf 去除only_full_group_by模式，文本最后一行添加sql_mode=STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION
 
-
+sql_mode=STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION
 
 ## MySQL 架构
 
@@ -593,6 +599,13 @@ https://cloud.tencent.com/developer/article/1508235
 
 ### 执行计划
 
+type字段的结果值，从好到坏依次是：system > const > eq_ref > ref > fulltext > ref_or_null > index_merge > unique_subquery > index_subquery > range > index > ALL
+一般来说，好的sql查询至少达到range级别，最好能达到ref
+
+
+
+
+
 
 
 
@@ -626,6 +639,72 @@ https://cloud.tencent.com/developer/article/1508235
 
 
 给一个表加字段，或者修改字段，或者加索引，需要扫描全表的数据。在对大表操作的时候，以免对线上服务造成影响。 行锁释放不会 立即释放，
+3. 表级锁
+3.1 表读锁(Table Read Lock) 
+3.2 表写锁(Table Write Lock) 
+3.3 元数据锁(meta data lock，MDL) 
+3.4 自增锁(AUTO-INC Locks)
+
+
+
+查看表锁情况:
+```
+show  open tables;
+
+# 查看表锁定状态
+mysql> show status like 'table%';
+```
+删除表锁:
+```
+unlock tables;
+```
+
+行级锁
+4.1  什么是行级锁?
+MySQL的行级锁，是由存储引擎来实现的，这里我们主要讲解InnoDB的行级锁。
+InnoDB行锁是通过给 索引上的索引项加锁来实现的，因此InnoDB这种行锁实现特点:只有通过索引条件检索的数据，
+ InnoDB才使用行级锁，否则，InnoDB将使用表锁!
+
+InnoDB的行级锁，按照锁定范围来说，分为四种:
+      记录锁(Record Locks):锁定索引中一条记录。
+      间隙锁(Gap Locks):要么锁住索引记录中间的值，要么锁住第一个索引记录前面的值或者 最后一个索引记录后面的值。
+      临键锁(Next-Key Locks):是索引记录上的记录锁和在索引记录之前的间隙锁的组合(间 隙锁 + 记录锁)。
+      插入意向锁(Insert Intention Locks):做insert操作时添加的对记录id的锁。
+InnoDB的行级锁，按照功能来说，分为两种:
+     读锁:允许一个事务去读一行，阻止其他事务更新目标行数据。同时阻止其他事务加写锁，但
+     不阻止其他事务加读锁。
+     写锁:允许获得排他锁的事务更新数据，阻止其他事务获取或修改数据。同时阻止其他事务加
+     读锁和写锁。
+
+ - InnoDB的行级锁，按照锁定范围来说，分为四种:
+     - 记录锁(Record Locks):锁定索引中一条记录。
+     - 间隙锁(Gap Locks):要么锁住索引记录中间的值，要么锁住第一个索引记录前面的值或者 最后一个索引记录后面的值。
+     - 临键锁(Next-Key Locks):是索引记录上的记录锁和在索引记录之前的间隙锁的组合(间 隙锁 + 记录锁)。
+     - 插入意向锁(Insert Intention Locks):做insert操作时添加的对记录id的锁。
+
+如何加行级锁?
+对于UPDATE、DELETE和INSERT语句，InnoDB会自动给涉及数据集加写锁; 
+对于普通SELECT语句，InnoDB不会加任何锁 事务可以通过以下语句手动给记录集加共享锁或排他锁。
+4.3 加锁规则【非常重要】 主键索引
+等值条件，命中，加记录锁 等值条件，未命中，加间隙锁 范围条件，命中，包含where条件的临键区间，加临键锁 范围条件，没有命中，加间隙锁
+辅助索引
+等值条件，命中，命中记录的辅助索引项 + 主键索引项加记录锁，辅助索引项两侧加间隙锁 等值条件，未命中，加间隙锁 范围条件，命中，包含where条件的临键区间加临键锁。命中记录的id索引项加记录锁 范围条件，没有命中，加间隙锁
+
+#### 锁相关参数
+InnoDB所使用的行级锁定争用状态查看:
+```
+
+show status  like  'innodb_row_lock%';
+
+```
+Innodb_row_lock_current_waits:当前正在等待锁定的数量;
+ Innodb_row_lock_time:从系统启动到现在锁定总时间长度;
+  Innodb_row_lock_time_avg:每次等待所花平均时间; 
+  Innodb_row_lock_time_max:从系统启动到现在等待最常的一次所花的时间; 
+  Innodb_row_lock_waits:系统启动后到现在总共等待的次数;
+
+
+
 
 ## 数据库数据同步方案
 
@@ -857,8 +936,6 @@ Fuzzy checkpoint：四种检查点。
 
 检查表的集合规则，将两张表的编码集合改为一致
 
-
-
 alter table htgw_sync_group convert to character set utf8 collate utf8mb3_unicode_ci;
 ##  锁
 
@@ -868,7 +945,9 @@ alter table htgw_sync_group convert to character set utf8 collate utf8mb3_unicod
 另一种策略是，发起死锁检测，发现死锁后，主动回滚死锁链条中的某一个事务，让其他事务得以继续执行。将参数 innodb_deadlock_detect 设置为 on，表示开启这个逻辑。
 
 
+查看db状态
 show engine innodb status\G
+
 
 ###  发生死锁时
 ```
@@ -922,6 +1001,247 @@ Oracle： read committed
 - 数据枷锁
 ### MVCC 读不加锁，读写不冲突
 实现原理，不同的事务访问快照中不同的版本的数据
+
+#### 什么是ReadView?
+ReadView是张存储事务id的表，主要包含当前系统中有哪些活跃的读写事务，把它们的事务id放到一个
+列表中。结合Undo日志的默认字段【事务trx_id】来控制那个版本的Undo日志可被其他事务看见。 四个列:
+m_ids:表示在生成ReadView时，当前系统中活跃的读写事务id列表 m_low_limit_id:事务id下限，表示当前系统中活跃的读写事务中最小的事务id，m_ids事务列表 中的最小事务id m_up_limit_id:事务id上限，表示生成ReadView时，系统中应该分配给下一个事务的id值
+1 2 3
+# 事务2:
+update tab_user set name='雄雄',age=18 where id=10;
+##### 当事务2使用Update语句修改该行数据时，会首先使用写锁锁定目标行，将该行当前的值复制到Undo 中，然后再真正地修改当前行的值，最后填写事务ID，使用回滚指针指向Undo中修改前的行。
+m_creator_trx_id:表示生成该ReadView的事务的事务id
+
+MySQL 8.0
+```
+CREATE TABLE `tab_user` (
+  `id` int(11) NOT NULL,
+  `name` varchar(100) DEFAULT NULL,
+  `age` int(11) NOT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB;
+Insert into tab_user(id,name,age,address) values (1,'刘备',18,'蜀国');
+```
+
+```
+# 事务01
+-- 查询事务隔离级别:
+#select @@tx_isolation;
+SELECT @@transaction_isolation;
+-- 设置数据库的隔离级别
+set session transaction isolation level read committed; SELECT * FROM tab_user; # 默认是刘备
+# Transaction 100
+BEGIN;
+UPDATE tab_user SET name = '关羽' WHERE id = 1; 
+UPDATE tab_user SET name = '张飞' WHERE id = 1; 
+COMMIT;
+
+```
+
+```
+# 事务02
+-- 查询事务隔离级别:
+#select @@tx_isolation;
+SELECT @@transaction_isolation;
+-- 设置数据库的隔离级别
+set session transaction isolation level read committed;
+# Transaction 200
+BEGIN;
+# 更新了一些别的表的记录
+...
+UPDATE tab_user SET name = '赵云' WHERE id = 1;
+UPDATE tab_user SET name = '诸葛亮' WHERE id = 1; COMMIT;
+```
+
+```
+# 事务03
+-- 查询事务隔离级别:
+#select @@tx_isolation;
+SELECT @@transaction_isolation;
+-- 设置数据库的隔离级别
+set session transaction isolation level read committed;
+BEGIN;
+# SELECT01:Transaction 100、200未提交
+SELECT * FROM tab_user WHERE id = 1; # 得到的列c的值为'刘备'
+# SELECT02:Transaction 100提交，Transaction 200未提交 SELECT * FROM tab_user WHERE id = 1; # 得到的列c的值为'张飞'
+# SELECT03:Transaction 100、200提交
+SELECT * FROM tab_user WHERE id = 1; # 得到的列c的值为'诸葛亮' COMMIT;
+```
+## update
+
+数据库更新的时候，更新先找到一条记录然后枷锁，更新完成之后再找下一条记录
+
+## 索引
+索引是提高查询效率，使用B+树
+### 索引类型
+-  聚簇索引
+-  辅助索引
+-  组合索引
+-  唯一索引
+
+单列索引： 只有一个列
+-  主键索引： 必须唯一，不能为null
+-  唯一索引： 必须唯一，可以为null
+-  普通索引：可以为空，可以不唯一
+-  全文索引：支持全文搜索的索引，不建议使用
+-  空间索引：支持OpenGIS 空间搜索 5.7 以上
+-  前缀索引：用字段的一部分建立索引，在文本类型如CHAR，VARCHAR，TEXT类列上创建索引时，可以指定索引列的长度， 但是数值类型不能指定。
+组合索引：
+组合索引的使用，需要遵循最左前缀原则(最左匹配原则，后面详细讲解)。 一般情况下，建议使用组合索引代替单列索引(主键索引除外，具体原因后面讲解)。
+```
+ALTER TABLE table_name ADD INDEX index_name (column1,column2);
+```
+
+
+全文索引：
+
+### 优势 劣势
+降低IO频次，降低数据排序成本，提高数据检索效率
+劣势，多占用磁盘空间
+### 索引创建原则
+数据结构：
+- Hash表
+  - 但是不支持范围快速查找，范围查找时还是只能通过扫描全表方式。
+  - 数据结构比较稀疏，不适合做聚合，不适合做范围等查找。
+
+  - 使用场景:对查询并发要求很高，K/V内存数据库，缓存
+- 二叉树
+  - 优点
+    - 磁盘IO次数会大大减少。
+    比较是在内存中进行的，比较的耗时可以忽略不计。
+     B树的高度一般2至3层就能满足大部分的应用场景，所以使用B树构建索引可以很好的提升查询的 效率。
+  - 缺点
+    - B树不支持范围查询的快速查找:如果我们想要查找15和26之间的数据，查找到15之后，需要回到 根节点重新遍历查找，需要从根节点进行多次遍历，查询效率有待提高。 空间占用较大:如果data存储的是行记录，行的大小随着列数的增多，所占空间会变大。一个页中 可存储的数据量就会变少，树相应就会变高，磁盘IO次数就会变大。
+
+必须有聚簇索引，如果没有按照如下规则
+InnoDB创建索引的具体规则如下:
+1. 在表上定义主键PRIMARY KEY，InnoDB将主键索引用作聚簇索引。
+2. 如果表没有定义主键，InnoDB会选择第一个不为NULL的唯一索引列用作聚簇索引。
+3. 如果以上两个都没有，InnoDB 会使用一个6 字节长整型的隐式字段 ROWID字段构建聚簇索引。该ROWID字段会在插入新行时自动递增。
+
+
+除聚簇索引之外的所有索引都称为辅助索引
+
+#### 辅助索引
+除聚簇索引之外的所有索引都称为辅助索引，InnoDB的辅助索引只会存储主键值而非磁盘地址。 使用辅助索引需要检索两遍索引:
+     首先检索辅助索引获得主键
+     然后使用主键到主索引中检索获得记录。
+####  回表查询
+根据在辅助索引树中获取的主键id，到主键索引树检索数据的过程称为回表查询。
+#### 组合索引
+
+
+
+组合索引创建原则
+1. 频繁出现在where条件中的列，建议创建组合索引。
+2. 频繁出现在order by和group by语句中的列，建议按照顺序去创建组合索引。
+order by a,b 需要组合索引列顺序(a,b)。如果索引的顺序是(b,a)，是用不到索引的。 3. 常出现在select语句中的列，也建议创建组合索引。
+####  覆盖索引
+
+根据在辅助索引树查询数据时，首先通过辅助索引找到主键值，然后需要再根据主键值
+到主键索引中找到主键对应的数据。这个过程称为回表。
+
+select中列数据如果可以直接在辅助索引树上全部获取，也就是说索引树已经“覆盖”了我们的查询需求， 这时MySQL就不会白费力气的回表查询，这中现象就是覆盖索引。
+
+### 索引优化
+1. 单表索引不能太多
+2. 频繁更新的资源不建议建立索引。 频繁更新字段引发页分裂和页合并
+3. 区分度低的字段，不建议建索引:比如性别，男，女;比如状态。区分度太低时，会导致扫描行数过多，再加上回表查询的消耗。
+    如果使用索引，比全表扫描的性能还要差。这些字段一般会用在组合索引中。
+
+4.  在InnoDB存储引擎中，主键索引建议使用自增的长整型，避免使用很长的字段:
+5. 不建议用无序的值作为索引
+6. 尽量创建组合索引，而不是单列索引:优点:
+(1)1个组合索引等同于多个索引效果，节省空间。 (2)可以使用覆盖索引
+### 索引优化
+1. 全值匹配我最爱
+2. 最左前缀匹配原则
+3. 不在索引列上做任何操作【计算、函数、类型转换】，会导致索引失效，转而使用全表扫描 4. 存储引擎不能使用索引中范围条件右边的列
+5. 尽量使用覆盖索引【只访问索引的查询，索引列和查询列一致】，减少使用select *
+6. 不等于【!= 或 <>】，索引会失效
+7. is null，is not null，索引会失效
+8. like以通配符开头，索引会失效
+9. 字符串不加单引号，索引会失效
+10. 少用or，用它来连接时，索引会失效
+
+####  InnoDB索引
+InnoDB 会强制添加一个索引，
+每个InnoDB表都有一个聚簇索引 ，也叫聚集索引。聚簇索引使用B+树构建，叶子节点存储的数据是整 行记录。一般情况下，聚簇索引等同于主键索引，当一个表没有创建主键索引时，InnoDB会自动创建一 个ROWID字段来构建聚簇索引。
+除聚簇索引之外的所有索引都称为辅助索引。在中InnoDB，辅助索引中的叶子节点存储的数据都是该行 的主键值。 在检索时，InnoDB使用此主键值在聚簇索引中搜索行记录。
+
+
+
+
+## 一些命令
+
+```
+sudo vi /etc/profile
+export PATH=${PATH}:/usr/local/mysql/bin
+
+```
+
+## MySQL 语句：
+
+### 1.使用select批量更新数据
+
+```
+update htgw_sync_main a INNER JOIN 
+(SELECT sync_id,com_file_size,time, CONVERT(com_file_size/1221*8, UNSIGNED)  as "newtime",start_time,end_time,sync_state 
+from  htgw_sync_main where time > 3000 and start_time >="2023-05-09 00:00:00") as b
+on a.sync_id = b.sync_id 
+SET a.time = b.newtime 
+where a.sync_id = b.sync_id 
+```
+
+### 2. **库空间以及索引空间大小:**
+
+```
+select TABLE_SCHEMA, concat(truncate(sum(data_length)/1024/1024,2),' MB') as data_size,
+    concat(truncate(sum(index_length)/1024/1024,2),'MB') as index_size
+     from information_schema.tables
+     group by TABLE_SCHEMA
+     order by data_length desc;
+     
+查询某个数据库内每张表的大小：
+
+SELECT TABLE_NAME,CONCAT(TRUNCATE(SUM(data_length)/1024/1024,2),' MB') AS data_size,
+     CONCAT(TRUNCATE(index_length/1024/1024,2),' MB') AS index_size
+     FROM information_schema.tables WHERE TABLE_SCHEMA = 'rain_test'
+     GROUP BY TABLE_NAME;
+     
+ 查看数据库中所有表的信息  
+SELECT CONCAT(table_schema,'.',table_name) AS 'Table Name', 
+CONCAT(TRUNCATE(table_rows/1000000,2),'M') AS 'Number of Rows', 
+CONCAT(TRUNCATE(data_length/(1024*1024*1024),2),'G') AS 'Data Size', 
+CONCAT(TRUNCATE(index_length/(1024*1024*1024),2),'G') AS 'Index Size' , 
+CONCAT(TRUNCATE((data_length+index_length)/(1024*1024*1024),2),'G') AS  'Total' 
+FROM information_schema.TABLES WHERE table_schema LIKE 'rain_test'; 
+     
+```
+
+### 3.  批量
+
+添加`rewriteBatchedStatements=true`后，`executeBatch批量提交到mysql的sql语句还是一条insert语句插入一条记录`。
+`插入10000条数据耗时1289ms`，[批量插入](https://so.csdn.net/so/search?q=批量插入&spm=1001.2101.3001.7020)的效率得到大幅提升。 效率比不加提升50%
+
+
+
+```
+批量更新设置为false 30000条从18秒变为2秒
+connect.setAutoCommit(false);
+
+```
+
+
+
+
+
+## 最佳实践：
+
+### 1.执行计划
+
+
 
 ## 参考资料
 

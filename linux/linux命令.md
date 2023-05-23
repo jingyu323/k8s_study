@@ -6,12 +6,40 @@ cp  -r -f 强制覆盖
 
 cp -rn  cp -rn directory Destination Path
 
+"xargs  使用"
+
+```
+
+
+查找tomcat 进程并杀死
+
+ls *.txt | xargs -i cp {} /tmp/ 
+ls *.tar |xargs -i docker load -i {}	*#逐个导入镜像*
+
+ ps -ef | grep tomcat | grep v | awk -F " " '{print $2}' | xargs  kill -9
+```
+
 
 
 netstat -naop :grep 5672          #查看端口是否呗占用
 more  xxx.log                     #查看日志信息
 ps -ef :grep 5672                 #查看进程
 systemctl stop  服务名             #停止指定的服务
+
+文件转码
+
+```
+转名称
+ convmv -f GBK -t UTF-8 -r --notest  文件名/目录
+转内容
+
+iconv -c -f utf8 -t GBK  "sourcefile" -o   "targetfile"
+全局替换字符串
+sed 's/司机室/SJS/g'
+
+rar 压缩文件
+ rar a  -r   -idq "${sub_dir}"  "${sub_dir}/*"
+```
 
 
 
