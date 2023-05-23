@@ -26,6 +26,10 @@ Restful风格，一切API都遵循Rest原则，容易上手近实时搜索，数
 useradd es
 # 为用户修改密码
 passwd es
+重置密码
+./elasticsearch-reset-password -u elastic
+
+daX7Xw+1j0zNd8IXpD14
 ```
 
 
