@@ -10,7 +10,23 @@
 
 ## 5.安装
 
+解压安装包 
+
+tar zvxf redis-6.2.7.tar.gz 
+
+yum install gcc 
+
+make PREFIX=/usr/local/redis install
+
+
+
+
+
 ## 6.使用
+
+客户端登录
+
+./bin/redis-cli -p 6499
 
 ### 数据类型
 1.zset 
