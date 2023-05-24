@@ -1241,6 +1241,59 @@ connect.setAutoCommit(false);
 
 ### 1.执行计划
 
+### 2.存储过程和函数
+
+
+
+mysql 中有三种循环方式：
+
+1.**while方式**
+
+```
+WHILE ( tmpname IS NOT NULL) DO 
+
+/*自己的业务逻辑(我是把字符串相加)*/
+
+SET tmpName = CONCAT(tmpName ," ") ; 
+SET temp_id = CONCAT(temp_id ,tmpName) ; 
+FETCH cur1 INTO tmpName;
+END WHILE;
+CLOSE cur1;
+```
+
+
+
+2. Repeat方式：
+
+   ```
+   OPEN mycursor;
+     REPEAT 
+       FETCH mycursor INTO a;
+        IF NOT done THEN
+               SET temp_id=CONCAT(temp_id,a,' ');/*字符串相加,自己的业务逻辑*/
+           END IF;
+        UNTIL done END REPEAT;
+   CLOSE mycursor;
+   ```
+
+   
+
+3. loop
+
+```
+OPEN cur1;  
+     emp_loop: LOOP  
+         FETCH cur1 INTO id;  
+         IF done=1 THEN  
+            LEAVE emp_loop; 
+         END IF;  
+          SET temp_id=CONCAT(temp_id,id,' ');/*字符串相加,自己的业务逻辑*/       
+     END LOOP emp_loop;  
+     CLOSE cur1;  
+```
+
+
+
 
 
 ## 参考资料
