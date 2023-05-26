@@ -1308,6 +1308,99 @@ OPEN cur1;
 
 6.存储过程一般是作为一个独立的部分来执行(call调用)。而函数可以作为查询语句的一个部分来调用.
 
+
+
+嵌套：
+
+```
+use test;
+DROP PROCEDURE IF EXISTS fun1;
+/*声明结束符为$*/
+DELIMITER $
+
+/*创建函数*/
+CREATE PROCEDURE  fun1( )
+
+BEGIN
+    /*用于保存结果*/
+
+    /*创建一个变量，用来保存当前行中a的值*/
+    DECLARE _id1 int DEFAULT 0;
+    DECLARE time1 int DEFAULT 0;
+    DECLARE newend1 VARCHAR(60);
+    /*创建一个变量，用来保存当前行中b的值*/
+    DECLARE newtime1 int DEFAULT 0;
+    DECLARE start_time1 VARCHAR(60);
+    DECLARE end_time1 VARCHAR(60);
+    /*创建游标结束标志变量*/
+    DECLARE v_done int DEFAULT 0;
+    DECLARE file_size1 DECIMAL(12,2);
+    DECLARE avg_speed1 DECIMAL(12,2);
+    DECLARE com_file_size1 DECIMAL(12,2);
+
+    DECLARE avg_speed_new int DEFAULT 0;
+    DECLARE time_new int DEFAULT 0;
+    DECLARE end_new VARCHAR(60);
+	DECLARE sped_ _id1 int DEFAULT 0;
+	DECLARE sub_id1 int DEFAULT 0;
+	DECLARE sub_max_speed DECIMAL(12,2);
+
+    /*创建游标*/
+    DECLARE cur_test1 CURSOR FOR
+        SELECT _id,file_size,com_size,  avg_speed,start_time,time,
+               CONVERT(com_size/1121*8, UNSIGNED)  as "newtime" ,
+               end_time,
+               adddate(start_time, interval  CONVERT(com_file_size/1121*8, UNSIGNED)   second) as newend
+        from   _main ;
+
+       -- where start_time >="2023-04-19 00:00:01" ;
+	DECLARE cur_max_speed CURSOR FOR
+        SELECT _id ,sub_id ,cur_speed
+        from   _sub
+        where _id = _id1;
+	DECLARE continue handler for not found set v_done = 1;
+    /*打开游标*/
+    OPEN cur_test1;
+    /*使用Loop循环遍历游标*/
+		out_loop: LOOP
+                FETCH cur_test1 INTO _id1,file_size1,com_size1,  avg_speed1,start_time1,time1,newtime1,end_time1,newend1;
+				IF v_done  > 0 THEN
+						LEAVE out_loop;
+				END IF;
+	        #使用游标（从游标中获取数据）
+				SELECT  _id1,file_size1,com_size1,  avg_speed1,start_time1,time1,newtime1,end_time1,newend1;
+				set avg_speed_new = 128+ CONVERT(RAND( ) *60, UNSIGNED);
+				set time_new=CONVERT(com_file_size1/avg_speed_new, UNSIGNED);
+				set  end_new=adddate(start_time1, interval  CONVERT(com_file_size1/avg_speed_new , UNSIGNED)   second);
+				update   _main  set avg_speed = avg_speed_new,time =time_new,end_time = end_new  where _id = _id1;
+				
+				OPEN cur_max_speed;
+				SET v_done = 0;
+				REPEAT
+					FETCH cur_max_speed INTO sped_ _id1,sub_id1,sub_max_speed;
+                    set sub_max_speed = 138+ CONVERT(RAND( ) *60, UNSIGNED);
+					SELECT sub_max_speed,sub_id1, _id1;
+					update   _sub  set cur_speed = 144   where sub_id =sub_id1;
+                until v_done   END REPEAT;
+				 CLOSE cur_max_speed;
+				 SET v_done = 0;
+	  END LOOP out_loop;
+	  CLOSE cur_test1;
+
+    /*返回结果*/
+END $
+/*结束符置为;*/
+DELIMITER ;
+
+call fun1()
+```
+
+游标的handler 一定要设置，也一定要设置到游标声明之后。就是因为没有设置游标的handler 导致嵌套只能打印一条外层的，不在继续遍历。
+
+DECLARE continue handler for not found set v_done = 1;
+
+
+
 ## 参考资料
 
 mysql8[集群搭建](https://www.cnblogs.com/ios9/p/14843778.html)
