@@ -25,9 +25,14 @@
 
 ## 5.安装
 
+https://www.mongodb.com/try/download/community-kubernetes-operator
 
+选择
 
 ```
+ 
+tar -zxvf mongodb-linux-x86_64-rhel70-4.2.23.tgz
+
 vim /etc/profile
 # 添加mongodb环境变量
 export PATH=$PATH:/usr/local/mongodb/bin
@@ -36,14 +41,45 @@ source /etc/profile
 # 检查环境变量
 echo $PATH
 
+
+vim /etc/mongodb.conf
+#指定数据库路径
+dbpath=/usr/local/mongodb/data
+#指定MongoDB日志文件
+logpath=/usr/local/mongodb/logs/mongodb.log
+# 使用追加的方式写日志
+logappend=true
+#端口号
+port=27017 
+#方便外网访问,外网所有ip都可以访问，不要写成固定的linux的ip
+bind_ip=0.0.0.0
+fork=true # 以守护进程的方式运行MongoDB，创建服务器进程
+#auth=true #启用用户验证
+#bind_ip=0.0.0.0 #绑定服务IP，若绑定127.0.0.1，则只能本机访问，不指定则默认本地所有IP
+
+
+
 启动
-./mongod -f ../mongodb.conf
+./mongod -f /etc/mongodb.conf
 ```
 
 连接mogodb,使用 mongosh
 
+vi /etc/yum.repos.d/mongodb-org-6.0.repo
+
 ```
- yum install -y mongodb-mongosh
+[mongodb-org-6.0]
+name=MongoDB Repository
+baseurl=https://repo.mongodb.org/yum/redhat/$releasever/mongodb-org/6.0/$basearch/
+gpgcheck=1
+enabled=1
+gpgkey=https://www.mongodb.org/static/pgp/server-6.0.asc
+```
+
+
+
+```
+yum install -y mongodb-mongosh
  
  执行
  mongosh
