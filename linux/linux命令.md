@@ -63,6 +63,8 @@ sudo vmhgfs-fuse .host:/ /mnt/code  -o allow_other  -o nonempty
 
 
 
+shell程序中，0表示真，非0表示假
+
 ## 查看磁盘空间
 
 ```

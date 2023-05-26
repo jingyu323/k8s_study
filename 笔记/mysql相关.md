@@ -1241,7 +1241,196 @@ connect.setAutoCommit(false);
 
 ### 1.执行计划
 
+### 2.存储过程和函数
 
+
+
+mysql 中有三种循环方式：
+
+1.**while方式**
+
+```
+WHILE ( tmpname IS NOT NULL) DO 
+
+/*自己的业务逻辑(我是把字符串相加)*/
+
+SET tmpName = CONCAT(tmpName ," ") ; 
+SET temp_id = CONCAT(temp_id ,tmpName) ; 
+FETCH cur1 INTO tmpName;
+END WHILE;
+CLOSE cur1;
+```
+
+
+
+2. Repeat方式：
+
+   ```
+   OPEN mycursor;
+     REPEAT 
+       FETCH mycursor INTO a;
+        IF NOT done THEN
+               SET temp_id=CONCAT(temp_id,a,' ');/*字符串相加,自己的业务逻辑*/
+           END IF;
+        UNTIL done END REPEAT;
+   CLOSE mycursor;
+   ```
+
+   
+
+3. loop
+
+```
+OPEN cur1;  
+     emp_loop: LOOP  
+         FETCH cur1 INTO id;  
+         IF done=1 THEN  
+            LEAVE emp_loop; 
+         END IF;  
+          SET temp_id=CONCAT(temp_id,id,' ');/*字符串相加,自己的业务逻辑*/       
+     END LOOP emp_loop;  
+     CLOSE cur1;  
+```
+
+
+
+存储过程：
+
+**存储函数有且只有一个返回值，而存储过程可以有多个返回值，也可以没有返回值。**
+
+.**存储函数只能有输入参数**，而且不能带in, 而存储过程可以有多个in,out,inout参数。
+
+存储过程中的语句功能更强大，存储过程可以实现很复杂的业务逻辑**，而函数有很多限制，如不能在函数中使用insert,update,delete,create等语句；**
+
+4.存储函数只完成查询的工作，可接受输入参数并返回一个结果，也就是函数实现的功能针对性比较强。
+
+**5.存储过程可以调用存储函数、但函数不能调用存储过程。**
+
+6.存储过程一般是作为一个独立的部分来执行(call调用)。而函数可以作为查询语句的一个部分来调用.
+
+
+
+嵌套：
+
+```
+use test;
+DROP PROCEDURE IF EXISTS fun1;
+/*声明结束符为$*/
+DELIMITER $
+
+/*创建函数*/
+CREATE PROCEDURE  fun1( )
+
+BEGIN
+    /*用于保存结果*/
+
+    /*创建一个变量，用来保存当前行中a的值*/
+    DECLARE _id1 int DEFAULT 0;
+    DECLARE time1 int DEFAULT 0;
+    DECLARE newend1 VARCHAR(60);
+    /*创建一个变量，用来保存当前行中b的值*/
+    DECLARE newtime1 int DEFAULT 0;
+    DECLARE start_time1 VARCHAR(60);
+    DECLARE end_time1 VARCHAR(60);
+    /*创建游标结束标志变量*/
+    DECLARE v_done int DEFAULT 0;
+    DECLARE file_size1 DECIMAL(12,2);
+    DECLARE avg_speed1 DECIMAL(12,2);
+    DECLARE com_file_size1 DECIMAL(12,2);
+
+    DECLARE avg_speed_new int DEFAULT 0;
+    DECLARE time_new int DEFAULT 0;
+    DECLARE end_new VARCHAR(60);
+	DECLARE sped_ _id1 int DEFAULT 0;
+	DECLARE sub_id1 int DEFAULT 0;
+	DECLARE sub_max_speed DECIMAL(12,2);
+
+    /*创建游标*/
+    DECLARE cur_test1 CURSOR FOR
+        SELECT _id,file_size,com_size,  avg_speed,start_time,time,
+               CONVERT(com_size/1121*8, UNSIGNED)  as "newtime" ,
+               end_time,
+               adddate(start_time, interval  CONVERT(com_file_size/1121*8, UNSIGNED)   second) as newend
+        from   _main ;
+
+       -- where start_time >="2023-04-19 00:00:01" ;
+	DECLARE cur_max_speed CURSOR FOR
+        SELECT _id ,sub_id ,cur_speed
+        from   _sub
+        where _id = _id1;
+	DECLARE continue handler for not found set v_done = 1;
+    /*打开游标*/
+    OPEN cur_test1;
+    /*使用Loop循环遍历游标*/
+		out_loop: LOOP
+                FETCH cur_test1 INTO _id1,file_size1,com_size1,  avg_speed1,start_time1,time1,newtime1,end_time1,newend1;
+				IF v_done  > 0 THEN
+						LEAVE out_loop;
+				END IF;
+	        #使用游标（从游标中获取数据）
+				SELECT  _id1,file_size1,com_size1,  avg_speed1,start_time1,time1,newtime1,end_time1,newend1;
+				set avg_speed_new = 128+ CONVERT(RAND( ) *60, UNSIGNED);
+				set time_new=CONVERT(com_file_size1/avg_speed_new, UNSIGNED);
+				set  end_new=adddate(start_time1, interval  CONVERT(com_file_size1/avg_speed_new , UNSIGNED)   second);
+				update   _main  set avg_speed = avg_speed_new,time =time_new,end_time = end_new  where _id = _id1;
+				
+				OPEN cur_max_speed;
+				SET v_done = 0;
+				REPEAT
+					FETCH cur_max_speed INTO sped_ _id1,sub_id1,sub_max_speed;
+                    set sub_max_speed = 138+ CONVERT(RAND( ) *60, UNSIGNED);
+					SELECT sub_max_speed,sub_id1, _id1;
+					update   _sub  set cur_speed = 144   where sub_id =sub_id1;
+                until v_done   END REPEAT;
+				 CLOSE cur_max_speed;
+				 SET v_done = 0;
+	  END LOOP out_loop;
+	  CLOSE cur_test1;
+
+    /*返回结果*/
+END $
+/*结束符置为;*/
+DELIMITER ;
+
+call fun1()
+```
+
+游标的handler 一定要设置，也一定要设置到游标声明之后。就是因为没有设置游标的handler 导致嵌套只能打印一条外层的，不在继续遍历。
+
+DECLARE continue handler for not found set v_done = 1;
+
+用户变量的分类
+用户变量是用户自己定义的，作为 MySQL 编码规范，MySQL 中的用户变量以一个 "@" 开头。根据作用范围不同，又分为会话用户变量和局部变量
+
+会话用户变量：作用域和会话变量一样，只对当前连接会话有效
+
+```
+#方式一：“=”或“:=”
+SET @用户变量 = 值;
+SET @用户变量 := 值;
+```
+
+
+
+局部变量：只在 BEGIN 和 END 语句块中有效。局部变量只能在存储过程和存储函数中使用
+
+```
+BEGIN
+    #声明局部变量
+    DECLARE 变量名1 变量数据类型 [DEFAULT 变量默认值];
+    DECLARE 变量名2, 变量名3,...变量数据类型 [DEFAULT 变量默认值];
+    #为局部变量赋值
+    SET 变量名1 = 值;
+    SELECT 值 INTO 变量名2 [FROM 子句];
+    #查看局部变量的值
+    SELECT 变量1, 变量2, 变量3;
+END
+```
+
+DECLARE 定义的变量的作用范围**是BEGIN … END块内，只能在块中使用**。
+SET 定义的**变量用户变量，作用范围是全局的**，如果在存储过程中定义了用户变量，在存储过程之外的sql也是可以调用的。
+
+​	
 
 ## 参考资料
 
