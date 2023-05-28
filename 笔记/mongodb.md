@@ -158,6 +158,12 @@ show tables
 
 
 
+java 驱动
+
+  https://www.mongodb.com/docs/drivers/java/sync/v4.9/?_ga=2.113893319.1355180383.1685271753-1372951013.1685271753
+
+https://mongodb.github.io/mongo-java-driver/4.9/driver-reactive/getting-started/installation/
+
 ## 7.常见问题
 
 ## 参考资料
