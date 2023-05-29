@@ -95,6 +95,10 @@ fork=true # 以守护进程的方式运行MongoDB，创建服务器进程
 
 启动
 ./mongod -f /etc/mongodb.conf
+
+添加开机启动
+vi /etc/rc.local
+
 ```
 
 连接mogodb,使用 mongosh
