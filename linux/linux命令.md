@@ -362,17 +362,9 @@ $		: 取值
 
 
 
-
-
-
-
 ### sed命令
 
 sed作用于一整行的处理
-
-
-
-
 
 
 
@@ -473,6 +465,53 @@ trap del_flag EXIT
 转换文件编码
 iconv -c -f utf8 -t GBK  "${tmp_record_file}" -o   "${tmp_record_file}"
 ```
+
+### 文件递归删除
+
+删除空文件夹，并删除
+
+find  . -type d -empty -delete 
+
+批量删除文件
+
+find . -name *.log -type f -delete
+
+### 批量强制删除文件夹
+
+```
+find . -type d -name target -exec rm -fr "{}" \;
+
+对于每个名为target的文件夹执行 rm -fr命令删除,
+`{}`为文件名占位符,`'\;'`为rm命令的结尾
+
+find . \( -name target -o -name bin \) -type d -exec rm -fr "{}" \;
+
+批量删除 target,bin文件夹
+这里用到了find的复合条件判断,意思就是要求文件夹名字为target或bin,
+-o 代表逻辑运算OR
+'\('和'\)'是用转义符将()传递给find,避免脚本解释器(shell)自作主张翻译
+这样find才能正确收到完整有效的命令参数 ( -name target -o -name bin )
+'\;' 也是同理
+```
+
+### Linux下find命令查询指定时间的大文件并删除
+
+```
+--时间单位为天
+find 查询路径  -ctime/-mtime/-atime 时间范围 -name 文件名称 -type f -exec rm {} \;
+--时间单位为分钟
+find 查询路径  -cmin/-mmin/-amin 时间范围 -name 文件名称 -type f -exec rm {} \; 
+Linux为我们提供了一个简便的查询方式，那就是 +n 和 -n。下面以 -mtime 举例说明：
+　　-mtime n : n为数字，意思为在n天之前的“一天之内”被更改过内容的文件
+　　-mtime +n : 列出在n天之前（不含n天本身）被更改过内容的文件名
+　　-mtime -n : 列出在n天之内（含n天本身）被更改过内容的文件名
+
+
+--删除/home/testfile目录下修改时间大于2天，后缀为.dat的文件
+find /home/testfile  -mtime +2 -name "*.dat" -type f -exec rm {} \;
+```
+
+
 
 
 
