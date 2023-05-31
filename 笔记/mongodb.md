@@ -258,3 +258,197 @@ https://blog.csdn.net/qq_15138049/article/details/127244575
 文档
 
 https://www.runoob.com/mongodb/mongodb-databases-documents-collections.html
+
+
+
+## 面试问题
+
+1、mongodb是什么？ 
+
+  2、mongodb有哪些特点？ 
+
+  3、你说的NoSQL数据库是什么意思?NoSQL与RDBMS直接有什么区别?为什么要使用和不使用NoSQL数据库?说一说NoSQL数据库的几个优点? 
+
+  4、NoSQL数据库有哪些类型? 
+
+  5、MySQL与MongoDB之间最基本的差别是什么? 
+
+  6、你怎么比较MongoDB、CouchDB及CouchBase? 
+
+  7、MongoDB成为最好NoSQL数据库的原因是什么? 
+
+  8、journal回放在条目(entry)不完整时(比如恰巧有一个中途故障了)会遇到问题吗? 
+
+  9、分析器在MongoDB中的作用是什么? 
+
+  10、名字空间(namespace)是什么? 
+
+  11、 如果用户移除对象的属性，该属性是否从存储层中删除? 
+
+  12、能否使用日志特征进行安全备份? 
+
+  13、允许空值null吗? 
+
+  14、更新操作立刻fsync到磁盘? 
+
+  15、如何执行事务/加锁? 
+
+  16、为什么我的数据文件如此庞大? 
+
+  17、启用备份故障恢复需要多久? 
+
+  18、什么是master或primary? 
+
+  19、什么是secondary或slave? 
+
+  20、我必须调用getLastError来确保写操作生效了么? 
+
+  21、我应该启动一个集群分片(sharded)还是一个非集群分片的 MongoDB 环境? 
+
+  22、分片(sharding)和复制(replication)是怎样工作的? 
+
+  23、数据在什么时候才会扩展到多个分片(shard)里? 
+
+  24、当我试图更新一个正在被迁移的块(chunk)上的文档时会发生什么? 
+
+  25、如果在一个分片(shard)停止或者很慢的时候，我发起一个查询会怎样? 
+
+  26、我可以把moveChunk目录里的旧文件删除吗? 
+
+  27、我怎么查看 Mongo 正在使用的链接? 
+
+  28、如果块移动操作(moveChunk)失败了，我需要手动清除部分转移的文档吗? 
+
+  29、如果我在使用复制技术(replication)，可以一部分使用日志(journaling)而其他部分则不使用吗? 
+
+  30、当更新一个正在被迁移的块（Chunk）上的文档时会发生什么？ 
+
+  31、MongoDB在A:{B,C}上建立索引，查询A:{B,C}和A:{C,B}都会使用索引吗？ 
+
+  32、如果一个分片（Shard）停止或很慢的时候，发起一个查询会怎样？ 
+
+  33、MongoDB支持存储过程吗？如果支持的话，怎么用？ 
+
+  34、如何理解MongoDB中的GridFS机制，MongoDB为何使用GridFS来存储文件？ 
+
+  35、什么是NoSQL数据库？NoSQL和RDBMS有什么区别？在哪些情况下使用和不使用NoSQL数据库？ 
+
+  36、MongoDB支持存储过程吗？如果支持的话，怎么用？ 
+
+  37、如何理解MongoDB中的GridFS机制，MongoDB为何使用GridFS来存储文件？ 
+
+  38、为什么MongoDB的数据文件很大？ 
+
+  39、当更新一个正在被迁移的块（Chunk）上的文档时会发生什么？ 
+
+  40、MongoDB在A:{B,C}上建立索引，查询A:{B,C}和A:{C,B}都会使用索引吗？ 
+
+  41、如果一个分片（Shard）停止或很慢的时候，发起一个查询会怎样？ 
+
+  42、分析器在MongoDB中的作用是什么? 
+
+  43、如果用户移除对象的属性，该属性是否从存储层中删除？ 
+
+  44、能否使用日志特征进行安全备份？ 
+
+  45、更新操作立刻fsync到磁盘？ 
+
+  46、如何执行事务/加锁？ 
+
+  47、什么是master或primary？ 
+
+  48、getLastError的作用 
+
+  49、分片（sharding）和复制（replication）是怎样工作的？ 
+
+  50、数据在什么时候才会扩展到多个分片（shard）里？ 
+
+  51、 当我试图更新一个正在被迁移的块（chunk）上的文档时会发生什么？ 
+
+  52、 我怎么查看 Mongo 正在使用的链接？ 
+
+  53、mongodb的结构介绍 
+
+  54、数据库的整体结构 
+
+  55、MongoDB是由哪种语言写的 
+
+  56、MongoDB的优势有哪些 
+
+  57、什么是集合 
+
+  58、什么是文档 
+
+  59、什么是”mongod“ 
+
+  60、"mongod"参数有什么 
+
+  61、什么是"mongo" 
+
+  62、MongoDB哪个命令可以切换数据库 
+
+  63、什么是非关系型数据库 
+
+  64、非关系型数据库有哪些类型 
+
+  65、为什么用MOngoDB？ 
+
+  66、在哪些场景使用MongoDB 
+
+  67、MongoDB中的命名空间是什么意思? 
+
+  68、哪些语言支持MongoDB? 
+
+  69、在MongoDB中如何创建一个新的数据库 
+
+  70、在MongoDB中如何查看数据库列表 
+
+  71、MongoDB中的分片是什么意思 
+
+  72、如何查看使用MongoDB的连接Sharding - MongoDB Manual21.如何查看使用MongoDB的连接 
+
+  73、什么是复制 
+
+  74、在MongoDB中如何在集合中插入一个文档 
+
+  75、在MongoDB中如何除去一个数据库Collection Methods24.在MongoDB中如何除去一个数据库 
+
+  76、在MongoDB中如何创建一个集合。 
+
+  77、在MongoDB中如何查看一个已经创建的集合 
+
+  78、在MongoDB中如何删除一个集合 
+
+  79、为什么要在MongoDB中使用分析器 
+
+  80、MongoDB支持主键外键关系吗 
+
+  81、MongoDB支持哪些数据类型 
+
+  82、为什么要在MongoDB中用"Code"数据类型 
+
+  83、为什么要在MongoDB中用"Regular Expression"数据类型 
+
+  84、为什么在MongoDB中使用"Object ID"数据类型 
+
+  85、如何在集合中插入一个文档 
+
+  86、"ObjectID"由哪些部分组成 
+
+  87、在MongoDb中什么是索引 
+
+  88、如何添加索引 
+
+  89、用什么方法可以格式化输出结果 
+
+  90、如何使用"AND"或"OR"条件循环查询集合中的文档 
+
+  91、在MongoDB中如何更新数据 
+
+  92、如何删除文档 
+
+  93、在MongoDB中如何排序 
+
+  94、什么是聚合 
+
+  95、在MongoDB中什么是副本集
