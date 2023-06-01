@@ -235,6 +235,23 @@ show tables
 
 
 
+### 6.4索引
+
+##### 6.4.1  单键索引
+
+单键索引(Single Field Indexes)顾名思义就是单个字段作为索引列，mongoDB的所有collection默认都有一个单键索引_id，我们也可以对一些经常作为过滤条件的字段设置索引，如给age字段添加一个索引，语法十分简单：
+
+```
+//给age字段添加升序索引
+　　db.userinfos.createIndex({age:1})
+```
+
+##### 6.4.2  复合索引
+
+
+
+
+
 
 
 java 驱动
@@ -258,6 +275,15 @@ https://blog.csdn.net/qq_15138049/article/details/127244575
 文档
 
 https://www.runoob.com/mongodb/mongodb-databases-documents-collections.html
+
+### 问题：
+
+#### mongoDb连接字符串中的+srv是什么意思？
+
+SRV 记录的使用消除了每个客户端为集群传递完整的状态信息集的要求。相反,单个 SRV 记录标识与集群关联的所有节点(及其端口号),关联的 TXT 记录定义 URI 的选项。
+
+在配置集群时使用域名可以为集群变更时提供一层额外的保护。例如需要将集群整体迁移到新网段，直接修改域名解析即可。另外，MongoDB 提供的 mongodb+srv:// 协议可以提供额外一层的保护。该协议允许通过域名解析得到所有 mongos 或节点的地址，而不是写在连接字符串中。
+ 
 
 
 
