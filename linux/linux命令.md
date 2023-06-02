@@ -340,6 +340,13 @@ log_count=$(expr $log_count + 1)
 
 ## 字符串操作	
 
+### 获取时间
+
+```
+获取当前时间
+cur_time=$(date +%Y%m%d%H%M%S)
+```
+
 ### 字符串分割  
 
 test_str=block#username#password#serverIP  
