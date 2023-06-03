@@ -149,7 +149,9 @@ db.createUser({user:"root",pwd:"root",roles:[{role:"userAdminAnyDatabase",db:"ad
 #进行验证，认证通过返回：1
 db.auth('root','root')
 
+db.createUser({user:"admin",pwd:"admin",roles:[{role:"root",db:"admin"}]})
 
+rs.conf()
 ```
 
 ### 创建副本集
@@ -179,7 +181,7 @@ chmod 400 keyfile
 
 
 
- rs.initiate({_id:"rs0",members:[{_id:0,host:"192.168.182.142:27018"},{_id:1,host:"192.168.182.143:27018"}, {_id:2,host:"192.168.182.144:27018"}]})
+ rs.initiate({_id:"rs0",members:[{_id:0,host:"192.168.182.142:27017"},{_id:1,host:"192.168.182.143:27017"}, {_id:2,host:"192.168.182.144:27017"}]})
 
 
 
@@ -279,6 +281,13 @@ java 驱动
 https://mongodb.github.io/mongo-java-driver/4.9/driver-reactive/getting-started/installation/
 
 ## 7.常见问题
+
+1.MongoDB报错“not authorized on admin to execute command“
+
+此错误是因为没有授权给admin用户对system.version表执行命令的权限，解决方法如下:
+\> db.grantRolesToUser ( "root", [ { role: "__system", db: "admin" } ] )
+
+2.MongoServerError: replSetInitiate quorum check failed because not all proposed set members responded affirmatively: 192.168.182.144:27017 failed with Authentication failed., 192.168.182.143:27017 failed with Authentication failed
 
 ## 参考资料
 
