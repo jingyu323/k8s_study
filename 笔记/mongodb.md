@@ -169,21 +169,10 @@ https://www.mongodb.com/docs/v6.0/replication/
 副本成员（Replicate）：从主节点通过复制操作以维护相同的数据集，即备份数据，不可写操作，但可以读操作（但需要配置）。是默认的一种从节点类型。
 仲裁者（Arbiter）：不保留任何数据的副本，只具有投票选举作用。当然也可以将仲裁服务器维护为副本集的一部分，即副本成员同时也可以是仲裁者。也是一种从节点类型。 
 
-
-
-openssl rand -base64 20 > keyfile 
-
-chmod 400 keyfile
-
-
-
-
-
-
-
- rs.initiate({_id:"rs0",members:[{_id:0,host:"192.168.182.142:27017"},{_id:1,host:"192.168.182.143:27017"}, {_id:2,host:"192.168.182.144:27017"}]})
-
-
+rs.initiate({_id:"rs1",
+            members:[{_id:0,host:"192.168.182.142:27017" ,priority:2},
+            {_id:1,host:"192.168.182.143:27017",priority:1}, 
+            {_id:2,host:"192.168.182.144:27017", arbiterOnly:true}]})
 
 rs.status() 查看状态
 
@@ -306,6 +295,8 @@ https://mongodb.github.io/mongo-java-driver/4.9/driver-reactive/getting-started/
 
 2.MongoServerError: replSetInitiate quorum check failed because not all proposed set members responded affirmatively: 192.168.182.144:27017 failed with Authentication failed., 192.168.182.143:27017 failed with Authentication failed
 
+配置文件中开启了权限校验
+
 ## 参考资料
 
 操作方法
@@ -327,7 +318,7 @@ https://www.runoob.com/mongodb/mongodb-databases-documents-collections.html
 SRV 记录的使用消除了每个客户端为集群传递完整的状态信息集的要求。相反,单个 SRV 记录标识与集群关联的所有节点(及其端口号),关联的 TXT 记录定义 URI 的选项。
 
 在配置集群时使用域名可以为集群变更时提供一层额外的保护。例如需要将集群整体迁移到新网段，直接修改域名解析即可。另外，MongoDB 提供的 mongodb+srv:// 协议可以提供额外一层的保护。该协议允许通过域名解析得到所有 mongos 或节点的地址，而不是写在连接字符串中。
- 
+
 
 
 
