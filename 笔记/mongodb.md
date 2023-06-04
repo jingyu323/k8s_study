@@ -229,6 +229,11 @@ db.createCollection("raintest")
 查看集合
 show tables
 
+所有的查询只针对集合，db代表数据库，不同数据库中的集合互相独立
+只能主节点，查询
+db.movies.find()
+
+
 ```
 
 ### 6.3 创建集合
@@ -309,10 +314,23 @@ rs.status() 查看状态
 #### 添加节点
 
 ```
-rs.add("192.168.182.142:27017")
+登录主节点添加节点
+rs1 [direct: primary] test> rs.add("192.168.182.145:27017")
+{
+  ok: 1,
+  '$clusterTime': {
+    clusterTime: Timestamp({ t: 1685845557, i: 1 }),
+    signature: {
+      hash: Binary(Buffer.from("0000000000000000000000000000000000000000", "hex"), 0),
+      keyId: Long("0")
+    }
+  },
+  operationTime: Timestamp({ t: 1685845557, i: 1 })
+}
+rs1 [direct: primary] test> 
 ```
 
-
+添加成功之后
 
 
 
