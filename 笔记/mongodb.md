@@ -154,28 +154,6 @@ db.createUser({user:"admin",pwd:"admin",roles:[{role:"root",db:"admin"}]})
 rs.conf()
 ```
 
-### 创建副本集
-
-https://www.mongodb.com/docs/v6.0/replication/
-
-副本集有两种类型，三种角色。
-两种类型：
-
-主节点（Primary）类型：数据操作的主要连接点，可读写
-次、辅助、从节点（Secondaries）类型：数据冗余备份节点，可以读（需要设置）或选举
-三种角色：
-
-主要成员（Primary）：主要接收所有写操作。就是主节点。
-副本成员（Replicate）：从主节点通过复制操作以维护相同的数据集，即备份数据，不可写操作，但可以读操作（但需要配置）。是默认的一种从节点类型。
-仲裁者（Arbiter）：不保留任何数据的副本，只具有投票选举作用。当然也可以将仲裁服务器维护为副本集的一部分，即副本成员同时也可以是仲裁者。也是一种从节点类型。 
-
-rs.initiate({_id:"rs1",
-            members:[{_id:0,host:"192.168.182.142:27017" ,priority:2},
-            {_id:1,host:"192.168.182.143:27017",priority:1}, 
-            {_id:2,host:"192.168.182.144:27017", arbiterOnly:true}]})
-
-rs.status() 查看状态
-
 
 
 
@@ -274,7 +252,65 @@ show tables
 
 ##### 6.4.2  复合索引
 
+### 6.5  分片
 
+分片是跨多台机器存储数据的过程，它是 MongoDB 满足数据增长需求的方法。随着数据的不断增加，单台机器可能不足以存储全部数据，也无法提供足够的读写吞吐量。通过分片，您可以添加更多计算机来满足数据增长和读/写操作的需求
+
+### 6.6 副本
+
+#### 创建副本集
+
+https://www.mongodb.com/docs/v6.0/replication/
+
+副本集有两种类型，三种角色。
+两种类型：
+
+主节点（Primary）类型：数据操作的主要连接点，可读写
+次、辅助、从节点（Secondaries）类型：数据冗余备份节点，可以读（需要设置）或选举
+三种角色：
+
+主要成员（Primary）：主要接收所有写操作。就是主节点。
+副本成员（Replicate）：从主节点通过复制操作以维护相同的数据集，即备份数据，不可写操作，但可以读操作（但需要配置）。是默认的一种从节点类型。
+仲裁者（Arbiter）：不保留任何数据的副本，只具有投票选举作用。当然也可以将仲裁服务器维护为副本集的一部分，即副本成员同时也可以是仲裁者。也是一种从节点类型。 
+
+```
+#指定数据库路径
+dbpath=/usr/local/mongodb/data
+#指定MongoDB日志文件
+logpath=/usr/local/mongodb/logs/mongodb.log
+# 使用追加的方式写日志
+logappend=true
+#端口号
+port=27017 
+#方便外网访问,外网所有ip都可以访问，不要写成固定的linux的ip
+bind_ip=0.0.0.0
+fork=true # 以守护进程的方式运行MongoDB，创建服务器进程
+auth=false #启用用户验证
+#bind_ip=0.0.0.0 #绑定服务IP，若绑定127.0.0.1，则只能本机访问，不指定则默认本地所有IP
+
+#启用日志文件
+journal=true
+#以后台方式运行进程
+
+replSet=rs1
+pidfilepath=/usr/local/mongodb/pid/main.pid
+
+```
+
+
+
+rs.initiate({_id:"rs1",
+            members:[{_id:0,host:"192.168.182.142:27017" ,priority:2},
+            {_id:1,host:"192.168.182.143:27017",priority:1}, 
+            {_id:2,host:"192.168.182.144:27017", arbiterOnly:true}]})
+
+rs.status() 查看状态
+
+#### 添加节点
+
+```
+rs.add("192.168.182.142:27017")
+```
 
 
 
