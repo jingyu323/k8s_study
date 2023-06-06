@@ -404,6 +404,10 @@ https://mongodb.github.io/mongo-java-driver/4.9/driver-reactive/getting-started/
 
 配置文件中开启了权限校验
 
+3.Nodes started with the --configsvr flag must have configsvr:true in their
+
+
+
 ## 参考资料
 
 操作方法
