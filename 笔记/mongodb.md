@@ -407,7 +407,19 @@ https://mongodb.github.io/mongo-java-driver/4.9/driver-reactive/getting-started/
 
 配置文件中开启了权限校验
 
-3.Nodes started with the --configsvr flag must have configsvr:true in their
+3."ctx":"ReplCoord-0","msg":"Attempting to set local replica set config; validating config for startup"}
+{"t":{"$date":"2023-06-07T11:32:24.884-04:00"},"s":"E",  "c":"REPL",     "id":21415,   "ctx":"ReplCoord-0","msg":"Locally stored replica set configuration is invalid; See http://www.mongodb.org/dochub/core/recover-replica-set-from-invalid-config for information on how to recover from this","attr":{"error":{"code":2,"codeName":"BadValue","errmsg":"Nodes started with the --configsvr flag must have configsvr:true in their config"},"localConfig":{"_id":"rs1","version":4,"term":6,"members":[{"_id":0,"host":"192.168.182.142:27017","arbiterOnly":
+
+
+
+这个是因为之前创建了replicanset 集群，删除data目录下数据启动正常
+
+4.Cannot assign requested address
+
+{"t":{"$date":"2023-06-07T11:39:41.805-04:00"},"s":"E",  "c":"CONTROL",  "id":20568,   "ctx":"initandlisten","msg":"Error setting up listener","attr":{"error":{"code":9001,"codeName":"SocketException","errmsg":"Cannot assign requested address"}}}
+{"t":{"$date":"2023-06-07T11:39:41.805-04:00"},"s":"I",  "c":"REPL",     "id":4784900, 
+
+
 
 
 
