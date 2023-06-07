@@ -257,13 +257,6 @@ MongoDB 的 find() 方法可以传入多个键(key)，每个键(key)以逗号隔
 
 ### 6.3 创建集合
 
-### 6.4  创建副本
-
-
-```
-
-```
-
 
 
 ### 6.4索引
@@ -283,9 +276,13 @@ MongoDB 的 find() 方法可以传入多个键(key)，每个键(key)以逗号隔
 
 
 
+### 6.5  集群
+
+MongoDB 有三种集群部署模式，分别为[主从复制](https://so.csdn.net/so/search?q=主从复制&spm=1001.2101.3001.7020)（Master-Slaver）、副本集（Replica Set）和分片（Sharding）模式。
 
 
-### 6.5  分片
+
+#### 6.5.1  分片
 
 分片是跨多台机器存储数据的过程，它是 MongoDB 满足数据增长需求的方法。随着数据的不断增加，单台机器可能不足以存储全部数据，也无法提供足够的读写吞吐量。通过分片，您可以添加更多计算机来满足数据增长和读/写操作的需求
 
@@ -302,6 +299,10 @@ config servers: Config servers store metadata and configuration settings for the
 
 
 
+
+
+
+
 问题：1.已经创建relicaset,config Server可以随意选择吗？
 
 
@@ -312,9 +313,11 @@ config servers: Config servers store metadata and configuration settings for the
 
 
 
-### 6.6 副本
+#### 6.5.2副本集
 
-#### 创建副本集
+副本集可以解决主节点发生故障导致数据丢失或不可用的问题，但遇到需要存储海量数据的情况时，副本集机制就束手无策了。副本集中的一台机器可能不足以存储数据，或者说集群不足以提供可接受的读写吞吐量。
+
+##### 创建副本集
 
 https://www.mongodb.com/docs/v6.0/replication/
 
@@ -364,7 +367,7 @@ rs.status() 查看状态
 
 rs.conf() 查看配置
 
-#### 添加节点
+##### 添加节点
 
 ```
 登录主节点添加节点
