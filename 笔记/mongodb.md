@@ -299,6 +299,33 @@ config servers: Config servers store metadata and configuration settings for the
 
 
 
+配置config server replica set
+
+三个server 不同的配置 bindIp: 192.168.182.144 需要不相同才行
+
+```
+sharding:
+  clusterRole: configsvr
+replication:
+  replSetName: shardtest
+systemLog:
+   destination: file
+   path: "/usr/local/mongodb/logs/mongodb.log"
+   logAppend: true
+storage:
+   journal:
+      enabled: true
+   dbPath: "/usr/local/mongodb/data"
+processManagement:
+   fork: true
+net:
+   bindIp: 192.168.182.144
+setParameter:
+   enableLocalhostAuthBypass: false
+```
+
+
+
 
 
 
