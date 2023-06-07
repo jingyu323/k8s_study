@@ -149,8 +149,12 @@ db.createUser({user:"root",pwd:"root",roles:[{role:"userAdminAnyDatabase",db:"ad
 #进行验证，认证通过返回：1
 db.auth('root','root')
 
+db.createUser({user:"admin",pwd:"admin",roles:[{role:"root",db:"admin"}]})
 
+rs.conf()
 ```
+
+
 
 
 
@@ -225,9 +229,36 @@ db.createCollection("raintest")
 查看集合
 show tables
 
+所有的查询只针对集合，db代表数据库，不同数据库中的集合互相独立
+只能主节点，查询
+db.movies.find()
+
+
+```
+
+| 操作       | 格式                     | 范例                                        | RDBMS中的类似语句       |
+| :--------- | :----------------------- | :------------------------------------------ | :---------------------- |
+| 等于       | `{<key>:<value>`}        | `db.col.find({"by":"菜鸟教程"}).pretty()`   | `where by = '菜鸟教程'` |
+| 小于       | `{<key>:{$lt:<value>}}`  | `db.col.find({"likes":{$lt:50}}).pretty()`  | `where likes < 50`      |
+| 小于或等于 | `{<key>:{$lte:<value>}}` | `db.col.find({"likes":{$lte:50}}).pretty()` | `where likes <= 50`     |
+| 大于       | `{<key>:{$gt:<value>}}`  | `db.col.find({"likes":{$gt:50}}).pretty()`  | `where likes > 50`      |
+| 大于或等于 | `{<key>:{$gte:<value>}}` | `db.col.find({"likes":{$gte:50}}).pretty()` | `where likes >= 50`     |
+| 不等于     | `{<key>:{$ne:<value>}}`  | `db.col.find({"likes":{$ne:50}}).pretty()`  | `where likes != 50`     |
+
+## MongoDB AND 条件
+
+MongoDB 的 find() 方法可以传入多个键(key)，每个键(key)以逗号隔开，即常规 SQL 的 AND 条件。
+
+语法格式如下：
+
+```
+>db.movies.find({key1:value1, key2:value2}).pretty()
 ```
 
 ### 6.3 创建集合
+
+### 6.4  创建副本
+
 
 ```
 
@@ -254,6 +285,108 @@ show tables
 
 
 
+### 6.5  分片
+
+分片是跨多台机器存储数据的过程，它是 MongoDB 满足数据增长需求的方法。随着数据的不断增加，单台机器可能不足以存储全部数据，也无法提供足够的读写吞吐量。通过分片，您可以添加更多计算机来满足数据增长和读/写操作的需求
+
+
+
+Sharded Cluster
+A MongoDB sharded cluster consists of the following components:
+
+shard: Each shard contains a subset of the sharded data. Each shard can be deployed as a replica set.
+
+mongos: The mongos acts as a query router, providing an interface between client applications and the sharded cluster. Starting in MongoDB 4.4, mongos can support hedged reads to minimize latencies.
+
+config servers: Config servers store metadata and configuration settings for the cluster.
+
+
+
+问题：1.已经创建relicaset,config Server可以随意选择吗？
+
+
+
+2.分片同步和副本同步怎么保证数据的一致性，会不会有双份
+
+
+
+
+
+### 6.6 副本
+
+#### 创建副本集
+
+https://www.mongodb.com/docs/v6.0/replication/
+
+副本集有两种类型，三种角色。
+两种类型：
+
+主节点（Primary）类型：数据操作的主要连接点，可读写
+次、辅助、从节点（Secondaries）类型：数据冗余备份节点，可以读（需要设置）或选举
+三种角色：
+
+主要成员（Primary）：主要接收所有写操作。就是主节点。
+副本成员（Replicate）：从主节点通过复制操作以维护相同的数据集，即备份数据，不可写操作，但可以读操作（但需要配置）。是默认的一种从节点类型。
+仲裁者（Arbiter）：不保留任何数据的副本，只具有投票选举作用。当然也可以将仲裁服务器维护为副本集的一部分，即副本成员同时也可以是仲裁者。也是一种从节点类型。 
+
+```
+#指定数据库路径
+dbpath=/usr/local/mongodb/data
+#指定MongoDB日志文件
+logpath=/usr/local/mongodb/logs/mongodb.log
+# 使用追加的方式写日志
+logappend=true
+#端口号
+port=27017 
+#方便外网访问,外网所有ip都可以访问，不要写成固定的linux的ip
+bind_ip=0.0.0.0
+fork=true # 以守护进程的方式运行MongoDB，创建服务器进程
+auth=false #启用用户验证
+#bind_ip=0.0.0.0 #绑定服务IP，若绑定127.0.0.1，则只能本机访问，不指定则默认本地所有IP
+
+#启用日志文件
+journal=true
+#以后台方式运行进程
+
+replSet=rs1
+pidfilepath=/usr/local/mongodb/pid/main.pid
+
+```
+
+
+
+rs.initiate({_id:"rs1",
+            members:[{_id:0,host:"192.168.182.142:27017" ,priority:2},
+            {_id:1,host:"192.168.182.143:27017",priority:1}, 
+            {_id:2,host:"192.168.182.144:27017", arbiterOnly:true}]})
+
+rs.status() 查看状态
+
+rs.conf() 查看配置
+
+#### 添加节点
+
+```
+登录主节点添加节点
+rs1 [direct: primary] test> rs.add("192.168.182.145:27017")
+{
+  ok: 1,
+  '$clusterTime': {
+    clusterTime: Timestamp({ t: 1685845557, i: 1 }),
+    signature: {
+      hash: Binary(Buffer.from("0000000000000000000000000000000000000000", "hex"), 0),
+      keyId: Long("0")
+    }
+  },
+  operationTime: Timestamp({ t: 1685845557, i: 1 })
+}
+rs1 [direct: primary] test> 
+```
+
+添加成功之后
+
+
+
 java 驱动
 
   https://www.mongodb.com/docs/drivers/java/sync/v4.9/?_ga=2.113893319.1355180383.1685271753-1372951013.1685271753
@@ -261,6 +394,15 @@ java 驱动
 https://mongodb.github.io/mongo-java-driver/4.9/driver-reactive/getting-started/installation/
 
 ## 7.常见问题
+
+1.MongoDB报错“not authorized on admin to execute command“
+
+此错误是因为没有授权给admin用户对system.version表执行命令的权限，解决方法如下:
+\> db.grantRolesToUser ( "root", [ { role: "__system", db: "admin" } ] )
+
+2.MongoServerError: replSetInitiate quorum check failed because not all proposed set members responded affirmatively: 192.168.182.144:27017 failed with Authentication failed., 192.168.182.143:27017 failed with Authentication failed
+
+配置文件中开启了权限校验
 
 ## 参考资料
 
@@ -283,7 +425,7 @@ https://www.runoob.com/mongodb/mongodb-databases-documents-collections.html
 SRV 记录的使用消除了每个客户端为集群传递完整的状态信息集的要求。相反,单个 SRV 记录标识与集群关联的所有节点(及其端口号),关联的 TXT 记录定义 URI 的选项。
 
 在配置集群时使用域名可以为集群变更时提供一层额外的保护。例如需要将集群整体迁移到新网段，直接修改域名解析即可。另外，MongoDB 提供的 mongodb+srv:// 协议可以提供额外一层的保护。该协议允许通过域名解析得到所有 mongos 或节点的地址，而不是写在连接字符串中。
- 
+
 
 
 
