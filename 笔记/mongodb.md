@@ -332,13 +332,39 @@ mongosh --host 192.168.182.142  --port  27019  登录节点
 
 ##### 配置Shard Replica Sets
 
+```
+sharding:
+  clusterRole: shardsvr
+replication:
+  replSetName: shardRpSets
+systemLog:
+   destination: file
+   path: "/usr/local/mongodb/logs/mongodbRpSets.log"
+   logAppend: true
+storage:
+   journal:
+      enabled: true
+   dbPath: "/usr/local/mongodb/shardRpSetsData"
+processManagement:
+   fork: true
+net:
+   bindIp: 192.168.182.142
+setParameter:
+   enableLocalhostAuthBypass: false
+  
+```
+
+mongod --config  /etc/mongodb_sharedRpSet.conf
 
 
 
+mongod --config  /etc/mongodb_sharedRpSet.conf
 
+tcp        0      0 192.168.182.143:27018   0.0.0.0:*               LISTEN      4319/mongod 
 
+默认端口27018  
 
-
+mongosh --host 192.168.182.142  --port  27018  登录节点
 
 问题：1.已经创建relicaset,config Server可以随意选择吗？
 
