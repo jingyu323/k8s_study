@@ -286,6 +286,9 @@ MongoDB 有三种集群部署模式，分别为[主从复制](https://so.csdn.ne
 
 分片是跨多台机器存储数据的过程，它是 MongoDB 满足数据增长需求的方法。随着数据的不断增加，单台机器可能不足以存储全部数据，也无法提供足够的读写吞吐量。通过分片，您可以添加更多计算机来满足数据增长和读/写操作的需求
 
+选定一个或多个key，按照选定的key进行数据分割，分割后的数据分别保存在不同的mongodb副本集中，这个是分片的基本思路。
+分片思路可以水平扩展机器，根据业务需要扩展任意多的机器。读写压力分散到集群不同的机器中。
+
 
 
 Sharded Cluster
@@ -362,15 +365,184 @@ mongod --config  /etc/mongodb_sharedRpSet.conf
 
 tcp        0      0 192.168.182.143:27018   0.0.0.0:*               LISTEN      4319/mongod 
 
+查看端口命令：
+
+netstat -anp | grep mongo 
+
+
+
 默认端口27018  
 
 mongosh --host 192.168.182.142  --port  27018  登录节点
 
-问题：1.已经创建relicaset,config Server可以随意选择吗？
+
+
+```
+ 初始化集群
+ rs.initiate()
+ 
+ 
+ rs.add("192.168.182.143:27018")
+  rs.add("192.168.182.144:27018")
+ 
+```
+
+##### 配置 `mongos`  for the Sharded Cluster
+
+
+
+配置文件
+
+```
+sharding:
+  configDB: shardtest/192.168.182.142:27019,192.168.182.143:27019,192.168.182.144:27019
+systemLog:
+   destination: file
+   path: "/usr/local/mongodb/logs/mongosRpSets.log"
+   logAppend: true
+processManagement:
+   fork: true
+net:
+   bindIp: 192.168.182.142
+setParameter:
+   enableLocalhostAuthBypass: false
+  
+  
+```
+
+mongos --config    /etc/mongodb_mongosRpSet.conf
+
+
+
+连接集群节点
+
+mongosh --host 192.168.182.142  --port  27017  登录节点
+
+添加Shards 到 集群。 shardRpSets 是 Shard Replica Sets 的名称
+
+```
+sh.addShard( "shardRpSets/192.168.182.142:27018,192.168.182.143:27018,192.168.182.144:27018")
+```
+
+
+
+查看状态
+
+sh.status()
+
+添加前：
+
+```
+test> sh.status()
+shardingVersion
+{
+  _id: 1,
+  minCompatibleVersion: 5,
+  currentVersion: 6,
+  clusterId: ObjectId("6480a5c9547b59abc36ef6a4")
+}
+---
+shards
+[]
+---
+active mongoses
+[]
+---
+autosplit
+{ 'Currently enabled': 'yes' }
+---
+balancer
+{
+  'Currently enabled': 'yes',
+  'Currently running': 'no',
+  'Failed balancer rounds in last 5 attempts': 0,
+  'Migration Results for the last 24 hours': 'No recent migrations'
+}
+---
+databases
+[
+  {
+    database: { _id: 'config', primary: 'config', partitioned: true },
+    collections: {}
+  }
+]
+
+```
+
+添加后
+
+```
+shardingVersion
+{
+  _id: 1,
+  minCompatibleVersion: 5,
+  currentVersion: 6,
+  clusterId: ObjectId("6480a5c9547b59abc36ef6a4")
+}
+---
+shards
+[
+  {
+    _id: 'shardRpSets',
+    host: 'shardRpSets/192.168.182.142:27018,192.168.182.143:27018,192.168.182.144:27018',
+    state: 1,
+    topologyTime: Timestamp({ t: 1686228160, i: 5 })
+  }
+]
+---
+active mongoses
+[ { '6.0.6': 1 } ]
+---
+autosplit
+{ 'Currently enabled': 'yes' }
+---
+balancer
+{
+  'Currently enabled': 'yes',
+  'Currently running': 'no',
+  'Failed balancer rounds in last 5 attempts': 0,
+  'Migration Results for the last 24 hours': 'No recent migrations'
+}
+---
+databases
+[
+  {
+    database: { _id: 'config', primary: 'config', partitioned: true },
+    collections: {}
+  }
+]
+
+```
+
+
+
+
+
+**开启数据库分片**
+
+sh.enableSharding("test")
+
+
+
+##### 分片设置 
+
+
+
+##### 分片迁移
+
+
+
+关于分片问题：
+
+1.已经创建relicaset,config Server可以随意选择吗？
 
 
 
 2.分片同步和副本同步怎么保证数据的一致性，会不会有双份
+
+
+
+3.分片是一个服务器搞一个replicasets，还是使用不同的名称建不同分片副本
 
 
 
@@ -450,6 +622,8 @@ rs1 [direct: primary] test>
 ```
 
 添加成功之后
+
+访问主节点
 
 
 
