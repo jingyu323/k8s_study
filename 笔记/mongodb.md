@@ -299,9 +299,11 @@ config servers: Config servers store metadata and configuration settings for the
 
 
 
-配置config server replica set
 
-三个server 不同的配置 bindIp: 192.168.182.144 需要不相同才行
+
+##### 配置config server replica set
+
+三个server 不同的配置 bindIp: 192.168.182.144 需要不相同才行，同时配置多个起不来
 
 ```
 sharding:
@@ -323,6 +325,14 @@ net:
 setParameter:
    enableLocalhostAuthBypass: false
 ```
+
+
+
+mongosh --host 192.168.182.142  --port  27019  登录节点
+
+##### 配置Shard Replica Sets
+
+
 
 
 
