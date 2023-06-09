@@ -336,9 +336,24 @@ sar 命令很强大，是分析系统性能的重要工具之一，通过该命�
 ```
 加法
 log_count=$(expr $log_count + 1)
+
+capacity=$(( 5*1024*1024/100*80))
 ```
 
 ## 字符串操作	
+
+### 日志：
+
+```
+logfile="/var/log/ht_fileclean.log"
+ht_clean_task_flag="/tmp/ht_clean_task_flag"
+function log_info() {
+    local log_time=`date +%Y%m%d%H%M%S`
+    local  level=$1
+    local  msg=$2
+    echo "${log_time} ${level} ${msg}" >> ${logfile}
+}
+```
 
 ### 获取时间
 
@@ -373,15 +388,28 @@ $		: 取值
  echo $subFile | awk -F "_" '{print $2}'
 ```
 
+查找时间最远的文件删除
 
-
-
+```
+find $target_dir -type f | xargs ls -alt  | tail   -n -10 |  awk '{ print $9 }'  | xargs rm -rf
+```
 
 ### sed命令
 
 sed作用于一整行的处理
 
+### while
 
+```
+while ((capacity <= cur_usaged))
+do
+  cur_usaged=$( du -sm  $target_dir | awk  -F " " '{print $1}')
+  log_info "info " "find $(find $target_dir -type f | xargs ls -alt  | tail   -n -10  | wc -l ) file to clean"
+  find $target_dir -type f | xargs ls -alt  | tail   -n -10 |  awk '{ print $9 }'  | xargs rm -rf
+  echo "start delete file, $cur_usaged "
+  sleep 10
+done
+```
 
 ### shell 以某个字符开头的判断
 
