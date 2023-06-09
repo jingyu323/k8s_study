@@ -340,6 +340,14 @@ log_count=$(expr $log_count + 1)
 capacity=$(( 5*1024*1024/100*80))
 ```
 
+
+
+指定换行符，添加windows和linux换行转换
+
+```
+echo -e   "${tsubDstFile}\r" 
+```
+
 ## 字符串操作	
 
 ### 日志：
