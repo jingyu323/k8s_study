@@ -257,13 +257,6 @@ MongoDB 的 find() 方法可以传入多个键(key)，每个键(key)以逗号隔
 
 ### 6.3 创建集合
 
-### 6.4  创建副本
-
-
-```
-
-```
-
 
 
 ### 6.4索引
@@ -283,11 +276,18 @@ MongoDB 的 find() 方法可以传入多个键(key)，每个键(key)以逗号隔
 
 
 
+### 6.5  集群
+
+MongoDB 有三种集群部署模式，分别为[主从复制](https://so.csdn.net/so/search?q=主从复制&spm=1001.2101.3001.7020)（Master-Slaver）、副本集（Replica Set）和分片（Sharding）模式。
 
 
-### 6.5  分片
+
+#### 6.5.1  分片
 
 分片是跨多台机器存储数据的过程，它是 MongoDB 满足数据增长需求的方法。随着数据的不断增加，单台机器可能不足以存储全部数据，也无法提供足够的读写吞吐量。通过分片，您可以添加更多计算机来满足数据增长和读/写操作的需求
+
+选定一个或多个key，按照选定的key进行数据分割，分割后的数据分别保存在不同的mongodb副本集中，这个是分片的基本思路。
+分片思路可以水平扩展机器，根据业务需要扩展任意多的机器。读写压力分散到集群不同的机器中。
 
 
 
@@ -302,7 +302,239 @@ config servers: Config servers store metadata and configuration settings for the
 
 
 
-问题：1.已经创建relicaset,config Server可以随意选择吗？
+
+
+##### 配置config server replica set
+
+三个server 不同的配置 bindIp: 192.168.182.144 需要不相同才行，同时配置多个起不来
+
+```
+sharding:
+  clusterRole: configsvr
+replication:
+  replSetName: shardtest
+systemLog:
+   destination: file
+   path: "/usr/local/mongodb/logs/mongodb.log"
+   logAppend: true
+storage:
+   journal:
+      enabled: true
+   dbPath: "/usr/local/mongodb/data"
+processManagement:
+   fork: true
+net:
+   bindIp: 192.168.182.144
+setParameter:
+   enableLocalhostAuthBypass: false
+```
+
+
+
+mongosh --host 192.168.182.142  --port  27019  登录节点
+
+##### 配置Shard Replica Sets
+
+```
+sharding:
+  clusterRole: shardsvr
+replication:
+  replSetName: shardRpSets
+systemLog:
+   destination: file
+   path: "/usr/local/mongodb/logs/mongodbRpSets.log"
+   logAppend: true
+storage:
+   journal:
+      enabled: true
+   dbPath: "/usr/local/mongodb/shardRpSetsData"
+processManagement:
+   fork: true
+net:
+   bindIp: 192.168.182.142
+setParameter:
+   enableLocalhostAuthBypass: false
+  
+```
+
+mongod --config  /etc/mongodb_sharedRpSet.conf
+
+
+
+mongod --config  /etc/mongodb_sharedRpSet.conf
+
+tcp        0      0 192.168.182.143:27018   0.0.0.0:*               LISTEN      4319/mongod 
+
+查看端口命令：
+
+netstat -anp | grep mongo 
+
+
+
+默认端口27018  
+
+mongosh --host 192.168.182.142  --port  27018  登录节点
+
+
+
+```
+ 初始化集群
+ rs.initiate()
+ 
+ 
+ rs.add("192.168.182.143:27018")
+  rs.add("192.168.182.144:27018")
+ 
+```
+
+##### 配置 `mongos`  for the Sharded Cluster
+
+
+
+配置文件
+
+```
+sharding:
+  configDB: shardtest/192.168.182.142:27019,192.168.182.143:27019,192.168.182.144:27019
+systemLog:
+   destination: file
+   path: "/usr/local/mongodb/logs/mongosRpSets.log"
+   logAppend: true
+processManagement:
+   fork: true
+net:
+   bindIp: 192.168.182.142
+setParameter:
+   enableLocalhostAuthBypass: false
+  
+  
+```
+
+mongos --config    /etc/mongodb_mongosRpSet.conf
+
+
+
+连接集群节点
+
+mongosh --host 192.168.182.142  --port  27017  登录节点
+
+添加Shards 到 集群。 shardRpSets 是 Shard Replica Sets 的名称
+
+```
+sh.addShard( "shardRpSets/192.168.182.142:27018,192.168.182.143:27018,192.168.182.144:27018")
+```
+
+
+
+查看状态
+
+sh.status()
+
+添加前：
+
+```
+test> sh.status()
+shardingVersion
+{
+  _id: 1,
+  minCompatibleVersion: 5,
+  currentVersion: 6,
+  clusterId: ObjectId("6480a5c9547b59abc36ef6a4")
+}
+---
+shards
+[]
+---
+active mongoses
+[]
+---
+autosplit
+{ 'Currently enabled': 'yes' }
+---
+balancer
+{
+  'Currently enabled': 'yes',
+  'Currently running': 'no',
+  'Failed balancer rounds in last 5 attempts': 0,
+  'Migration Results for the last 24 hours': 'No recent migrations'
+}
+---
+databases
+[
+  {
+    database: { _id: 'config', primary: 'config', partitioned: true },
+    collections: {}
+  }
+]
+
+```
+
+添加后
+
+```
+shardingVersion
+{
+  _id: 1,
+  minCompatibleVersion: 5,
+  currentVersion: 6,
+  clusterId: ObjectId("6480a5c9547b59abc36ef6a4")
+}
+---
+shards
+[
+  {
+    _id: 'shardRpSets',
+    host: 'shardRpSets/192.168.182.142:27018,192.168.182.143:27018,192.168.182.144:27018',
+    state: 1,
+    topologyTime: Timestamp({ t: 1686228160, i: 5 })
+  }
+]
+---
+active mongoses
+[ { '6.0.6': 1 } ]
+---
+autosplit
+{ 'Currently enabled': 'yes' }
+---
+balancer
+{
+  'Currently enabled': 'yes',
+  'Currently running': 'no',
+  'Failed balancer rounds in last 5 attempts': 0,
+  'Migration Results for the last 24 hours': 'No recent migrations'
+}
+---
+databases
+[
+  {
+    database: { _id: 'config', primary: 'config', partitioned: true },
+    collections: {}
+  }
+]
+
+```
+
+
+
+
+
+**开启数据库分片**
+
+sh.enableSharding("test")
+
+
+
+##### 分片设置 
+
+
+
+##### 分片迁移
+
+
+
+关于分片问题：
+
+1.已经创建relicaset,config Server可以随意选择吗？
 
 
 
@@ -310,11 +542,17 @@ config servers: Config servers store metadata and configuration settings for the
 
 
 
+3.分片是一个服务器搞一个replicasets，还是使用不同的名称建不同分片副本
 
 
-### 6.6 副本
 
-#### 创建副本集
+
+
+#### 6.5.2副本集
+
+副本集可以解决主节点发生故障导致数据丢失或不可用的问题，但遇到需要存储海量数据的情况时，副本集机制就束手无策了。副本集中的一台机器可能不足以存储数据，或者说集群不足以提供可接受的读写吞吐量。
+
+##### 创建副本集
 
 https://www.mongodb.com/docs/v6.0/replication/
 
@@ -364,7 +602,7 @@ rs.status() 查看状态
 
 rs.conf() 查看配置
 
-#### 添加节点
+##### 添加节点
 
 ```
 登录主节点添加节点
@@ -385,6 +623,8 @@ rs1 [direct: primary] test>
 
 添加成功之后
 
+访问主节点
+
 
 
 java 驱动
@@ -403,6 +643,22 @@ https://mongodb.github.io/mongo-java-driver/4.9/driver-reactive/getting-started/
 2.MongoServerError: replSetInitiate quorum check failed because not all proposed set members responded affirmatively: 192.168.182.144:27017 failed with Authentication failed., 192.168.182.143:27017 failed with Authentication failed
 
 配置文件中开启了权限校验
+
+3."ctx":"ReplCoord-0","msg":"Attempting to set local replica set config; validating config for startup"}
+{"t":{"$date":"2023-06-07T11:32:24.884-04:00"},"s":"E",  "c":"REPL",     "id":21415,   "ctx":"ReplCoord-0","msg":"Locally stored replica set configuration is invalid; See http://www.mongodb.org/dochub/core/recover-replica-set-from-invalid-config for information on how to recover from this","attr":{"error":{"code":2,"codeName":"BadValue","errmsg":"Nodes started with the --configsvr flag must have configsvr:true in their config"},"localConfig":{"_id":"rs1","version":4,"term":6,"members":[{"_id":0,"host":"192.168.182.142:27017","arbiterOnly":
+
+
+
+这个是因为之前创建了replicanset 集群，删除data目录下数据启动正常
+
+4.Cannot assign requested address
+
+{"t":{"$date":"2023-06-07T11:39:41.805-04:00"},"s":"E",  "c":"CONTROL",  "id":20568,   "ctx":"initandlisten","msg":"Error setting up listener","attr":{"error":{"code":9001,"codeName":"SocketException","errmsg":"Cannot assign requested address"}}}
+{"t":{"$date":"2023-06-07T11:39:41.805-04:00"},"s":"I",  "c":"REPL",     "id":4784900, 
+
+
+
+
 
 ## 参考资料
 
