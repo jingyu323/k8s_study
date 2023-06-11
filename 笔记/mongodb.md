@@ -300,9 +300,11 @@ mongos: The mongos acts as a query router, providing an interface between client
 
 config servers: Config servers store metadata and configuration settings for the cluster.
 
+Config server：MongoDB负责追踪数据块在shard上的分布信息，每个分片存储哪些数据块，叫做分片的元数据，保存在config server上的数据库 config中，一般使用3台config server，所有config server中的config数据库必须完全相同（建议将config server部署在不同的服务器，以保证稳定性）；
 
+Shard server：将数据进行分片，拆分成数据块（chunk），每个trunk块的大小默认为64M，数据块真正存放的单位；
 
-
+Mongos server：数据库集群请求的入口，所有的请求都通过mongos进行协调，查看分片的元数据，查找chunk存放位置，mongos自己就是一个请求分发中心，在生产环境通常有多mongos作为请求的入口，防止其中一个挂掉所有的mongodb请求都没有办法操作。
 
 ##### 配置config server replica set
 
