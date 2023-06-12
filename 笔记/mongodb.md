@@ -278,7 +278,9 @@ MongoDB 的 find() 方法可以传入多个键(key)，每个键(key)以逗号隔
 
 哈希索引(hashed Indexes)就是将field的值进行hash计算后作为索引，其强大之处在于实现O(1)查找，当然用哈希索引最主要的功能也就是实现定值查找，对于经常需要排序或查询范围查询的集合不要使用哈希索引。
 
+db.collection.createIndex( { _id: "hashed" } )
 
+db.collection.createIndex( { "fieldA" : 1, "fieldB" : "hashed", "fieldC" : -1 } )
 
 
 
