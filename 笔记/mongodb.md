@@ -653,6 +653,52 @@ https://mongodb.github.io/mongo-java-driver/4.9/driver-reactive/getting-started/
 
 
 
+#### 6.6.2 全文检索 
+
+2.6 版本以后是默认开启全文检索的
+
+### 语法
+
+```
+db_name.table_name.createIndex({filed: "text"});   // 单个字段建立 全文索引 
+
+创建全文检索
+db.raintest.test22222.createIndex({name:"text"});
+
+db.raintest.test22222.ensureIndex({name:"text"})
+
+
+不添加db的话直接回报错哦
+raintest.test22222.createIndex({name:"text"});
+
+
+
+ReferenceError: raintest is not defined
+
+查看创建的多索引
+db.raintest.test22222.getIndexes()
+
+test> db.raintest.test22222.getIndexes()
+[
+  { v: 2, key: { _id: 1 }, name: '_id_' },
+  {
+    v: 2,
+    key: { _fts: 'text', _ftsx: 1 },
+    name: 'name_text',
+    weights: { name: 1 },
+    default_language: 'english',
+    language_override: 'language',
+    textIndexVersion: 3
+  }
+]
+
+
+```
+
+
+
+
+
 ## 7.常见问题
 
 1.MongoDB报错“not authorized on admin to execute command“
