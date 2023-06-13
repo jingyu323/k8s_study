@@ -245,7 +245,7 @@ db.movies.find()
 | 大于或等于 | `{<key>:{$gte:<value>}}` | `db.col.find({"likes":{$gte:50}}).pretty()` | `where likes >= 50`     |
 | 不等于     | `{<key>:{$ne:<value>}}`  | `db.col.find({"likes":{$ne:50}}).pretty()`  | `where likes != 50`     |
 
-## MongoDB AND 条件
+##### MongoDB AND 条件
 
 MongoDB 的 find() 方法可以传入多个键(key)，每个键(key)以逗号隔开，即常规 SQL 的 AND 条件。
 
@@ -542,13 +542,15 @@ sh.enableSharding("test")
 
 
 
-关于分片问题：
+##### 关于分片问题：
 
 1.已经创建relicaset,config Server可以随意选择吗？
 
-
+两种不同类型的集群，
 
 2.分片同步和副本同步怎么保证数据的一致性，会不会有双份
+
+这个问题其实是两种不同的集群组成类型
 
 
 
@@ -642,6 +644,14 @@ java 驱动
   https://www.mongodb.com/docs/drivers/java/sync/v4.9/?_ga=2.113893319.1355180383.1685271753-1372951013.1685271753
 
 https://mongodb.github.io/mongo-java-driver/4.9/driver-reactive/getting-started/installation/
+
+
+
+### 6.6 高级操作
+
+#### 6.6.1 数据库引用 
+
+
 
 ## 7.常见问题
 
