@@ -35,6 +35,9 @@ daX7Xw+1j0zNd8IXpD14
 
 本地密码：
 Xi3aLVfl43JNHdufBCom
+
+142
+eP3-Uii07tHLZ+hit=VO
 ```
 
 
@@ -144,6 +147,8 @@ sudo /bin/systemctl enable kibana.service
 sudo systemctl start kibana.service
 sudo systemctl stop kibana.service
 
+sudo systemctl start kibana.service
+sudo systemctl status kibana.service
 
 ```
 

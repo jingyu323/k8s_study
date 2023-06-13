@@ -214,6 +214,10 @@ db.system.users.remove({user:"user"})
 
 ###  6.2 数据库操作
 
+###  原子操作：
+
+mongodb提供了许多原子操作，比如文档的保存，修改，删除等，都是原子操作。
+
 ```
 切换数据库，有则切换，没有则创建，
 use DATABASE_NAME
@@ -662,11 +666,19 @@ https://mongodb.github.io/mongo-java-driver/4.9/driver-reactive/getting-started/
 ```
 db_name.table_name.createIndex({filed: "text"});   // 单个字段建立 全文索引 
 
-创建全文检索
-db.raintest.test22222.createIndex({name:"text"});
+创建全文检索 需要 use db之后查看相关的
+db.test22222.createIndex({name:"text"});
 
-db.raintest.test22222.ensureIndex({name:"text"})
+db.test22222.ensureIndex({name:"text"})
 
+执行查询需要use raintest
+
+
+ 
+ 查询索引
+ db.test22222.getIndexes()
+ 全文搜索是按照关键字匹配的
+ db.test22222.find({$text: {$search:"wan"}})   
 
 不添加db的话直接回报错哦
 raintest.test22222.createIndex({name:"text"});
