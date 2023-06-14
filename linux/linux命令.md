@@ -355,6 +355,24 @@ netstat -natp
 
 分析系统性能命令
 
+安装
+
+yum -y install sysstat
+
+
+
+sar -u   
+Cannot open /var/log/sa/sa14: No such file or directory
+Please check if data collecting is enabled
+
+解决方法：
+
+启动sysstat服务
+
+systemctl start sysstat
+
+
+
 sar 命令很强大，是分析系统性能的重要工具之一，通过该命令可以全面地获取系统的 CPU、运行队列、磁盘读写（I/O）、分区（交换区）、内存、CPU 中断和网络等性能数据。
 
 [root@localhost ~]# sar [options] [-o filename] interval [count]
@@ -366,7 +384,9 @@ sar 命令很强大，是分析系统性能的重要工具之一，通过该命�
 - count：表示采样次数，是可选参数，其默认值为 1；
 - options：为命令行选项，由于 sar 命令提供的选项很多，这里不再一一介绍，仅列举出常用的一些选项及对应的功能，如表 1 所示。
 
+   使用sar -n DEV 1 2检测数据流向
 
+命令后面1 2 意思是：每一秒钟取1次值，取2次。
 
 | sar命令选项 | 功能                                                         |
 | ----------- | ------------------------------------------------------------ |
@@ -634,6 +654,14 @@ systemctl stop firewalld.service
 禁止防火墙
 systemctl disable firewalld.service
 ```
+
+
+
+## 网络：
+
+### 网卡bond：
+
+
 
 
 

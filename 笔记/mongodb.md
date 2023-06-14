@@ -326,6 +326,20 @@ config servers: Config servers store metadata and configuration settings for the
 
 Config server：MongoDB负责追踪数据块在shard上的分布信息，每个分片存储哪些数据块，叫做分片的元数据，保存在config server上的数据库 config中，一般使用3台config server，所有config server中的config数据库必须完全相同（建议将config server部署在不同的服务器，以保证稳定性）；
 
+
+
+
+
+只要有一个config server失效，那么集群的metadata都将处于只读状态，可以对shards进行数据读写，但是chunks分离和迁移将不能进行，知道三个config servers全部有效为止。如果三个config servers都失效，那么意味着集群将不能读取metadata数据，如果此时重启mongos，那么它将不能获取metadata数据，将无法提供router，直到config servers有效。此外，metadata的数据量非常小，所以这不会对Config servers或者mongos带来存储上的压力。Config server的负载非常小，它对硬件配置要求很低，只需要较少的内存和存储空间即可。
+
+  prodution环境中，需要三个config servers；如果仅仅为了测试可以只需要一个。
+
+
+
+脑裂问题：
+
+
+
 Shard server：将数据进行分片，拆分成数据块（chunk），每个trunk块的大小默认为64M，数据块真正存放的单位；
 
 Mongos server：数据库集群请求的入口，所有的请求都通过mongos进行协调，查看分片的元数据，查找chunk存放位置，mongos自己就是一个请求分发中心，在生产环境通常有多mongos作为请求的入口，防止其中一个挂掉所有的mongodb请求都没有办法操作。
@@ -551,6 +565,22 @@ sh.enableSharding("test")
 
 
 ##### 分片设置 
+
+shark key可以决定collection数据在集群的分布，shard key必须为索引字段或者为组合索引的左前缀。documents插入成功后，任何update操作都不能修改shard key，否则会抛出异常
+
+###### Range分区：
+
+首先shard key必须是数字类型，整个区间的上下边界分别为“正无穷大”、“负无穷大”，每个chunk覆盖一段子区间，即整体而言，任何shard key均会被某个特定的chunk所覆盖。区间均为作闭右开。每个区间均不会有重叠覆盖，且互相临近。当然chunk并不是预先创建的，而是随着chunk数据的增大而不断split。
+
+
+
+  Range分区更好的支持range查询，根据指定的shard key进行range查询，
+
+###### Hash分区
+
+计算shard key的hash值（64位数字），并以此作为Range来分区，基本方式同1）；Hash值具有很强的散列能力，通常不同的shard key具有不同的hash值（冲突是有限的），这种分区方式可以将document更加随机的分散在不同的chunks上。
+
+
 
 
 
