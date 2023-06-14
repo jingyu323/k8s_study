@@ -265,6 +265,16 @@ MongoDB 的 find() 方法可以传入多个键(key)，每个键(key)以逗号隔
 
 ### 6.4索引
 
+
+
+```
+查询索引:db.collection.getIndexes(),
+创建索引:db.collection.createIndex(),
+删除索引:db.collection.dropIndex()
+```
+
+
+
 ##### 6.4.1  单键索引
 
 单键索引(Single Field Indexes)顾名思义就是单个字段作为索引列，mongoDB的所有collection默认都有一个单键索引_id，我们也可以对一些经常作为过滤条件的字段设置索引，如给age字段添加一个索引，语法十分简单：
@@ -659,9 +669,11 @@ https://mongodb.github.io/mongo-java-driver/4.9/driver-reactive/getting-started/
 
 #### 6.6.2 全文检索 
 
-2.6 版本以后是默认开启全文检索的
+2.6 版本以后是默认开启全文检索的 ,但 ensureIndex() 在 5.0 版本后已被移除，使用 createIndex() 代替。  
 
 ### 语法
+
+
 
 ```
 db_name.table_name.createIndex({filed: "text"});   // 单个字段建立 全文索引 
