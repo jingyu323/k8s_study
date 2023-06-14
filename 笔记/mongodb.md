@@ -271,6 +271,8 @@ MongoDB 的 find() 方法可以传入多个键(key)，每个键(key)以逗号隔
 查询索引:db.collection.getIndexes(),
 创建索引:db.collection.createIndex(),
 删除索引:db.collection.dropIndex()
+创建唯一索引
+db.collection.createIndex({name:1},{unique:true}) #1从小到大排序
 ```
 
 
