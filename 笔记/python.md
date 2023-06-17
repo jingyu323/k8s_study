@@ -94,25 +94,36 @@ F12 --> Network --> XHR --> Name --> Response
 3、下面是http我们爬包是常用的请求头参数
 
 复制代码
-　　- accept: 浏览器通过这个头告诉服务器，他所支持的数据类型
-
-　　- Accept-Charset：浏览器通过这个头告诉服务器，它支持那种字符集
-
-　　- Accept-Encoding：浏览器通过这个头告诉服务器，支持的压缩格式
-
-　　- Accept-Language：浏览器通过这个头告诉服务器，他的语言环境
-
-　　- Host：浏览器同过这个头告诉服务器，想访问哪台主机
-
-　　- If-ModifiedSince：浏览器通过这个头告诉服务器，缓存数据的时间
-
-　　- Heferer：浏览器通过这个头告诉服务器，客户及时那个页面来的，防盗链
-
-　　- Connection：浏览器通过这个头告诉服务器，请求完后是断开链接还是保持链接
-
-　　- X-Requested-With：XMLHttpRequest 代表通过ajax方式进行访问
-
+  - accept: 浏览器通过这个头告诉服务器，他所支持的数据类型
+  - Accept-Charset：浏览器通过这个头告诉服务器，它支持那种字符集
+  - Accept-Encoding：浏览器通过这个头告诉服务器，支持的压缩格式
+  - Accept-Language：浏览器通过这个头告诉服务器，他的语言环境
+  - Host：浏览器同过这个头告诉服务器，想访问哪台主机
+  - If-ModifiedSince：浏览器通过这个头告诉服务器，缓存数据的时间
+  - Heferer：浏览器通过这个头告诉服务器，客户及时那个页面来的，防盗链
+  - Connection：浏览器通过这个头告诉服务器，请求完后是断开链接还是保持链接
+  - X-Requested-With：XMLHttpRequest 代表通过ajax方式进行访问
 　　- User-Agent：请求载体的身份标识
+
+
+
+### 8.3 爬虫类库
+
+#### 8.3.1 Beautiful Soup 
+
+的一个HTML 或XML 的解析库，我们可以用它来方便地从网页中提取数据。
+
+#### 8.3.2 pyquery 
+
+同样是一个强大的网页解析工具，它提供了和jQuery 类似的语法来解析HTML 文梢， 支持c ss 选择器，使用非常方便。
+
+### 8.3.3 tesserocr
+
+在爬虫过程中，难免会遇到各种各样的验证码，而大多数验证码还是罔形验证码，这时候我们可以直接用OCR 来识别。
+
+#### 8.3.4 RedisDump 
+
+RedisDump 是一个用于Redis 数据导人／导出的工具，是基于Ruby 实现的，所以要安装RedisDump ,需要先安装Ruby
 
 ### 抓包工具
 - fidder4
