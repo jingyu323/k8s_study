@@ -615,8 +615,31 @@ db.printShardingStatus()
 ```
 
 db.shards.find()
+查看分片集合信息
+db.collections.find().pretty()
+查询集合中块信息
+db.chunks.find().pretty()
+跟踪集群拆分和迁移情况
+db.changelog.find({'what': 'split'}).pretty()
+跟踪网络连接
+db.adminCommand({'connPoolStats':1})
+删除分片
+db.adminCommand({'removeShard': 'study'})
+移动块
+sh.moveChunk('video.movies', {imdId: 50000}, "shard0002")
+修改块的大小
+db.settings.updateOne(
+   { _id: "chunksize" },
+   { $set: { _id: "chunksize", value: 1} },
+   { upsert: true }
+)
 
-
+超大块
+当一个块大于config.settings中所设置的最大块大小时，均衡器就不允许移动这个块了。这些不可拆分、不可移动的块被称为超大块
+对于分发超大块，可以关闭均衡器，临时设置块大小大于该超大块，然后手工移动该块，后恢复块大小及启动均衡器。为了避免超大块，可以修改片键使其具有更小的粒度，如年月日片键，修改为年月日小时分钟秒。
+sh.splitAt('video.movies', {'imdId': NumberLong('7000000000000000000000')})
+刷新配置
+db.adminCommand({'flushRouterConfig': 1})
 ```
 
 
