@@ -580,7 +580,7 @@ mongo --host 192.168.182.142 --port 27017
 
 启用分片
 
-
+仅为测试修改chunksize
 
 use config 
 
@@ -596,99 +596,21 @@ db.settings.updateOne(
 
 
 
-
-
 设置db启动分片
 
 sh.enableSharding("shardtest2");
 
-sh.shardCollection("<database>.<collection>", { <shard key field> : "hashed" } )
-
-
-
- sh.shardCollection("shardtest2.usertable",{"_id":"hashed"}); 
-
 \# 配置collection分片键 为 shardbtest 库中的usertable表进行分片基于id的哈希分片
 
-sh.shardCollection("shardbtest.usertable",{"_id":"hashed"});   #为 shardbtest裤中的usertable表进行分片基于id的哈希分片
+ sh.shardCollection("shardtest2.usertable",{"_id":"hashed"});  #为 shardbtest裤中的usertable表进行分片基于id的哈希分片
 
-for(i=6000;i<=9000;i++){db.usertable.insert({"id":i})}
-
-
-
-
-
-```
-db.adminCommand(
-   {
-     enableSharding: "shardbtest"
-   }
-)
-
-配置分片 需要切换到
-
-db.adminCommand(
-   {
-     configureCollectionBalancing: "shardbtest.usertable",
-     chunkSize: 1,
-     defragmentCollection: true
-   }
-)
-```
-
-
-
-
-
-
-
-
+for(i=1;i<=6000;i++){db.usertable.insert({"id":i,"name":"nnn"+i})}
 
 查看分片验证
 
  db.usertable.stats();
 
-
-
-切换至shardreplitest db执行如下命令
-
-创建shardreplitest 未分片
-
-sh.enableSharding("shardtest2"); 
-
-
-
-切换至
-
-db.runCommand({"shardCollection":"shardreplitest.usertable","key":{"_id":1}})
-
-db.adminCommand(
-   {
-     enableSharding: "shardreplitest"
-   }
-)
-
-sh.shardCollection("shardreplitest.usertable",{"_id":"hashed"});
-
-执行插入6000条未分片
-
-for(i=1;i<=6000;i++){db.usertable.insertOne({"id":i,"name":"ss"+i})}
-
-配置分片大小
-
-```
-db.adminCommand(
-   {
-     configureCollectionBalancing: "shardreplitest.usertable",
-     chunkSize: 1,
-     defragmentCollection: true
-   }
-)
-
-sh.shardCollection("shardreplitest.usertable",{"_id":"hashed"}); 
-```
-
-查看分片状态
+ 查看分片状态
 
 db.printShardingStatus()
 
