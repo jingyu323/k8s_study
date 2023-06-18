@@ -650,7 +650,7 @@ db.adminCommand({'flushRouterConfig': 1})
 
 
 
-##### 分片设置 
+##### 分片键设置 
 
 shark key可以决定collection数据在集群的分布，shard key必须为索引字段或者为组合索引的左前缀。documents插入成功后，任何update操作都不能修改shard key，否则会抛出异常
 
@@ -666,7 +666,11 @@ shark key可以决定collection数据在集群的分布，shard key必须为索�
 
 计算shard key的hash值（64位数字），并以此作为Range来分区，基本方式同1）；Hash值具有很强的散列能力，通常不同的shard key具有不同的hash值（冲突是有限的），这种分区方式可以将document更加随机的分散在不同的chunks上。
 
+**混合型key**
 
+大方向随机递增，小范围随机分布。
+
+为了防止出现大量的chunk均衡迁移，可能造成的IO压力。我们需要设置合理分片使用策略（片键的选择、分片算法（range、hash））
 
 ##### chunksize的选择
 
