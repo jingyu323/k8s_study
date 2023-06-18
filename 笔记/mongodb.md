@@ -369,6 +369,10 @@ setParameter:
    enableLocalhostAuthBypass: false
 ```
 
+启动config server
+
+mongod --config  /etc/mongodb_shard_config_server.conf
+
 
 
 mongosh --host 192.168.182.142  --port  27019  登录节点
