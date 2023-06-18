@@ -336,6 +336,10 @@ Config server：MongoDB负责追踪数据块在shard上的分布信息，每个�
 
 
 
+
+
+
+
 脑裂问题：
 
 
@@ -661,6 +665,22 @@ shark key可以决定collection数据在集群的分布，shard key必须为索�
 ###### Hash分区
 
 计算shard key的hash值（64位数字），并以此作为Range来分区，基本方式同1）；Hash值具有很强的散列能力，通常不同的shard key具有不同的hash值（冲突是有限的），这种分区方式可以将document更加随机的分散在不同的chunks上。
+
+
+
+##### chunksize的选择
+
+适合业务的chunksize是最好的。chunk的分裂和迁移非常消耗IO资源；chunk分裂的时机：在插入和更新，读数据不会分裂。
+
+MongoDB 默认的 chunkSize 为64MB，如无特殊需求，建议保持默认值；chunkSize 会直接影响到 chunk 分裂、迁移的行为。
+
+chunkSize 越小，chunk 分裂及迁移越多，数据分布越均衡；反之，chunkSize 越大，chunk 分裂及迁移会更少，但可能导致数据分布不均。
+
+chunkSize 太小，容易出现 jumbo chunk（即shardKey 的某个取值出现频率很高，这些文档只能放到一个 chunk 里，无法再分裂）而无法迁移；chunkSize 越大，则可能出现 chunk 内文档数太多（chunk 内文档数不能超过 250000 ）而无法迁移。
+
+chunk 自动分裂只会在数据写入时触发，所以如果将 chunkSize 改小，系统需要一定的时间来将 chunk 分裂到指定的大小。
+
+chunk 只会分裂，不会合并，所以即使将 chunkSize 改大，现有的 chunk 数量不会减少，但 chunk 大小会随着写入不断增长，直到达到目标大小。
 
 
 
