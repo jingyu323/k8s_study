@@ -572,7 +572,25 @@ databases
 
 **开启数据库分片**
 
-sh.enableSharding("test")
+
+
+启用分片
+
+sh.enableSharding("shardbtest");
+
+sh.shardCollection("<database>.<collection>", { <shard key field> : "hashed" } )
+
+\#为 shardbtest裤中的usertable表进行分片基于id的哈希分片
+
+sh.shardCollection("shardbtest.usertable",{"_id":"hashed"});   #为 shardbtest裤中的usertable表进行分片基于id的哈希分片
+
+for(i=1;i<=3000;i++){db.usertable.insert({"id":i})}
+
+
+
+查看分片验证
+
+ db.usertable.stats();
 
 
 
