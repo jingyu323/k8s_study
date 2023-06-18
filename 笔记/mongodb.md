@@ -574,7 +574,47 @@ databases
 
 
 
+mongo --host 192.168.182.142 --port 27017
+
+
+
 启用分片
+
+
+
+use config 
+
+设置分片chunk大小
+
+```
+db.settings.updateOne(
+   { _id: "chunksize" },
+   { $set: { _id: "chunksize", value: 1} },
+   { upsert: true }
+)
+```
+
+
+
+
+
+设置db启动分片
+
+sh.enableSharding("shardtest2");
+
+sh.shardCollection("<database>.<collection>", { <shard key field> : "hashed" } )
+
+
+
+ sh.shardCollection("shardtest2.usertable",{"_id":"hashed"}); 
+
+\# 配置collection分片键 为 shardbtest 库中的usertable表进行分片基于id的哈希分片
+
+sh.shardCollection("shardbtest.usertable",{"_id":"hashed"});   #为 shardbtest裤中的usertable表进行分片基于id的哈希分片
+
+for(i=6000;i<=9000;i++){db.usertable.insert({"id":i})}
+
+
 
 
 
@@ -585,7 +625,7 @@ db.adminCommand(
    }
 )
 
-配置分片
+配置分片 需要切换到
 
 db.adminCommand(
    {
@@ -598,18 +638,6 @@ db.adminCommand(
 
 
 
-设置db启动分片
-
-sh.enableSharding("shardbtest");
-
-sh.shardCollection("<database>.<collection>", { <shard key field> : "hashed" } )
-
-\# 配置collection分片键 为 shardbtest 库中的usertable表进行分片基于id的哈希分片
-
-sh.shardCollection("shardbtest.usertable",{"_id":"hashed"});   #为 shardbtest裤中的usertable表进行分片基于id的哈希分片
-
-for(i=1;i<=3000;i++){db.usertable.insert({"id":i})}
-
 
 
 
@@ -621,6 +649,48 @@ for(i=1;i<=3000;i++){db.usertable.insert({"id":i})}
  db.usertable.stats();
 
 
+
+切换至shardreplitest db执行如下命令
+
+创建shardreplitest 未分片
+
+sh.enableSharding("shardtest2"); 
+
+
+
+切换至
+
+db.runCommand({"shardCollection":"shardreplitest.usertable","key":{"_id":1}})
+
+db.adminCommand(
+   {
+     enableSharding: "shardreplitest"
+   }
+)
+
+sh.shardCollection("shardreplitest.usertable",{"_id":"hashed"});
+
+执行插入6000条未分片
+
+for(i=1;i<=6000;i++){db.usertable.insertOne({"id":i,"name":"ss"+i})}
+
+配置分片大小
+
+```
+db.adminCommand(
+   {
+     configureCollectionBalancing: "shardreplitest.usertable",
+     chunkSize: 1,
+     defragmentCollection: true
+   }
+)
+
+sh.shardCollection("shardreplitest.usertable",{"_id":"hashed"}); 
+```
+
+查看分片状态
+
+db.printShardingStatus()
 
 ##### 分片设置 
 
@@ -838,22 +908,33 @@ test> db.raintest.test22222.getIndexes()
 
 
 
+5.MongoServerError: Please create an index that starts with the proposed shard key before sharding the collection
+
+
+
+```
+db.shardreplitest.ensureIndex({_id:1,id:1})
+```
+
+
+
 ## 8.优化实践
 
 8.1  优化建议
 
 1. 数据模式设计；提倡单文档设计，将关联关系作为内嵌文档或者内嵌数组；当关联数据量较大时，考虑通过表关联实现，dbref或者自定义实现关联。
-
 2. 避免单独使用不适用索引的查询符（$ne、$nin、$where等）。
-
 3. 避免使用skip跳过大量数据 。
 
    - 通过查询条件尽量缩小数据范围。
 
    - 利用上一次的结果作为条件来查询下一页的结果。
-
 4. 根据业务场景选择合适的写入策略，在数据安全和性能之间找到平衡点。
    1. 这个怎么找？
+5. 不要使用自增长的字段作为分片键，避免热点问题。
+6. 使用与常用查询相关的字段作为分片键，且包含唯一字段（如业务主键，id等）
+7. 索引对于分区同样重要，每个分片集合上要有同样的索引，分片键默认成为索引
+8. 分片集合只允许在id和分片键上创建唯一索引。
 
 
 
