@@ -598,7 +598,7 @@ db.settings.updateOne(
 
 sh.enableSharding("shardtest2");
 
-\# 配置collection分片键 为 shardbtest 库中的usertable表进行分片基于id的哈希分片
+\# 配置collection分片键 为 shardbtest 库中的usertable表进行分片基于id的哈希分片 通过sh.shardCollection加会自动创建索引（前提是此集合不存在的情况下）
 
  sh.shardCollection("shardtest2.usertable",{"_id":"hashed"});  #为 shardbtest裤中的usertable表进行分片基于id的哈希分片
 
