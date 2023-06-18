@@ -644,6 +644,9 @@ db.settings.updateOne(
 sh.splitAt('video.movies', {'imdId': NumberLong('7000000000000000000000')})
 刷新配置
 db.adminCommand({'flushRouterConfig': 1})
+
+命令检查块分配
+db.getCollection(collName).getShardDistribution()
 ```
 
 
