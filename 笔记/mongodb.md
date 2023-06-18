@@ -403,9 +403,9 @@ setParameter:
 
 mongod --config  /etc/mongodb_sharedRpSet.conf
 
+mongod --config  /etc/mongodb_sharedRpSet2.conf
 
-
-mongod --config  /etc/mongodb_sharedRpSet.conf
+mongod --config  /etc/mongodb_sharedRpSet3.conf
 
 tcp        0      0 192.168.182.143:27018   0.0.0.0:*               LISTEN      4319/mongod 
 
@@ -418,6 +418,12 @@ netstat -anp | grep mongo
 默认端口27018  
 
 mongosh --host 192.168.182.142  --port  27018  登录节点
+
+
+
+mongosh --host 192.168.182.142  --port   27011
+
+mongosh --host 192.168.182.142  --port   27012
 
 
 
@@ -466,6 +472,8 @@ mongosh --host 192.168.182.142  --port  27017  登录节点
 
 ```
 sh.addShard( "shardRpSets/192.168.182.142:27018,192.168.182.143:27018,192.168.182.144:27018")
+sh.addShard( "shardRpSets2/192.168.182.142:27011,192.168.182.143:27011,192.168.182.144:27011")
+sh.addShard( "shardRpSets3/192.168.182.142:27012,192.168.182.143:27012,192.168.182.144:27012")
 ```
 
 
