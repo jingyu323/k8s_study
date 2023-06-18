@@ -576,15 +576,43 @@ databases
 
 启用分片
 
+
+
+```
+db.adminCommand(
+   {
+     enableSharding: "shardbtest"
+   }
+)
+
+配置分片
+
+db.adminCommand(
+   {
+     configureCollectionBalancing: "shardbtest.usertable",
+     chunkSize: 1,
+     defragmentCollection: true
+   }
+)
+```
+
+
+
+设置db启动分片
+
 sh.enableSharding("shardbtest");
 
 sh.shardCollection("<database>.<collection>", { <shard key field> : "hashed" } )
 
-\#为 shardbtest裤中的usertable表进行分片基于id的哈希分片
+\# 配置collection分片键 为 shardbtest 库中的usertable表进行分片基于id的哈希分片
 
 sh.shardCollection("shardbtest.usertable",{"_id":"hashed"});   #为 shardbtest裤中的usertable表进行分片基于id的哈希分片
 
 for(i=1;i<=3000;i++){db.usertable.insert({"id":i})}
+
+
+
+
 
 
 
