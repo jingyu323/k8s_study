@@ -608,6 +608,21 @@ for(i=1;i<=6000;i++){db.usertable.insert({"id":i,"name":"nnn"+i})}
 
 db.printShardingStatus()
 
+
+
+1 查看分片配置信息
+
+```
+
+db.shards.find()
+
+
+```
+
+
+
+
+
 ##### 分片设置 
 
 shark key可以决定collection数据在集群的分布，shard key必须为索引字段或者为组合索引的左前缀。documents插入成功后，任何update操作都不能修改shard key，否则会抛出异常
