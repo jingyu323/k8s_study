@@ -1,0 +1,650 @@
+Xshell 6 (Build 0095)
+Copyright (c) 2002 NetSarang Computer, Inc. All rights reserved.
+
+Type `help' to learn how to use Xshell prompt.
+[d:\~]$ 
+
+Connecting to 192.168.99.155:22...
+Connection established.
+To escape to local shell, press 'Ctrl+Alt+]'.
+
+Activate the web console with: systemctl enable --now cockpit.socket
+
+Last login: Sat Jun 10 10:44:36 2023
+[root@localhost ~]# 
+[root@localhost ~]# 
+[root@localhost ~]# 
+[root@localhost ~]# lsblk
+NAME        MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
+sr0          11:0    1 10.7G  0 rom  /run/media/root/CentOS-Stream-8-x86_64-dvd
+nvme0n1     259:0    0   80G  0 disk 
+├─nvme0n1p1 259:1    0    1G  0 part /boot
+└─nvme0n1p2 259:2    0   59G  0 part 
+  ├─cs-root 253:0    0   37G  0 lvm  /
+  ├─cs-swap 253:1    0    4G  0 lvm  [SWAP]
+  └─cs-home 253:2    0 18.1G  0 lvm  /home
+[root@localhost ~]# pvscan 
+  PV /dev/nvme0n1p2   VG cs              lvm2 [<59.00 GiB / 0    free]
+  Total: 1 [<59.00 GiB] / in use: 1 [<59.00 GiB] / in no VG: 0 [0   ]
+[root@localhost ~]# vgscan
+  Found volume group "cs" using metadata type lvm2
+[root@localhost ~]# vgscan
+  Found volume group "cs" using metadata type lvm2
+[root@localhost ~]# lvscan 
+  ACTIVE            '/dev/cs/swap' [3.93 GiB] inherit
+  ACTIVE            '/dev/cs/home' [18.06 GiB] inherit
+  ACTIVE            '/dev/cs/root' [37.00 GiB] inherit
+[root@localhost ~]# 
+[root@localhost ~]# 
+[root@localhost ~]# 
+[root@localhost ~]# 
+[root@localhost ~]# lsblk
+NAME        MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
+sr0          11:0    1 10.7G  0 rom  /run/media/root/CentOS-Stream-8-x86_64-dvd
+nvme0n1     259:0    0   80G  0 disk 
+├─nvme0n1p1 259:1    0    1G  0 part /boot
+└─nvme0n1p2 259:2    0   59G  0 part 
+  ├─cs-root 253:0    0   37G  0 lvm  /
+  ├─cs-swap 253:1    0    4G  0 lvm  [SWAP]
+  └─cs-home 253:2    0 18.1G  0 lvm  /home
+[root@localhost ~]# fdisk -l  
+Disk /dev/nvme0n1: 80 GiB, 85899345920 bytes, 167772160 sectors
+Units: sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes
+Disklabel type: dos
+Disk identifier: 0x654919f3
+
+Device         Boot   Start       End   Sectors Size Id Type
+/dev/nvme0n1p1 *       2048   2099199   2097152   1G 83 Linux
+/dev/nvme0n1p2      2099200 125829119 123729920  59G 8e Linux LVM
+
+
+Disk /dev/mapper/cs-root: 37 GiB, 39728447488 bytes, 77594624 sectors
+Units: sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes
+
+
+Disk /dev/mapper/cs-swap: 4 GiB, 4223664128 bytes, 8249344 sectors
+Units: sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes
+
+
+Disk /dev/mapper/cs-home: 18.1 GiB, 19394461696 bytes, 37879808 sectors
+Units: sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes
+[root@localhost ~]# 
+[root@localhost ~]# 
+[root@localhost ~]# 
+[root@localhost ~]# 
+[root@localhost ~]# fdisk -l  
+Disk /dev/nvme0n1: 80 GiB, 85899345920 bytes, 167772160 sectors
+Units: sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes
+Disklabel type: dos
+Disk identifier: 0x654919f3
+
+Device         Boot   Start       End   Sectors Size Id Type
+/dev/nvme0n1p1 *       2048   2099199   2097152   1G 83 Linux
+/dev/nvme0n1p2      2099200 125829119 123729920  59G 8e Linux LVM
+
+
+Disk /dev/mapper/cs-root: 37 GiB, 39728447488 bytes, 77594624 sectors
+Units: sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes
+
+
+Disk /dev/mapper/cs-swap: 4 GiB, 4223664128 bytes, 8249344 sectors
+Units: sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes
+
+
+Disk /dev/mapper/cs-home: 18.1 GiB, 19394461696 bytes, 37879808 sectors
+Units: sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes
+[root@localhost ~]# df -h 
+Filesystem           Size  Used Avail Use% Mounted on
+devtmpfs             1.8G     0  1.8G   0% /dev
+tmpfs                1.9G     0  1.9G   0% /dev/shm
+tmpfs                1.9G  9.8M  1.8G   1% /run
+tmpfs                1.9G     0  1.9G   0% /sys/fs/cgroup
+/dev/mapper/cs-root   37G   20G   18G  54% /
+/dev/nvme0n1p1      1014M  257M  758M  26% /boot
+/dev/mapper/cs-home   19G  4.5G   14G  25% /home
+tmpfs                371M   24K  371M   1% /run/user/0
+/dev/sr0              11G   11G     0 100% /run/media/root/CentOS-Stream-8-x86_64-dvd
+[root@localhost ~]# lsblk
+NAME        MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
+sr0          11:0    1 10.7G  0 rom  /run/media/root/CentOS-Stream-8-x86_64-dvd
+nvme0n1     259:0    0   80G  0 disk 
+├─nvme0n1p1 259:1    0    1G  0 part /boot
+└─nvme0n1p2 259:2    0   59G  0 part 
+  ├─cs-root 253:0    0   37G  0 lvm  /
+  ├─cs-swap 253:1    0    4G  0 lvm  [SWAP]
+  └─cs-home 253:2    0 18.1G  0 lvm  /home
+[root@localhost ~]# 
+[root@localhost ~]# 
+[root@localhost ~]# fdisk -l  
+Disk /dev/nvme0n1: 80 GiB, 85899345920 bytes, 167772160 sectors
+Units: sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes
+Disklabel type: dos
+Disk identifier: 0x654919f3
+
+Device         Boot   Start       End   Sectors Size Id Type
+/dev/nvme0n1p1 *       2048   2099199   2097152   1G 83 Linux
+/dev/nvme0n1p2      2099200 125829119 123729920  59G 8e Linux LVM
+
+
+Disk /dev/mapper/cs-root: 37 GiB, 39728447488 bytes, 77594624 sectors
+Units: sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes
+
+
+Disk /dev/mapper/cs-swap: 4 GiB, 4223664128 bytes, 8249344 sectors
+Units: sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes
+
+
+Disk /dev/mapper/cs-home: 18.1 GiB, 19394461696 bytes, 37879808 sectors
+Units: sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes
+[root@localhost ~]# 
+[root@localhost ~]# 
+[root@localhost ~]# 
+[root@localhost ~]# fdisk -l  
+Disk /dev/nvme0n1: 80 GiB, 85899345920 bytes, 167772160 sectors
+Units: sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes
+Disklabel type: dos
+Disk identifier: 0x654919f3
+
+Device         Boot   Start       End   Sectors Size Id Type
+/dev/nvme0n1p1 *       2048   2099199   2097152   1G 83 Linux
+/dev/nvme0n1p2      2099200 125829119 123729920  59G 8e Linux LVM
+
+
+Disk /dev/mapper/cs-root: 37 GiB, 39728447488 bytes, 77594624 sectors
+Units: sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes
+
+
+Disk /dev/mapper/cs-swap: 4 GiB, 4223664128 bytes, 8249344 sectors
+Units: sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes
+
+
+Disk /dev/mapper/cs-home: 18.1 GiB, 19394461696 bytes, 37879808 sectors
+Units: sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes
+[root@localhost ~]# 
+[root@localhost ~]# fidisk /dev/nvme0n1 
+bash: fidisk: command not found...
+Failed to search for file: Failed to download gpg key for repo 'epel': Curl error (37): Couldn't read a file:// file for file:///etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-8 [Couldn't open file /etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-8]
+[root@localhost ~]# fdisk /dev/nvme0n1 
+
+Welcome to fdisk (util-linux 2.32.1).
+Changes will remain in memory only, until you decide to write them.
+Be careful before using the write command.
+
+
+Command (m for help): n
+Partition type
+   p   primary (2 primary, 0 extended, 2 free)
+   e   extended (container for logical partitions)
+Select (default p): p
+Partition number (3,4, default 3): 
+First sector (125829120-167772159, default 125829120): 
+Last sector, +sectors or +size{K,M,G,T,P} (125829120-167772159, default 167772159): 
+
+Created a new partition 3 of type 'Linux' and of size 20 GiB.
+
+Command (m for help): w
+The partition table has been altered.
+Syncing disks.
+
+[root@localhost ~]# fdisk -l  
+Disk /dev/nvme0n1: 80 GiB, 85899345920 bytes, 167772160 sectors
+Units: sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes
+Disklabel type: dos
+Disk identifier: 0x654919f3
+
+Device         Boot     Start       End   Sectors Size Id Type
+/dev/nvme0n1p1 *         2048   2099199   2097152   1G 83 Linux
+/dev/nvme0n1p2        2099200 125829119 123729920  59G 8e Linux LVM
+/dev/nvme0n1p3      125829120 167772159  41943040  20G 83 Linux
+
+
+Disk /dev/mapper/cs-root: 37 GiB, 39728447488 bytes, 77594624 sectors
+Units: sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes
+
+
+Disk /dev/mapper/cs-swap: 4 GiB, 4223664128 bytes, 8249344 sectors
+Units: sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes
+
+
+Disk /dev/mapper/cs-home: 18.1 GiB, 19394461696 bytes, 37879808 sectors
+Units: sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes
+[root@localhost ~]# lsblk
+NAME        MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
+sr0          11:0    1 10.7G  0 rom  /run/media/root/CentOS-Stream-8-x86_64-dvd
+nvme0n1     259:0    0   80G  0 disk 
+├─nvme0n1p1 259:1    0    1G  0 part /boot
+├─nvme0n1p2 259:2    0   59G  0 part 
+│ ├─cs-root 253:0    0   37G  0 lvm  /
+│ ├─cs-swap 253:1    0    4G  0 lvm  [SWAP]
+│ └─cs-home 253:2    0 18.1G  0 lvm  /home
+└─nvme0n1p3 259:3    0   20G  0 part 
+[root@localhost ~]# partprobe
+Warning: Unable to open /dev/sr0 read-write (Read-only file system).  /dev/sr0 has been opened read-only.
+[root@localhost ~]# lvm
+lvm> 
+lvm> 
+lvm> 
+lvm> 
+lvm> q
+  No such command 'q'.  Try 'help'.
+lvm> exit
+  Exiting.
+[root@localhost ~]# reboot
+Connection closing...Socket close.
+
+Connection closed by foreign host.
+
+Disconnected from remote host(192.168.99.155) at 11:41:15.
+
+Type `help' to learn how to use Xshell prompt.
+[d:\~]$ 
+
+Connecting to 192.168.99.155:22...
+Connection established.
+To escape to local shell, press 'Ctrl+Alt+]'.
+
+Activate the web console with: systemctl enable --now cockpit.socket
+
+Last login: Sat Jun 10 10:46:27 2023 from 192.168.99.127
+[root@localhost ~]# lsblk
+NAME        MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
+sr0          11:0    1 10.7G  0 rom  
+nvme0n1     259:0    0   80G  0 disk 
+├─nvme0n1p1 259:1    0    1G  0 part /boot
+├─nvme0n1p2 259:2    0   59G  0 part 
+│ ├─cs-root 253:0    0   37G  0 lvm  /
+│ ├─cs-swap 253:1    0    4G  0 lvm  [SWAP]
+│ └─cs-home 253:2    0 18.1G  0 lvm  /home
+└─nvme0n1p3 259:3    0   20G  0 part 
+[root@localhost ~]# fdisk -l  
+Disk /dev/nvme0n1: 80 GiB, 85899345920 bytes, 167772160 sectors
+Units: sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes
+Disklabel type: dos
+Disk identifier: 0x654919f3
+
+Device         Boot     Start       End   Sectors Size Id Type
+/dev/nvme0n1p1 *         2048   2099199   2097152   1G 83 Linux
+/dev/nvme0n1p2        2099200 125829119 123729920  59G 8e Linux LVM
+/dev/nvme0n1p3      125829120 167772159  41943040  20G 83 Linux
+
+
+Disk /dev/mapper/cs-root: 37 GiB, 39728447488 bytes, 77594624 sectors
+Units: sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes
+
+
+Disk /dev/mapper/cs-swap: 4 GiB, 4223664128 bytes, 8249344 sectors
+Units: sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes
+
+
+Disk /dev/mapper/cs-home: 18.1 GiB, 19394461696 bytes, 37879808 sectors
+Units: sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes
+[root@localhost ~]# partprobe 
+Warning: Unable to open /dev/sr0 read-write (Read-only file system).  /dev/sr0 has been opened read-only.
+[root@localhost ~]# 
+Socket error Event: 32 Error: 10053.
+Connection closing...Socket close.
+
+Connection closed by foreign host.
+
+Disconnected from remote host(192.168.99.155) at 11:45:59.
+
+Type `help' to learn how to use Xshell prompt.
+[d:\~]$ 
+
+Connecting to 192.168.99.155:22...
+Connection established.
+To escape to local shell, press 'Ctrl+Alt+]'.
+
+Activate the web console with: systemctl enable --now cockpit.socket
+
+Last login: Sat Jun 10 11:43:23 2023 from 192.168.99.127
+[root@localhost ~]# 
+[root@localhost ~]# 
+[root@localhost ~]# 
+[root@localhost ~]# lsblk
+NAME        MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
+sr0          11:0    1 1024M  0 rom  
+nvme0n1     259:0    0   80G  0 disk 
+├─nvme0n1p1 259:1    0    1G  0 part /boot
+├─nvme0n1p2 259:2    0   59G  0 part 
+│ ├─cs-root 253:0    0   37G  0 lvm  /
+│ ├─cs-swap 253:1    0    4G  0 lvm  [SWAP]
+│ └─cs-home 253:2    0 18.1G  0 lvm  /home
+└─nvme0n1p3 259:3    0   20G  0 part 
+[root@localhost ~]# partprobe
+[root@localhost ~]# 
+[root@localhost ~]# 
+[root@localhost ~]# 
+[root@localhost ~]#  pvcreate /dev/nvme0n1p3
+  Physical volume "/dev/nvme0n1p3" successfully created.
+[root@localhost ~]# pvdisplay 
+  --- Physical volume ---
+  PV Name               /dev/nvme0n1p2
+  VG Name               cs
+  PV Size               <59.00 GiB / not usable 3.00 MiB
+  Allocatable           yes (but full)
+  PE Size               4.00 MiB
+  Total PE              15103
+  Free PE               0
+  Allocated PE          15103
+  PV UUID               748L1w-sHfH-qs0H-NOkk-eEaN-DX78-KCcYDY
+   
+  "/dev/nvme0n1p3" is a new physical volume of "20.00 GiB"
+  --- NEW Physical volume ---
+  PV Name               /dev/nvme0n1p3
+  VG Name               
+  PV Size               20.00 GiB
+  Allocatable           NO
+  PE Size               0   
+  Total PE              0
+  Free PE               0
+  Allocated PE          0
+  PV UUID               DUCeVp-pgA8-5LOA-V30N-wb5O-UEsZ-vO0Xfu
+   
+[root@localhost ~]# vgdisplay 
+  --- Volume group ---
+  VG Name               cs
+  System ID             
+  Format                lvm2
+  Metadata Areas        1
+  Metadata Sequence No  4
+  VG Access             read/write
+  VG Status             resizable
+  MAX LV                0
+  Cur LV                3
+  Open LV               3
+  Max PV                0
+  Cur PV                1
+  Act PV                1
+  VG Size               <59.00 GiB
+  PE Size               4.00 MiB
+  Total PE              15103
+  Alloc PE / Size       15103 / <59.00 GiB
+  Free  PE / Size       0 / 0   
+  VG UUID               fQivhZ-JtEj-97ae-iH7X-XSBA-xWh5-etfV1h
+   
+[root@localhost ~]# 
+[root@localhost ~]# 
+[root@localhost ~]# vg
+vgcfgbackup      vgchange         vgconvert        vgdisplay        vgextend         vgimportclone    vgmerge          vgreduce         vgrename         vgscan           
+vgcfgrestore     vgck             vgcreate         vgexport         vgimport         vgimportdevices  vgmknodes        vgremove         vgs              vgsplit          
+[root@localhost ~]# vg
+vgcfgbackup      vgchange         vgconvert        vgdisplay        vgextend         vgimportclone    vgmerge          vgreduce         vgrename         vgscan           
+vgcfgrestore     vgck             vgcreate         vgexport         vgimport         vgimportdevices  vgmknodes        vgremove         vgs              vgsplit          
+[root@localhost ~]# vgex
+vgexport  vgextend  
+[root@localhost ~]# vgextend  cs /dev/nvme0n1p
+/dev/nvme0n1p2  /dev/nvme0n1p3  
+[root@localhost ~]# vgextend  cs /dev/nvme0n1p
+/dev/nvme0n1p2  /dev/nvme0n1p3  
+[root@localhost ~]# vgextend  cs /dev/nvme0n1p3 
+  Volume group "cs" successfully extended
+[root@localhost ~]# df -h
+Filesystem           Size  Used Avail Use% Mounted on
+devtmpfs             1.8G     0  1.8G   0% /dev
+tmpfs                1.9G     0  1.9G   0% /dev/shm
+tmpfs                1.9G  9.6M  1.8G   1% /run
+tmpfs                1.9G     0  1.9G   0% /sys/fs/cgroup
+/dev/mapper/cs-root   37G   20G   18G  54% /
+/dev/nvme0n1p1      1014M  257M  758M  26% /boot
+/dev/mapper/cs-home   19G  4.5G   14G  25% /home
+tmpfs                371M   12K  371M   1% /run/user/42
+tmpfs                371M     0  371M   0% /run/user/0
+[root@localhost ~]# lvresize -L +20G /dev/mapper/cs-home 
+  Insufficient free space: 5120 extents needed, but only 5119 available
+[root@localhost ~]# lsblk 
+NAME        MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
+sr0          11:0    1 1024M  0 rom  
+nvme0n1     259:0    0   80G  0 disk 
+├─nvme0n1p1 259:1    0    1G  0 part /boot
+├─nvme0n1p2 259:2    0   59G  0 part 
+│ ├─cs-root 253:0    0   37G  0 lvm  /
+│ ├─cs-swap 253:1    0    4G  0 lvm  [SWAP]
+│ └─cs-home 253:2    0 18.1G  0 lvm  /home
+└─nvme0n1p3 259:3    0   20G  0 part 
+[root@localhost ~]# lvresize -L +19G /dev/mapper/cs-home 
+  Size of logical volume cs/home changed from 18.06 GiB (4624 extents) to 37.06 GiB (9488 extents).
+  Logical volume cs/home successfully resized.
+[root@localhost ~]# df -h
+Filesystem           Size  Used Avail Use% Mounted on
+devtmpfs             1.8G     0  1.8G   0% /dev
+tmpfs                1.9G     0  1.9G   0% /dev/shm
+tmpfs                1.9G  9.6M  1.8G   1% /run
+tmpfs                1.9G     0  1.9G   0% /sys/fs/cgroup
+/dev/mapper/cs-root   37G   20G   18G  54% /
+/dev/nvme0n1p1      1014M  257M  758M  26% /boot
+/dev/mapper/cs-home   19G  4.5G   14G  25% /home
+tmpfs                371M   12K  371M   1% /run/user/42
+tmpfs                371M     0  371M   0% /run/user/0
+[root@localhost ~]# 
+[root@localhost ~]# df -h
+Filesystem           Size  Used Avail Use% Mounted on
+devtmpfs             1.8G     0  1.8G   0% /dev
+tmpfs                1.9G     0  1.9G   0% /dev/shm
+tmpfs                1.9G  9.6M  1.8G   1% /run
+tmpfs                1.9G     0  1.9G   0% /sys/fs/cgroup
+/dev/mapper/cs-root   37G   20G   18G  54% /
+/dev/nvme0n1p1      1014M  257M  758M  26% /boot
+/dev/mapper/cs-home   19G  4.5G   14G  25% /home
+tmpfs                371M   12K  371M   1% /run/user/42
+tmpfs                371M     0  371M   0% /run/user/0
+[root@localhost ~]# 
+[root@localhost ~]# 
+[root@localhost ~]# df -h
+Filesystem           Size  Used Avail Use% Mounted on
+devtmpfs             1.8G     0  1.8G   0% /dev
+tmpfs                1.9G     0  1.9G   0% /dev/shm
+tmpfs                1.9G  9.6M  1.8G   1% /run
+tmpfs                1.9G     0  1.9G   0% /sys/fs/cgroup
+/dev/mapper/cs-root   37G   20G   18G  54% /
+/dev/nvme0n1p1      1014M  257M  758M  26% /boot
+/dev/mapper/cs-home   19G  4.5G   14G  25% /home
+tmpfs                371M   12K  371M   1% /run/user/42
+tmpfs                371M     0  371M   0% /run/user/0
+[root@localhost ~]# fdisk -l  
+Disk /dev/nvme0n1: 80 GiB, 85899345920 bytes, 167772160 sectors
+Units: sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes
+Disklabel type: dos
+Disk identifier: 0x654919f3
+
+Device         Boot     Start       End   Sectors Size Id Type
+/dev/nvme0n1p1 *         2048   2099199   2097152   1G 83 Linux
+/dev/nvme0n1p2        2099200 125829119 123729920  59G 8e Linux LVM
+/dev/nvme0n1p3      125829120 167772159  41943040  20G 83 Linux
+
+
+
+
+Disk /dev/mapper/cs-root: 37 GiB, 39728447488 bytes, 77594624 sectors
+Units: sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes
+
+
+Disk /dev/mapper/cs-swap: 4 GiB, 4223664128 bytes, 8249344 sectors
+Units: sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes
+
+
+Disk /dev/mapper/cs-home: 37.1 GiB, 39795556352 bytes, 77725696 sectors
+Units: sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes
+[root@localhost ~]# reboot
+Connection closing...Socket close.
+
+Connection closed by foreign host.
+
+Disconnected from remote host(192.168.99.155) at 11:55:01.
+
+Type `help' to learn how to use Xshell prompt.
+[d:\~]$ 
+
+Connecting to 192.168.99.155:22...
+Could not connect to '192.168.99.155' (port 22): Connection failed.
+
+Type `help' to learn how to use Xshell prompt.
+[d:\~]$ 
+
+Connecting to 192.168.99.155:22...
+Connection established.
+To escape to local shell, press 'Ctrl+Alt+]'.
+
+Activate the web console with: systemctl enable --now cockpit.socket
+
+Last login: Sat Jun 10 11:46:39 2023 from 192.168.99.127
+[root@localhost ~]# 
+[root@localhost ~]# 
+[root@localhost ~]# 
+[root@localhost ~]# 
+[root@localhost ~]# df -h
+Filesystem           Size  Used Avail Use% Mounted on
+devtmpfs             1.8G     0  1.8G   0% /dev
+tmpfs                1.9G     0  1.9G   0% /dev/shm
+tmpfs                1.9G  9.7M  1.8G   1% /run
+tmpfs                1.9G     0  1.9G   0% /sys/fs/cgroup
+/dev/mapper/cs-root   37G   20G   18G  54% /
+/dev/nvme0n1p1      1014M  257M  758M  26% /boot
+/dev/mapper/cs-home   19G  4.5G   14G  25% /home
+tmpfs                371M   12K  371M   1% /run/user/42
+tmpfs                371M     0  371M   0% /run/user/0
+[root@localhost ~]# vgdisplay 
+  --- Volume group ---
+  VG Name               cs
+  System ID             
+  Format                lvm2
+  Metadata Areas        2
+  Metadata Sequence No  6
+  VG Access             read/write
+  VG Status             resizable
+  MAX LV                0
+  Cur LV                3
+  Open LV               3
+  Max PV                0
+  Cur PV                2
+  Act PV                2
+  VG Size               78.99 GiB
+  PE Size               4.00 MiB
+  Total PE              20222
+  Alloc PE / Size       19967 / <78.00 GiB
+  Free  PE / Size       255 / 1020.00 MiB
+  VG UUID               fQivhZ-JtEj-97ae-iH7X-XSBA-xWh5-etfV1h
+   
+[root@localhost ~]# lvresize -L +19G /dev/mapper/cs-home 
+  Insufficient free space: 4864 extents needed, but only 255 available
+[root@localhost ~]# lvresize -L +18G /dev/mapper/cs-home 
+  Insufficient free space: 4608 extents needed, but only 255 available
+[root@localhost ~]# 
+[root@localhost ~]# 
+[root@localhost ~]# 
+[root@localhost ~]# df -h
+Filesystem           Size  Used Avail Use% Mounted on
+devtmpfs             1.8G     0  1.8G   0% /dev
+tmpfs                1.9G     0  1.9G   0% /dev/shm
+tmpfs                1.9G  9.6M  1.8G   1% /run
+tmpfs                1.9G     0  1.9G   0% /sys/fs/cgroup
+/dev/mapper/cs-root   37G   20G   18G  54% /
+/dev/nvme0n1p1      1014M  257M  758M  26% /boot
+/dev/mapper/cs-home   19G  4.5G   14G  25% /home
+tmpfs                371M   12K  371M   1% /run/user/42
+tmpfs                371M     0  371M   0% /run/user/0
+[root@localhost ~]# lcblk
+bash: lcblk: command not found...
+Similar command is: 'lsblk'
+[root@localhost ~]# lsblk
+NAME        MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
+sr0          11:0    1 1024M  0 rom  
+nvme0n1     259:0    0   80G  0 disk 
+├─nvme0n1p1 259:1    0    1G  0 part /boot
+├─nvme0n1p2 259:2    0   59G  0 part 
+│ ├─cs-root 253:0    0   37G  0 lvm  /
+│ ├─cs-swap 253:1    0    4G  0 lvm  [SWAP]
+│ └─cs-home 253:2    0 37.1G  0 lvm  /home
+└─nvme0n1p3 259:3    0   20G  0 part 
+  └─cs-home 253:2    0 37.1G  0 lvm  /home
+[root@localhost ~]# xfs_growfs  /dev/mapper/cs-home
+meta-data=/dev/mapper/cs-home    isize=512    agcount=4, agsize=1183744 blks
+         =                       sectsz=512   attr=2, projid32bit=1
+         =                       crc=1        finobt=1, sparse=1, rmapbt=0
+         =                       reflink=1    bigtime=0 inobtcount=0
+data     =                       bsize=4096   blocks=4734976, imaxpct=25
+         =                       sunit=0      swidth=0 blks
+naming   =version 2              bsize=4096   ascii-ci=0, ftype=1
+log      =internal log           bsize=4096   blocks=2560, version=2
+         =                       sectsz=512   sunit=0 blks, lazy-count=1
+realtime =none                   extsz=4096   blocks=0, rtextents=0
+data blocks changed from 4734976 to 9715712
+[root@localhost ~]# df -h
+Filesystem           Size  Used Avail Use% Mounted on
+devtmpfs             1.8G     0  1.8G   0% /dev
+tmpfs                1.9G     0  1.9G   0% /dev/shm
+tmpfs                1.9G  9.6M  1.8G   1% /run
+tmpfs                1.9G     0  1.9G   0% /sys/fs/cgroup
+/dev/mapper/cs-root   37G   20G   18G  54% /
+/dev/nvme0n1p1      1014M  257M  758M  26% /boot
+/dev/mapper/cs-home   38G  4.6G   33G  13% /home
+tmpfs                371M   12K  371M   1% /run/user/42
+tmpfs                371M     0  371M   0% /run/user/0
+[root@localhost ~]# lsblk 
+NAME        MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
+sr0          11:0    1 1024M  0 rom  
+nvme0n1     259:0    0   80G  0 disk 
+├─nvme0n1p1 259:1    0    1G  0 part /boot
+├─nvme0n1p2 259:2    0   59G  0 part 
+│ ├─cs-root 253:0    0   37G  0 lvm  /
+│ ├─cs-swap 253:1    0    4G  0 lvm  [SWAP]
+│ └─cs-home 253:2    0 37.1G  0 lvm  /home
+└─nvme0n1p3 259:3    0   20G  0 part 
+  └─cs-home 253:2    0 37.1G  0 lvm  /home
+[root@localhost ~]# 

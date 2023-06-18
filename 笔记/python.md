@@ -107,7 +107,9 @@ F12 --> Network --> XHR --> Name --> Response
 
 
 
-### 8.3 爬虫类库
+### 8.3 web爬虫类库
+
+
 
 #### 8.3.1 Beautiful Soup 
 
@@ -117,13 +119,42 @@ F12 --> Network --> XHR --> Name --> Response
 
 同样是一个强大的网页解析工具，它提供了和jQuery 类似的语法来解析HTML 文梢， 支持c ss 选择器，使用非常方便。
 
-### 8.3.3 tesserocr
+#### 8.3.3 tesserocr
 
 在爬虫过程中，难免会遇到各种各样的验证码，而大多数验证码还是罔形验证码，这时候我们可以直接用OCR 来识别。
+
+
+
+tesseract test.png result -l chi_sim 
+
+
 
 #### 8.3.4 RedisDump 
 
 RedisDump 是一个用于Redis 数据导人／导出的工具，是基于Ruby 实现的，所以要安装RedisDump ,需要先安装Ruby
+
+#### 8.3.5 Tornado 
+
+Tornado 是一个支持异步的Web 框架，通过使用非阻塞I / O 流，它可以支撑成千上万的开放连接，效率非常高，本节就来介绍一下它的安装方式
+
+
+
+gem install redis-dump 
+
+
+
+安装成功后，就可以执行如下两个命令：
+redis dump
+redis-load
+
+### 8.4 APP 爬虫类库安装
+
+#### 8.4.1  Charles
+
+Charles 是一个网络抓包工具，相比Fiddler ，其功能更为强大， 而且跨平台支持得更好，所以这
+里选用它来作为主要的移动端抓包工具
+
+
 
 ### 抓包工具
 - fidder4
