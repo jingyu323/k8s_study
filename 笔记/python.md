@@ -143,7 +143,7 @@ RedisDump 是一个用于Redis 数据导人／导出的工具，是基于Ruby �
 
 Tornado 是一个支持异步的Web 框架，通过使用非阻塞I / O 流，它可以支撑成千上万的开放连接，效率非常高，本节就来介绍一下它的安装方式
 
-
+pip install tornado
 
 gem install redis-dump 
 
@@ -157,6 +157,8 @@ redis-load
 
 #### 8.3.6  pyspider
 
+http://docs.pyspider.org/en/latest/Quickstart/
+
 p）叩id er 是支持JavaScript 渲染的，而这个过程是依赖于PhantomJS 的，所以还需要安装PhantomJS
 
   phantomjs安装步骤
@@ -164,6 +166,12 @@ p）叩id er 是支持JavaScript 渲染的，而这个过程是依赖于PhantomJ
 pip install pymysql
 
 pip install pymongo
+
+pip install redis
+
+pip  install mitmproxy
+
+pip  install pyspider
 
 ### 8.4 APP 爬虫类库安装
 
