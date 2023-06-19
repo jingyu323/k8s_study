@@ -115,6 +115,10 @@ F12 --> Network --> XHR --> Name --> Response
 
 的一个HTML 或XML 的解析库，我们可以用它来方便地从网页中提取数据。
 
+pip install beautifulsoup4
+
+https://beautifulsoup.readthedocs.io/zh_CN/v4.4.0/#id55
+
 #### 8.3.2 pyquery 
 
 同样是一个强大的网页解析工具，它提供了和jQuery 类似的语法来解析HTML 文梢， 支持c ss 选择器，使用非常方便。
@@ -123,7 +127,9 @@ F12 --> Network --> XHR --> Name --> Response
 
 在爬虫过程中，难免会遇到各种各样的验证码，而大多数验证码还是罔形验证码，这时候我们可以直接用OCR 来识别。
 
+安装插件
 
+conda install -c simonflueckiger tesserocr pillow
 
 tesseract test.png result -l chi_sim 
 
@@ -146,6 +152,18 @@ gem install redis-dump
 安装成功后，就可以执行如下两个命令：
 redis dump
 redis-load
+
+
+
+#### 8.3.6  pyspider
+
+p）叩id er 是支持JavaScript 渲染的，而这个过程是依赖于PhantomJS 的，所以还需要安装PhantomJS
+
+  phantomjs安装步骤
+
+pip install pymysql
+
+pip install pymongo
 
 ### 8.4 APP 爬虫类库安装
 
