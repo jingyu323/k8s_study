@@ -161,6 +161,22 @@ http://docs.pyspider.org/en/latest/Quickstart/
 
 p）叩id er 是支持JavaScript 渲染的，而这个过程是依赖于PhantomJS 的，所以还需要安装PhantomJS
 
+
+
+下载对应的pycurl安装包
+
+https://www.lfd.uci.edu/~gohlke/pythonlibs/
+
+执行安装
+
+pip install D:\下载\ad3-2.2.1-cp39-cp39-win32.whl
+
+在执行安装 pip  install pyspider 即可成功
+
+
+
+
+
   phantomjs安装步骤
 
 pip install pymysql
@@ -171,7 +187,7 @@ pip install redis
 
 pip  install mitmproxy
 
-pip  install pyspider
+
 
 ### 8.4 APP 爬虫类库安装
 
