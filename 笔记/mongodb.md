@@ -948,7 +948,13 @@ https://docs.mongoing.com/
 
 1、mongodb是什么？ 
 
+
   2、mongodb有哪些特点？ 
+  High Availability
+  Horizontal Scalability
+  Support for Multiple Storage Engines
+  - WiredTiger Storage Engine (including support for Encryption at Rest)
+  - In-Memory Storage Engine.
 
   3、你说的NoSQL数据库是什么意思?NoSQL与RDBMS直接有什么区别?为什么要使用和不使用NoSQL数据库?说一说NoSQL数据库的几个优点? 
 
