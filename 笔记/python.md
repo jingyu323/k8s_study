@@ -161,7 +161,7 @@ http://docs.pyspider.org/en/latest/Quickstart/
 
 如果要快速实现一个页面的抓取，推荐使用 pyspider，开发更加便捷，如快速抓取某个普通新闻网站的新闻内容。如果要应对反爬程度很强、超大规模的抓取，推荐使用 Scrapy，如抓取封 IP、封账号、高频验证的网站的大规模数据采集。
 
-  
+
 著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
 
 下载对应的pycurl安装包
@@ -190,9 +190,17 @@ pip install pymongo
 
 pip install redis
 
-pip  install mitmproxy
+pip  install mitmproxy    mitmweb 和mitmdump  是 mitmproxy    关键组建
 
 
+
+用来爬取App 
+
+ Appium
+
+
+
+Scrapy
 
 ### 8.4 APP 爬虫类库安装
 
