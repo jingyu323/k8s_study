@@ -237,6 +237,20 @@ yum-config-manager \
 
 yum install --allowerasing docker-ce -y
 
+
+
+```
+查看是否安装poman
+rpm -q podman
+podman-1.4.2-5.module_el8.1.0+237+63e26edc.x86_64
+删除poman
+dnf remove podman
+
+yum erase podman buildah
+```
+
+
+
 $ systemctl start docker
 
 
