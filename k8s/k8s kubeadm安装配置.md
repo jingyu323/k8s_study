@@ -196,9 +196,42 @@ systemctl restart containerd
 
 
 
+
+
+
+
 ### 替换阿里云`docker`仓库
 
-yum-config-manager  --add-repo http://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
+删除之前安装的
+
+```
+yum remove docker \
+                  docker-client \
+                  docker-client-latest \
+                  docker-common \
+                  docker-latest \
+                  docker-latest-logrotate \
+                  docker-logrotate \
+                  docker-selinux \
+                  docker-engine-selinux \
+                  docker-engine \
+                  docker-ce
+
+```
+
+安装工具包
+
+**yum install** -y yum-utils \
+ device-mapper-persistent-data \
+ lvm2
+
+ 
+
+yum-config-manager \
+  --add-repo \
+  https:**//**mirrors.tuna.tsinghua.edu.cn**/**docker-ce**/**linux**/**centos**/**docker-ce.repo
+
+
 
 ### 安装`docker`引擎
 
