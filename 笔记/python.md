@@ -125,6 +125,11 @@ https://beautifulsoup.readthedocs.io/zh_CN/v4.4.0/#id55
 
 #### 8.3.3 tesserocr
 
+安装tesserocr
+1、打开链接，https://digi.bib.uni-mannheim.de/tesseract/，见下图。
+
+
+
 在爬虫过程中，难免会遇到各种各样的验证码，而大多数验证码还是罔形验证码，这时候我们可以直接用OCR 来识别。
 
 安装插件
@@ -133,7 +138,10 @@ conda install -c simonflueckiger tesserocr pillow
 
 tesseract test.png result -l chi_sim 
 
+安装Python的OCR识别库
 
+pip install Pillow
+pip install pytesseract
 
 #### 8.3.4 RedisDump 
 
