@@ -221,9 +221,13 @@ yum remove docker \
 
 安装工具包
 
-**yum install** -y yum-utils \
+```
+yum install -y yum-utils \
  device-mapper-persistent-data \
  lvm2
+```
+
+
 
  
 

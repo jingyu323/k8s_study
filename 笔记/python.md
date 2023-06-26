@@ -202,6 +202,14 @@ pip  install mitmproxy    mitmweb 和mitmdump  是 mitmproxy    关键组建
 
 Scrapy
 
+
+
+#### 8.3.7  Selenium 
+
+https://python-selenium-zh.readthedocs.io/zh_CN/latest/1.%E5%AE%89%E8%A3%85/
+
+
+
 ### 8.4 APP 爬虫类库安装
 
 #### 8.4.1  Charles
