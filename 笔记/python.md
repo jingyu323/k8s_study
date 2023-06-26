@@ -12,6 +12,14 @@
 
 ## 6.使用
 
+6.1 正则
+
+```
+字符串中间尽量使用非贪婪匹配，也就是用.*?叫来代替.* ,如果匹配的结果在字符串结尾，.*?就有可能匹配不到任何内容
+```
+
+
+
 ## 7.常见问题
 ## 8.爬虫
 爬虫到底是个什么呢? 
@@ -125,6 +133,11 @@ https://beautifulsoup.readthedocs.io/zh_CN/v4.4.0/#id55
 
 #### 8.3.3 tesserocr
 
+安装tesserocr
+1、打开链接，https://digi.bib.uni-mannheim.de/tesseract/，见下图。
+
+
+
 在爬虫过程中，难免会遇到各种各样的验证码，而大多数验证码还是罔形验证码，这时候我们可以直接用OCR 来识别。
 
 安装插件
@@ -133,7 +146,10 @@ conda install -c simonflueckiger tesserocr pillow
 
 tesseract test.png result -l chi_sim 
 
+安装Python的OCR识别库
 
+pip install Pillow
+pip install pytesseract
 
 #### 8.3.4 RedisDump 
 
@@ -216,6 +232,8 @@ https://python-selenium-zh.readthedocs.io/zh_CN/latest/1.%E5%AE%89%E8%A3%85/
 
 Charles 是一个网络抓包工具，相比Fiddler ，其功能更为强大， 而且跨平台支持得更好，所以这
 里选用它来作为主要的移动端抓包工具
+
+
 
 
 
