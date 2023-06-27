@@ -9,7 +9,13 @@
 
 jdk 安装
 
+远程调试
 
+```
+CATALINA_OPTS="-server -Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=8788"
+```
+
+idea  debug config 中添加  Remote Jvm Debug
 
 ## java 安装配置
 
