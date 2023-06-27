@@ -544,7 +544,7 @@ synchronized 与Lock都是可重入锁，同一个线程再次进入同步代码
    2、线程间数据隔离
    3、进行事务操作，用于存储线程事务信息。
    4、数据库连接，Session会话管理。
-threadLocals属性对应在ThreadLocal中定义的ThreadLocalMap对象。 
+   threadLocals属性对应在ThreadLocal中定义的ThreadLocalMap对象。 
 #####  总结
 
 （1）每个Thread维护着一个ThreadLocalMap的引用
@@ -729,6 +729,17 @@ HttpServletBean 调用init 初始化-》  initServletBean()-》initWebApplicatio
 2. 对象适配器
 
 ## 并发
+
+## 高级应用
+
+- 时间轮算法 HashedWheelTimer
+
+  适用场景
+  订单超时
+  分布式锁中为线程续期的看门狗
+  心跳检测
+
+  
 
 
 
