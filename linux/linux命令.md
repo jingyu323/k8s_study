@@ -306,6 +306,16 @@ Average:        all      8.83      0.00      2.09      0.63      0.00     88.46
 
 #### 磁盘读写（I/O）能力
 
+磁盘读速率
+
+hdparm -t /dev/sda
+
+写速率
+
+dd if=/dev/zero of=/tmp/output.img bs=8k count=256k 
+
+
+
 如果想要查看系统磁盘的读写性能，可执行如下命令：
 
 ```
