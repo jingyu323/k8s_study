@@ -267,6 +267,22 @@ https://python-selenium-zh.readthedocs.io/zh_CN/latest/1.%E5%AE%89%E8%A3%85/
 
 https://www.selenium.dev/documentation/
 
+#### 8.3.8  jupyter  
+
+安装成功之后
+
+pip install jupyter -i https://pypi.tuna.tsinghua.edu.cn/simple
+
+生成配置
+
+jupyter notebook --generate-config
+
+在 jupyter  中不能定义方法 只能直接运行
+
+jupyter notebook  启动 jupyter 
+
+
+
 ### 8.4 APP 爬虫类库安装
 
 #### 8.4.1  Charles
