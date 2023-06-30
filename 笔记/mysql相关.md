@@ -652,6 +652,18 @@ type字段的结果值，从好到坏依次是：system > const > eq_ref > ref >
 
 局限于单一数据库节点，将一张表分散存储在不同的物理块中
 
+
+
+查询分区信息：
+
+SELECT partition_name, partition_ordinal_position, partition_method, partition_expression, partition_description
+FROM information_schema.partitions
+WHERE table_schema = 'rain_test' AND table_name = 'user';
+
+
+
+
+
 ### 分片
 
 分表顾名思义，就是把一张超大的数据表，拆分为多个较小的表，得到有效的缓解。
