@@ -281,6 +281,8 @@ jupyter notebook --generate-config
 
 jupyter notebook  启动 jupyter 
 
+http://localhost:8888/tree#notebooks
+
 
 
 ### 8.4 APP 爬虫类库安装
