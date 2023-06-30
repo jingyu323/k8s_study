@@ -27,6 +27,36 @@
 
 提醒：如果在没有返回值return的情况下调用闭包函数时，只会调用外层函数，不会调用内层函数
 
+6.3 方法参数传递和使用
+
+方法参数不需要指定类型，上一个方法的返回值，直接当作参数传递进去，不像java 需要指定类型。
+
+```
+def insert_data( conn):
+
+    cur = conn.cursor()
+    SQL = 'create table if not exists info(' \
+          'id int primary key,' \
+          'title char not null,' \
+          'photo_src char not null)'
+
+    try:
+        # 开启一个事务
+        conn.begin()
+        # 设置将执行的SQL语句
+        cur.execute(SQL)
+        # 提交事务
+        conn.commit()
+    except Exception:
+        print('【初始化失败（表）】')
+        # 打印错误信息
+        print('  ', traceback.print_exc())
+   
+使用 
+    conn = get_pymysql_conn()
+    insert_data(conn)
+```
+
 
 
 
@@ -235,7 +265,7 @@ Scrapy
 
 https://python-selenium-zh.readthedocs.io/zh_CN/latest/1.%E5%AE%89%E8%A3%85/
 
-
+https://www.selenium.dev/documentation/
 
 ### 8.4 APP 爬虫类库安装
 
