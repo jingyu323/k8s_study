@@ -662,6 +662,10 @@ WHERE table_schema = 'rain_test' AND table_name = 'user';
 
 
 
+去除：only_full_group_by 兼容问题， 新安装的数据库不添加sql mode 就容易出现这个问题
+
+sql_mode=STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION
+
 
 
 ### 分片
