@@ -47,11 +47,25 @@ eP3-Uii07tHLZ+hit=VO
 https://www.elastic.co/guide/en/elasticsearch/reference/8.7/rpm.html#rpm-repo
 
 ```sh
-下载rpm包
-wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-8.7.1-x86_64.rpm
+直接安装，需要配置仓库
+ cd  /etc/yum.repos.d/
+ elasticsearch.repo
 
-su es
-rpm --install elasticsearch-8.7.1-x86_64.rpm
+[elasticsearch]
+name=Elasticsearch repository for 8.x packages
+baseurl=https://artifacts.elastic.co/packages/8.x/yum
+gpgcheck=1
+gpgkey=https://artifacts.elastic.co/GPG-KEY-elasticsearch
+enabled=0
+autorefresh=1
+type=rpm-md
+
+sudo yum install --enablerepo=elasticsearch elasticsearch 
+
+下载rpm包
+wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-8.8.2-x86_64.rpm
+
+rpm --install elasticsearch-8.8.2-x86_64.rpm
 
 开机启动
 sudo /bin/systemctl daemon-reload
@@ -80,19 +94,133 @@ vm.max_map_count=655360
 
 需要用https
 https://127.0.0.1:9200/
+默认用户
+elastic
 
- cd  /etc/yum.repos.d/
- elasticsearch.repo
+密码就是打印到屏幕上的密码
 
-[elasticsearch]
-name=Elasticsearch repository for 8.x packages
-baseurl=https://artifacts.elastic.co/packages/8.x/yum
-gpgcheck=1
-gpgkey=https://artifacts.elastic.co/GPG-KEY-elasticsearch
-enabled=0
-autorefresh=1
-type=rpm-md
+
+
+
 ```
+
+
+
+```
+143  - mongo2
+Authentication and authorization are enabled.
+TLS for the transport and HTTP layers is enabled and configured.
+
+The generated password for the elastic built-in superuser is : WSzZnnZUUPPXXQdhNMFY
+
+If this node should join an existing cluster, you can reconfigure this with
+'/usr/share/elasticsearch/bin/elasticsearch-reconfigure-node --enrollment-token <token-here>'
+after creating an enrollment token on your existing cluster.
+
+You can complete the following actions at any time:
+
+Reset the password of the elastic built-in superuser with 
+'/usr/share/elasticsearch/bin/elasticsearch-reset-password -u elastic'.
+
+Generate an enrollment token for Kibana instances with 
+ '/usr/share/elasticsearch/bin/elasticsearch-create-enrollment-token -s kibana'.
+
+Generate an enrollment token for Elasticsearch nodes with 
+'/usr/share/elasticsearch/bin/elasticsearch-create-enrollment-token -s node'.
+144 - mongo1
+
+Authentication and authorization are enabled.
+TLS for the transport and HTTP layers is enabled and configured.
+
+The generated password for the elastic built-in superuser is : 0877+C7=nc-=ESJjajwB
+
+If this node should join an existing cluster, you can reconfigure this with
+'/usr/share/elasticsearch/bin/elasticsearch-reconfigure-node --enrollment-token <token-here>'
+after creating an enrollment token on your existing cluster.
+
+You can complete the following actions at any time:
+
+Reset the password of the elastic built-in superuser with 
+'/usr/share/elasticsearch/bin/elasticsearch-reset-password -u elastic'.
+
+Generate an enrollment token for Kibana instances with 
+ '/usr/share/elasticsearch/bin/elasticsearch-create-enrollment-token -s kibana'.
+
+Generate an enrollment token for Elasticsearch nodes with 
+'/usr/share/elasticsearch/bin/elasticsearch-create-enrollment-token -s node'.
+
+-------------------------------------------------------------------------------------------------
+### NOT starting on installation, please execute the following statements to configure elasticsearch service to start automatically using systemd
+ sudo systemctl daemon-reload
+ sudo systemctl enable elasticsearch.service
+### You can start elasticsearch service by executing
+ sudo systemctl start elasticsearch.service
+
+Couldn't write '1' to 'vm/unprivileged_userfaultfd', ignoring: No such file or directory
+
+
+```
+
+
+
+
+
+### 集群配置
+
+1.修改
+
+/etc/elasticsearch/elasticsearch.yml
+
+node1  主节点
+
+增加如下
+
+```
+# 集群名称，默认是 elasticsearch
+cluster.name: es
+# 节点名称
+node.name: node1
+# 是否作为集群的主节点 ，默认 true
+node.master: true
+# 是否作为集群的数据节点 ，默认 true
+node.data: true
+# 配置访问本节点的地址
+network.host: 0.0.0.0
+
+# 设置对外服务的http端口，默认为9200
+http.port: 9200
+
+# 设置节点间交互的tcp端口,默认是9300
+transport.tcp.port: 9300
+
+# 配置所有用来组建集群的机器的IP地址
+discovery.zen.ping.unicast.hosts: ["192.168.182.142:9300", "192.168.182.143:9301","192.168.182.144:9302"]
+
+# 配置当前集群中最少具有 master 资格节点数，对于多于两个节点的集群环境，建议配置大于1
+discovery.zen.minimum_master_nodes: 2
+```
+
+
+
+
+
+### 卸载
+
+systemctl stop elasticsearch.service
+
+systemctl stop elasticsearch.service;
+[root@localhost ~]# systemctl disable elasticsearch;
+Removed /etc/systemd/system/multi-user.target.wants/elasticsearch.service.
+[root@localhost ~]#  systemctl daemon-reload;
+
+rpm -qa | grep elasticsearch;
+
+rpm -e --nodeps  elasticsearch-8.7.1-1.x86_64
+
+ rm -rf /etc/elasticsearch;
+ rm -rf /opt/software/elasticsearch;
+
+rm -rf /var/lib/elasticsearch /usr/share/elasticsearch
 
 ## 6.使用
 
@@ -104,6 +232,14 @@ type=rpm-md
 
 ## 7.常见问题
 
+7.1 错误排查
+
+日志
+
+ /var/log/elasticsearch/es.log
+
+
+
 ## 8.参考资料
 
 
@@ -114,7 +250,9 @@ type=rpm-md
 
 Kibana是ElasticSearch的数据可视化和实时分析的工具，利用Elasticsearch的聚合功能，生成各种图表，如柱形图，线状图，饼图等。
 
+8.0.8  Kibana 适配8.8 版本es，8.7的 不适配
 
+ https://www.elastic.co/guide/cn/kibana/current/rpm.html
 
 安装
 
@@ -134,6 +272,8 @@ enabled=1
 autorefresh=1
 type=rpm-md
 
+
+sudo yum install kibana -y
 
 ```
 
@@ -167,18 +307,41 @@ You can then generate an enrollment token for Kibana with the [`elasticsearch-cr
 生成token
 bin/elasticsearch-create-enrollment-token -s kibana
 
+
+Reset the password of the elastic built-in superuser with 
+'/usr/share/elasticsearch/bin/elasticsearch-reset-password -u elastic'.
+
+Generate an enrollment token for Kibana instances with 
+ '/usr/share/elasticsearch/bin/elasticsearch-create-enrollment-token -s kibana'.
+
+Generate an enrollment token for Elasticsearch nodes with 
+'/usr/share/elasticsearch/bin/elasticsearch-create-enrollment-token -s node'.
+
+
+
+
 ```
 
 验证码生成
+
+/usr/share/kibana/bin/kibana-verification-code 
 
 不兼容
 
 Couldn't configure Elastic
 The Elasticsearch cluster (v8.7.1) is incompatible with this version of Kibana (v8.8.0).
 
-升级
+升级  Elasticsearch,参见卸载之后重新安装即可
+
+
+
+
+
+
 
 在安装完kibana后，直接启动kibana服务，只能在本机通过127.0.0.1:5601来访问。如果需要远端访问，则需要修改kibana.yml。
+
+/etc/kibana/kibana.yml
 
 修改kibana服务绑定地址。
 

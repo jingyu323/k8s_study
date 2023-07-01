@@ -270,6 +270,22 @@ Linux 系统中的 /etc/passwd 文件，是系统用户配置文件，存储了�
 
 pstree -g
 
+
+
+###### 添加sudoers 读写权限
+
+chmod u+w /etc/sudoers 
+
+##### 编辑sudoers文件
+
+vi /etc/sudoers
+
+找到这行 root ALL=(ALL) ALL,在他下面添加xxx ALL=(ALL) ALL (这里的xxx是你的用户名)
+
+取消写权限
+
+chmod u-w /etc/sudoers
+
 ### 性能
 
 #### CPU
