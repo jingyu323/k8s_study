@@ -73,6 +73,7 @@ sudo /bin/systemctl enable elasticsearch.service
 启动/停止
 sudo systemctl start elasticsearch.service
 sudo systemctl stop elasticsearch.service
+sudo systemctl status elasticsearch.service
 
 journalctl --unit elasticsearch
 
@@ -177,27 +178,130 @@ node1  主节点
 
 ```
 # 集群名称，默认是 elasticsearch
+
+# ======================== Elasticsearch Configuration =========================
+#
+# NOTE: Elasticsearch comes with reasonable defaults for most settings.
+#       Before you set out to tweak and tune the configuration, make sure you
+#       understand what are you trying to accomplish and the consequences.
+#
+# The primary way of configuring a node is via this file. This template lists
+# the most important settings you may want to configure for a production cluster.
+#
+# Please consult the documentation for further information on configuration options:
+# https://www.elastic.co/guide/en/elasticsearch/reference/index.html
+#
+# ---------------------------------- Cluster -----------------------------------
+#
+# Use a descriptive name for your cluster:
+#
 cluster.name: es
-# 节点名称
+#
+# ------------------------------------ Node ------------------------------------
+#
+# Use a descriptive name for the node:
+#
 node.name: node1
-# 是否作为集群的主节点 ，默认 true
-node.master: true
-# 是否作为集群的数据节点 ，默认 true
-node.data: true
-# 配置访问本节点的地址
-network.host: 0.0.0.0
-
-# 设置对外服务的http端口，默认为9200
+#
+# Add custom attributes to the node:
+#
+#node.attr.rack: r1
+#
+# ----------------------------------- Paths ------------------------------------
+#
+# Path to directory where to store the data (separate multiple locations by comma):
+#
+path.data: /var/lib/elasticsearch
+#
+# Path to log files:
+#
+path.logs: /var/log/elasticsearch
+#
+# ----------------------------------- Memory -----------------------------------
+#
+# Lock the memory on startup:
+#
+#bootstrap.memory_lock: true
+#
+# Make sure that the heap size is set to about half the memory available
+# on the system and that the owner of the process is allowed to use this
+# limit.
+#
+# Elasticsearch performs poorly when the system is swapping the memory.
+#
+# ---------------------------------- Network -----------------------------------
+#
+# By default Elasticsearch is only accessible on localhost. Set a different
+# address here to expose this node on the network:
+#
+#network.host: 192.168.0.1
+#
+# By default Elasticsearch listens for HTTP traffic on the first free port it
+# finds starting at 9200. Set a specific HTTP port here:
+#
 http.port: 9200
+#
+# For more information, consult the network module documentation.
+#
+# --------------------------------- Discovery ----------------------------------
+#
+# Pass an initial list of hosts to perform discovery when this node is started:
+# The default list of hosts is ["127.0.0.1", "[::1]"]
+#
+#discovery.seed_hosts: ["host1", "host2"]
+#
+# Bootstrap the cluster using an initial set of master-eligible nodes:
+#
+cluster.initial_master_nodes: ["node1", "node2"]
+#
+# For more information, consult the discovery and cluster formation module documentation.
+#
+# ---------------------------------- Various -----------------------------------
+#
+# Allow wildcard deletion of indices:
+#
+#action.destructive_requires_name: false
 
-# 设置节点间交互的tcp端口,默认是9300
-transport.tcp.port: 9300
+#----------------------- BEGIN SECURITY AUTO CONFIGURATION -----------------------
+#
+# The following settings, TLS certificates, and keys have been automatically      
+# generated to configure Elasticsearch security features on 01-07-2023 14:38:29
+#
+# --------------------------------------------------------------------------------
 
-# 配置所有用来组建集群的机器的IP地址
-discovery.zen.ping.unicast.hosts: ["192.168.182.142:9300", "192.168.182.143:9301","192.168.182.144:9302"]
+# Enable security features
+xpack.security.enabled: true
 
-# 配置当前集群中最少具有 master 资格节点数，对于多于两个节点的集群环境，建议配置大于1
-discovery.zen.minimum_master_nodes: 2
+xpack.security.enrollment.enabled: true
+
+# Enable encryption for HTTP API client connections, such as Kibana, Logstash, and Agents
+xpack.security.http.ssl:
+  enabled: true
+  keystore.path: certs/http.p12
+
+# Enable encryption and mutual authentication between cluster nodes
+xpack.security.transport.ssl:
+  enabled: true
+  verification_mode: certificate
+  keystore.path: certs/transport.p12
+  truststore.path: certs/transport.p12
+# Create a new cluster with the current node only
+# Additional nodes can still join the cluster later
+#cluster.initial_master_nodes: ["localhost.localdomain"]
+
+# Allow HTTP API connections from anywhere
+# Connections are encrypted and require user authentication
+http.host: 0.0.0.0
+
+# Allow other nodes to join the cluster from anywhere
+# Connections are encrypted and mutually authenticated
+transport.host: 0.0.0.0
+transport.port: 9300
+
+#----------------------- END SECURITY AUTO CONFIGURATION -------------------------
+
+
+
 ```
 
 
@@ -253,6 +357,10 @@ Kibana是ElasticSearch的数据可视化和实时分析的工具，利用Elastic
 8.0.8  Kibana 适配8.8 版本es，8.7的 不适配
 
  https://www.elastic.co/guide/cn/kibana/current/rpm.html
+
+
+
+
 
 安装
 
@@ -347,4 +455,10 @@ The Elasticsearch cluster (v8.7.1) is incompatible with this version of Kibana (
 
 server.host: "0.0.0.0"
 配置完成后，重新启动kibana服务即可通过远端访问。
+
+
+
+##### kibana 使用
+
+https://www.elastic.co/guide/cn/kibana/current/connect-to-elasticsearch.html
 
