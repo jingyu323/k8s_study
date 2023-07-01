@@ -617,6 +617,8 @@ db.printShardingStatus()
 1 查看分片配置信息
 
 ```
+databases集合含有已经包含在片上的数据库列表和一些相关信息
+db.databases.find()
 
 db.shards.find()
 查看分片集合信息
@@ -694,6 +696,12 @@ chunk 只会分裂，不会合并，所以即使将 chunkSize 改大，现有的
 
 
 ##### 分片迁移
+
+
+
+##### 分片连接
+
+[mongos](https://docs.mongodb.com/manual/reference/glossary/#term-mongos)路由器才能与分片[集群中的](https://docs.mongodb.com/manual/reference/glossary/#term-sharded-cluster)任何集合进行交互
 
 
 
