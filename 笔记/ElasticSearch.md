@@ -108,6 +108,8 @@ elastic
 
 
 ```
+ 142 qvKpUo1_T1yqgkpn_KMk
+
 143  - mongo2
 Authentication and authorization are enabled.
 TLS for the transport and HTTP layers is enabled and configured.
@@ -302,6 +304,17 @@ transport.port: 9300
 
 
 
+```
+
+注册节点
+
+
+
+
+
+```
+状态查询
+curl -XGET"http://localhost:9200/_cluster/health?pretty=true"
 ```
 
 
