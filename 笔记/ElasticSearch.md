@@ -38,6 +38,11 @@ Xi3aLVfl43JNHdufBCom
 
 142
 eP3-Uii07tHLZ+hit=VO
+
+143
+uwoa39X4RI1rnLtHiKrY
+144
+IFOiAvm1Yu+TkYm=IwTz
 ```
 
 
@@ -60,7 +65,7 @@ enabled=0
 autorefresh=1
 type=rpm-md
 
-sudo yum install --enablerepo=elasticsearch elasticsearch 
+sudo yum install --enablerepo=elasticsearch elasticsearch  -y
 
 下载rpm包
 wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-8.8.2-x86_64.rpm
@@ -315,7 +320,44 @@ transport.port: 9300
 ```
 状态查询
 curl -XGET"http://localhost:9200/_cluster/health?pretty=true"
+查询Elasticsearch运行状态
+curl --cacert /etc/elasticsearch/certs/http_ca.crt -u elastic https://localhost:9200 
+查询集群节点信息
+curl --cacert /etc/elasticsearch/certs/http_ca.crt -u elastic https://localhost:9200/_cluster/health?pretty=true 
+
+ curl --cacert /etc/elasticsearch/certs/http_ca.crt  -u elastic https://localhost:9200/_cat/nodes
+
+142    qvKpUo1_T1yqgkpn_KMk
+
+生成token
+/usr/share/elasticsearch/bin/elasticsearch-create-enrollment-token -s node
+
+/usr/share/elasticsearch/bin/elasticsearch-certutil cert
+
+/usr/share/elasticsearch/bin/elasticsearch --enrollment-token eyJ2ZXIiOiI4LjguMiIsImFkciI6WyIxOTIuMTY4LjE4Mi4xNDI6OTIwMCJdLCJmZ3IiOiIxNDdjOWE5NGMwZDUwNTk2NWMwYWE0MmEyNDg3YzVkMjUyMWYzNjc5Y2QxZmMxOTBmYTg5ZDUxOTJlOTM1NjE4Iiwia2V5IjoibTkzMUZJa0JtRy1SVjJfNjZfYzk6M0hZN0Mxam5Uak9LWEVJQTJpN3BjUSJ9
+
+
+/usr/share/elasticsearch/bin/elasticsearch-reconfigure-node --enrollment-token eyJ2ZXIiOiI4LjguMiIsImFkciI6WyIxOTIuMTY4LjE4Mi4xNDI6OTIwMCJdLCJmZ3IiOiIxNDdjOWE5NGMwZDUwNTk2NWMwYWE0MmEyNDg3YzVkMjUyMWYzNjc5Y2QxZmMxOTBmYTg5ZDUxOTJlOTM1NjE4Iiwia2V5IjoiU3BlVEZJa0JlNGN3cEVUbFBMR1g6UEpPRm1DTzZUNGlMelFtTV9pVXZDQSJ9
+
+/usr/share/elasticsearch/bin/elasticsearch-reconfigure-node --enrollment-token eyJ2ZXIiOiI4LjguMiIsImFkciI6WyIxOTIuMTY4LjE4Mi4xNDI6OTIwMCJdLCJmZ3IiOiIxNDdjOWE5NGMwZDUwNTk2NWMwYWE0MmEyNDg3YzVkMjUyMWYzNjc5Y2QxZmMxOTBmYTg5ZDUxOTJlOTM1NjE4Iiwia2V5IjoiUnBkVEZJa0JlNGN3cEVUbHFyRWI6T2prOEdfTDBRbzZOR2dNME81enZwUSJ9
+
+
+/usr/share/elasticsearch/bin/elasticsearch-node  remove-settings
+
+repurpose - Repurpose this node to another master/data role, cleaning up any excess persisted data
+unsafe-bootstrap - Forces the successful election of the current node after the permanent loss of the half or more master-eligible nodes
+detach-cluster - Detaches this node from its cluster, allowing it to unsafely join a new cluster
+override-version - Overwrite the version stored in this node's data path with [8.8.2] to bypass the version compatibility checks
+remove-settings - Removes persistent settings from the cluster state
+remove-customs - Removes custom metadata from the cluster state
+
 ```
+
+
+
+错误：
+
+1.ERROR: Skipping security auto configuration because it appears that the node is not starting up for the first time. The node might already be part of a cluster and this auto setup utility is designed to configure Security for new clusters only
 
 
 
@@ -332,7 +374,7 @@ Removed /etc/systemd/system/multi-user.target.wants/elasticsearch.service.
 
 rpm -qa | grep elasticsearch;
 
-rpm -e --nodeps  elasticsearch-8.7.1-1.x86_64
+rpm -e --nodeps   elasticsearch-8.8.2-1.x86_64
 
  rm -rf /etc/elasticsearch;
  rm -rf /opt/software/elasticsearch;
