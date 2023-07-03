@@ -381,6 +381,16 @@ rpm -e --nodeps   elasticsearch-8.8.2-1.x86_64
 
 rm -rf /var/lib/elasticsearch /usr/share/elasticsearch
 
+
+
+### cerebro 安装
+
+启动 默认9000端口
+
+systemctl   start cerebro.service
+
+
+
 ## 6.使用
 
 1.分词设置
