@@ -465,7 +465,7 @@ rm -rf /var/lib/elasticsearch /usr/share/elasticsearch
 
 -  集群状态详情 https://blog.51cto.com/u_15812686/5739502
 
-
+### 6.2 分片 配置
 
 ## 7.常见问题
 
@@ -474,6 +474,10 @@ rm -rf /var/lib/elasticsearch /usr/share/elasticsearch
 日志
 
  /var/log/elasticsearch/es.log
+
+```
+ERROR: Skipping security auto configuration because it appears that the node is not starting up for the first time. The node might already be part of a cluster and this auto setup utility is designed to configure Security for new clusters only.
+```
 
 
 
