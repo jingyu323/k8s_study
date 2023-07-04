@@ -381,13 +381,101 @@ rpm -e --nodeps   elasticsearch-8.8.2-1.x86_64
 
 rm -rf /var/lib/elasticsearch /usr/share/elasticsearch
 
+
+
+### cerebro 安装
+
+启动 默认9000端口
+
+systemctl   start cerebro.service
+
+
+
 ## 6.使用
 
 1.分词设置
 
 2.语法
 
+3.集群信息
 
+- 集群的健康状态，通过api获取：GET _cluster/health?pretty
+
+  关键指标说明：
+  status：集群状态，分为green、yellow和red。
+  number_of_nodes/number_of_data_nodes:集群的节点数和数据节点数。
+  active_primary_shards：集群中所有活跃的主分片数。
+  active_shards：集群中所有活跃的分片数。
+  relocating_shards：当前节点迁往其他节点的分片数量，通常为0，当有节点加入或者退出时该值会增加。
+  initializing_shards：正在初始化的分片。
+  unassigned_shards：未分配的分片数，通常为0，当有某个节点的副本分片丢失该值就会增加。
+  number_of_pending_tasks：是指主节点创建索引并分配shards等任务，如果该指标数值一直未减小代表集群存在不稳定因素
+  active_shards_percent_as_number：集群分片健康度，活跃分片数占总分片数比例。
+
+  number_of_pending_tasks：pending task只能由主节点来进行处理，这些任务包括创建索引并将shards分配给节点
+
+- 集群状态信息可以由以下api获取：GET _cluster/stats?pretty
+
+  关键指标说明：
+  indices.count：索引总数。
+  indices.shards.total：分片总数。
+  indices.shards.primaries：主分片数量。
+  docs.count：文档总数。
+  store.size_in_bytes：数据总存储容量。
+  segments.count：段总数。
+  nodes.count.total：总节点数。
+  nodes.count.data：数据节点数。
+  nodes. process. cpu.percent：节点CPU使用率。
+  fs.total_in_bytes：文件系统使用总容量。
+
+  fs.free_in_bytes：文件系统剩余总容量。
+
+- 节点指标可以通过以下api获取:GET /_nodes/stats?pretty
+
+  name：节点名。
+  roles：节点角色。
+  indices.docs.count：索引文档数。
+  segments.count：段总数。
+  jvm.heap_used_percent：内存使用百分比。
+  thread_pool.{bulk, index, get, search}.{active, queue, rejected}：线程池的一些信息，包括bulk、index、get和search线程池，主要指标有active（激活）线程数，线程queue（队列）数和rejected（拒绝）线程数量。
+
+  以下一些指标是一个累加值，当节点重启之后会清零。
+  indices.indexing.index_total：索引文档数。
+  indices.indexing.index_time_in_millis：索引总耗时。
+  indices.get.total：get请求数。
+  indices.get.time_in_millis：get请求总耗时。
+  indices.search.query_total：search总请求数。
+  indices.search.query_time_in_millis：search请求总耗时。indices.search.fetch_total：fetch操作总数量。
+  indices.search.fetch_time_in_millis：fetch请求总耗时。
+  jvm.gc.collectors.young.collection_count：年轻代垃圾回收次数。
+  jvm.gc.collectors.young.collection_time_in_millis：年轻代垃圾回收总耗时。
+  jvm.gc.collectors.old.collection_count：老年代垃圾回收次数。
+
+  jvm.gc.collectors.old.collection_time_in_millis：老年代垃圾回收总耗时。
+
+- 索引监控指标注意针对单个索引，不过也可以通过"_all"对集群种所有索引进行监控，节点指标可以通过以下api获取：GET /_stats?pretty
+
+  关键指标说明（indexname泛指索引名称）：
+  indexname.primaries.docs.count：索引文档数量。
+      以下一些指标是一个累加值，当节点重启之后会清零。
+  indexname.primaries.indexing.index_total：索引文档数。
+  indexname.primaries.indexing.index_time_in_millis：索引总耗时。
+  indexname.primaries.get.total：get请求数。
+  indexname.primaries.get.time_in_millis：get请求总耗时。
+  indexname.primaries.search.query_total：search总请求数。
+  indexname.primaries.search.query_time_in_millis：search请求总耗时。indices.search.fetch_total：fetch操作总数量。
+  indexname.primaries.search.fetch_time_in_millis：fetch请求总耗时。
+  indexname.primaries.refresh.total：refresh请求总量。
+  indexname.primaries.refresh.total_time_in_millis：refresh请求总耗时。
+  indexname.primaries.flush.total：flush请求总量。
+
+  indexname.primaries.flush.total_time_in_millis：flush请求总耗时。
+
+  
+
+-  集群状态详情 https://blog.51cto.com/u_15812686/5739502
+
+### 6.2 分片 配置
 
 ## 7.常见问题
 
@@ -396,6 +484,10 @@ rm -rf /var/lib/elasticsearch /usr/share/elasticsearch
 日志
 
  /var/log/elasticsearch/es.log
+
+```
+ERROR: Skipping security auto configuration because it appears that the node is not starting up for the first time. The node might already be part of a cluster and this auto setup utility is designed to configure Security for new clusters only.
+```
 
 
 
