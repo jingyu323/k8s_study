@@ -49,12 +49,12 @@ IFOiAvm1Yu+TkYm=IwTz
 
 官网
 
-https://www.elastic.co/guide/en/elasticsearch/reference/8.7/rpm.html#rpm-repo
+https://www.elastic.co/guide/en/elasticsearch/reference/8.8/rpm.html#rpm-repo
 
 ```sh
 直接安装，需要配置仓库
  cd  /etc/yum.repos.d/
- elasticsearch.repo
+ vielasticsearch.repo
 
 [elasticsearch]
 name=Elasticsearch repository for 8.x packages
