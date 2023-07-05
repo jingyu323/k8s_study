@@ -363,7 +363,29 @@ remove-customs - Removes custom metadata from the cluster state
 
 2.Skipping security auto configuration because this node is configured to bootstrap or to join a multi-node cluster, which is not supported
 
+不能删除安全项配置，
 
+```
+xpack.security.enabled: true
+
+xpack.security.enrollment.enabled: true
+
+# Enable encryption for HTTP API client connections, such as Kibana, Logstash, and Agents
+xpack.security.http.ssl:
+  enabled: true
+  keystore.path: certs/http.p12
+
+# Enable encryption and mutual authentication between cluster nodes
+xpack.security.transport.ssl:
+  enabled: true
+  verification_mode: certificate
+  keystore.path: certs/transport.p12
+  truststore.path: certs/transport.p12
+```
+
+
+
+3. ERROR: Skipping security auto configuration because it appears that security is already configured
 
 
 
