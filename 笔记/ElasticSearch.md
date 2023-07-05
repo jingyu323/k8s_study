@@ -40,7 +40,7 @@ Xi3aLVfl43JNHdufBCom
 eP3-Uii07tHLZ+hit=VO
 
 143
-uwoa39X4RI1rnLtHiKrY
+xMLhNuN+8bZnlOEgD8GO
 144
 IFOiAvm1Yu+TkYm=IwTz
 ```
@@ -358,6 +358,10 @@ remove-customs - Removes custom metadata from the cluster state
 错误：
 
 1.ERROR: Skipping security auto configuration because it appears that the node is not starting up for the first time. The node might already be part of a cluster and this auto setup utility is designed to configure Security for new clusters only
+
+
+
+2.Skipping security auto configuration because this node is configured to bootstrap or to join a multi-node cluster, which is not supported
 
 
 
