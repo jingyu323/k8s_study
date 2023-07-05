@@ -359,7 +359,7 @@ remove-customs - Removes custom metadata from the cluster state
 
 1.ERROR: Skipping security auto configuration because it appears that the node is not starting up for the first time. The node might already be part of a cluster and this auto setup utility is designed to configure Security for new clusters only
 
-
+这个是因为安装好之后启动过一次，之后注册节点没成功。
 
 2.Skipping security auto configuration because this node is configured to bootstrap or to join a multi-node cluster, which is not supported
 
@@ -386,6 +386,8 @@ xpack.security.transport.ssl:
 
 
 3. ERROR: Skipping security auto configuration because it appears that security is already configured
+
+   安装好之后配置了集群但是注册失败，具体原因还得继续排除
 
 
 
