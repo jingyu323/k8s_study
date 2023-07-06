@@ -315,10 +315,14 @@ transport.port: 9300
 
 
 
-生成证书
+生成节点间通讯TLS证书
 
 ```javascript
+生成CA证书
 /usr/share/elasticsearch/bin/elasticsearch-certutil ca
+
+创建密钥库
+/usr/share/elasticsearch/bin/elasticsearch-certutil cert --ca elastic-stack-ca.p12
 ```
 
 ```
