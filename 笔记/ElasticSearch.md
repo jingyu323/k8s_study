@@ -315,7 +315,11 @@ transport.port: 9300
 
 
 
+生成证书
 
+```javascript
+/usr/share/elasticsearch/bin/elasticsearch-certutil ca
+```
 
 ```
 状态查询
