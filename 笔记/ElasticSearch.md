@@ -323,6 +323,12 @@ transport.port: 9300
 
 创建密钥库
 /usr/share/elasticsearch/bin/elasticsearch-certutil cert --ca elastic-stack-ca.p12
+
+
+/usr/share/elasticsearch/bin/elasticsearch-certutil http
+
+ca path
+/usr/share/elasticsearch/cert/elastic-stack-ca.p12
 ```
 
 ```
