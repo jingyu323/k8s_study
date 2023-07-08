@@ -466,6 +466,12 @@ rm -rf /var/lib/elasticsearch /usr/share/elasticsearch
 
 
 
+设置
+
+https://www.elastic.co/guide/en/elasticsearch/reference/8.8/security-basic-setup-https.html
+
+
+
 ### cerebro 安装
 
 启动 默认9000端口
