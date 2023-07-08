@@ -400,6 +400,12 @@ remove-customs - Removes custom metadata from the cluster state
 
 
 
+#### 添加节点到已经存在的集群
+
+https://www.elastic.co/guide/en/elasticsearch/reference/8.8/add-elasticsearch-nodes.html
+
+
+
 错误：
 
 1.ERROR: Skipping security auto configuration because it appears that the node is not starting up for the first time. The node might already be part of a cluster and this auto setup utility is designed to configure Security for new clusters only
