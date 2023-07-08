@@ -331,10 +331,10 @@ ca path
 /usr/share/elasticsearch/cert/elastic-stack-ca.p12
 
 retrieve the password for http.p12
-bin/elasticsearch-keystore show xpack.security.http.ssl.keystore.secure_password
+/usr/share/elasticsearch/bin/elasticsearch-keystore show xpack.security.http.ssl.keystore.secure_password
 
 retrieve the password for transport.p12:
-bin/elasticsearch-keystore show xpack.security.transport.ssl.keystore.secure_password
+/usr/share/elasticsearch/bin/elasticsearch-keystore show xpack.security.transport.ssl.keystore.secure_password
 ```
 
 ```
