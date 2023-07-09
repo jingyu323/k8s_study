@@ -406,6 +406,22 @@ https://www.elastic.co/guide/en/elasticsearch/reference/8.8/add-elasticsearch-no
 
 
 
+
+
+#### 设置https ，添加之后之后kinabna访问集群
+
+https://www.elastic.co/guide/en/elasticsearch/reference/8.8/security-basic-setup-https.html
+
+```
+
+
+
+```
+
+
+
+
+
 错误：
 
 1.ERROR: Skipping security auto configuration because it appears that the node is not starting up for the first time. The node might already be part of a cluster and this auto setup utility is designed to configure Security for new clusters only
@@ -465,10 +481,6 @@ rpm -e --nodeps   elasticsearch-8.8.2-1.x86_64
 rm -rf /var/lib/elasticsearch /usr/share/elasticsearch
 
 
-
-设置
-
-https://www.elastic.co/guide/en/elasticsearch/reference/8.8/security-basic-setup-https.html
 
 
 
@@ -617,7 +629,7 @@ autorefresh=1
 type=rpm-md
 
 
-sudo yum install kibana -y
+ 	
 
 ```
 
@@ -697,4 +709,8 @@ server.host: "0.0.0.0"
 ##### kibana 使用
 
 https://www.elastic.co/guide/cn/kibana/current/connect-to-elasticsearch.html
+
+kibana https  配置
+
+https://www.elastic.co/guide/en/elasticsearch/reference/8.8/security-basic-setup-https.html#encrypt-kibana-http
 
