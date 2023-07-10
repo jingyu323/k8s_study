@@ -336,7 +336,23 @@ Config server：MongoDB负责追踪数据块在shard上的分布信息，每个�
 
 
 
+##### 分片启动：
 
+##### 1.启动config server  
+
+mongod --config  /etc/mongodb_shard_config_server.conf
+
+##### 2. 启动 shard Replica Sets
+
+mongod --config  /etc/mongodb_sharedRpSet.conf
+
+mongod --config  /etc/mongodb_sharedRpSet2.conf
+
+mongod --config  /etc/mongodb_sharedRpSet3.conf
+
+##### 3.启动mongos 
+
+mongos --config    /etc/mongodb_mongosRpSet.conf
 
 
 

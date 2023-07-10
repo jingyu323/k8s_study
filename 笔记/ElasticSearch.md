@@ -40,9 +40,9 @@ Xi3aLVfl43JNHdufBCom
 eP3-Uii07tHLZ+hit=VO
 
 143
-uwoa39X4RI1rnLtHiKrY
+xMLhNuN+8bZnlOEgD8GO
 144
-IFOiAvm1Yu+TkYm=IwTz
+RiYighjuwV*e4lsxpKiY
 ```
 
 
@@ -179,13 +179,12 @@ Couldn't write '1' to 'vm/unprivileged_userfaultfd', ignoring: No such file or d
 
 /etc/elasticsearch/elasticsearch.yml
 
-node1  主节点
+node1  主节点 , node2 node3 节点只是名称ip不同其他没有啥不同
 
 增加如下
 
 ```
 # 集群名称，默认是 elasticsearch
-
 # ======================== Elasticsearch Configuration =========================
 #
 # NOTE: Elasticsearch comes with reasonable defaults for most settings.
@@ -241,7 +240,7 @@ path.logs: /var/log/elasticsearch
 # By default Elasticsearch is only accessible on localhost. Set a different
 # address here to expose this node on the network:
 #
-#network.host: 192.168.0.1
+network.host: 192.168.182.143
 #
 # By default Elasticsearch listens for HTTP traffic on the first free port it
 # finds starting at 9200. Set a specific HTTP port here:
@@ -255,11 +254,11 @@ http.port: 9200
 # Pass an initial list of hosts to perform discovery when this node is started:
 # The default list of hosts is ["127.0.0.1", "[::1]"]
 #
-#discovery.seed_hosts: ["host1", "host2"]
+discovery.seed_hosts: ["192.168.182.142", "192.168.182.143","192.168.182.144"]
 #
 # Bootstrap the cluster using an initial set of master-eligible nodes:
 #
-cluster.initial_master_nodes: ["node1", "node2"]
+cluster.initial_master_nodes: ["node1", "node2", "node3"]
 #
 # For more information, consult the discovery and cluster formation module documentation.
 #
@@ -277,9 +276,12 @@ cluster.initial_master_nodes: ["node1", "node2"]
 # --------------------------------------------------------------------------------
 
 # Enable security features
+xpack.security.autoconfiguration.enabled : true
 xpack.security.enabled: true
 
+
 xpack.security.enrollment.enabled: true
+xpack.security.transport.ssl.verification_mode: none
 
 # Enable encryption for HTTP API client connections, such as Kibana, Logstash, and Agents
 xpack.security.http.ssl:
@@ -290,8 +292,8 @@ xpack.security.http.ssl:
 xpack.security.transport.ssl:
   enabled: true
   verification_mode: certificate
-  keystore.path: certs/transport.p12
-  truststore.path: certs/transport.p12
+  keystore.path: certs/elastic-certificates.p12
+  truststore.path: certs/elastic-certificates.p12
 # Create a new cluster with the current node only
 # Additional nodes can still join the cluster later
 #cluster.initial_master_nodes: ["localhost.localdomain"]
@@ -306,16 +308,59 @@ transport.host: 0.0.0.0
 transport.port: 9300
 
 #----------------------- END SECURITY AUTO CONFIGURATION -------------------------
+node.roles: [master,data]
 
 
 
 ```
 
-注册节点
+1.这里有两种方式，把安全的相关属性设置为false，启动三节点即可，集群创建成功。
+
+为了安全就需要启用安全属性，需要各个节点之间的交互证书
+
+生成集群节点证书：
+
+```
+生成ca证书
+./bin/elasticsearch-certutil ca
+使用ca证书生成集群通信证书
+./bin/elasticsearch-certutil cert --ca elastic-stack-ca.p12
+
+```
+
+把证书复制到其他节点/etc/elasticsearch/certs 目录中
+
+把证书密钥添加至本地密钥库
+
+```
+./bin/elasticsearch-keystore add xpack.security.transport.ssl.keystore.secure_password
+
+
+./bin/elasticsearch-keystore add xpack.security.transport.ssl.truststore.secure_password
+```
 
 
 
+节点更新完成之后重启各个节点，查看节点状态，集群创建成功。
 
+生成节点间通讯TLS证书
+
+```javascript
+生成CA证书
+/usr/share/elasticsearch/bin/elasticsearch-certutil ca
+
+创建密钥库
+/usr/share/elasticsearch/bin/elasticsearch-certutil cert --ca elastic-stack-ca.p12
+
+/usr/share/elasticsearch/bin/elasticsearch-certutil http
+
+
+retrieve the password for http.p12
+/usr/share/elasticsearch/bin/elasticsearch-keystore show xpack.security.http.ssl.keystore.secure_password
+
+retrieve the password for transport.p12:
+/usr/share/elasticsearch/bin/elasticsearch-keystore show xpack.security.transport.ssl.keystore.secure_password
+```
 
 ```
 状态查询
@@ -355,13 +400,67 @@ remove-customs - Removes custom metadata from the cluster state
 
 
 
+#### 添加节点到已经存在的集群
+
+https://www.elastic.co/guide/en/elasticsearch/reference/8.8/add-elasticsearch-nodes.html
+
+
+
+
+
+#### 设置https ，添加之后之后kinabna访问集群
+
+https://www.elastic.co/guide/en/elasticsearch/reference/8.8/security-basic-setup-https.html
+
+```
+
+
+
+```
+
+
+
+
+
 错误：
 
 1.ERROR: Skipping security auto configuration because it appears that the node is not starting up for the first time. The node might already be part of a cluster and this auto setup utility is designed to configure Security for new clusters only
 
+这个是因为安装好之后启动过一次，之后注册节点没成功。
+
+2.Skipping security auto configuration because this node is configured to bootstrap or to join a multi-node cluster, which is not supported
+
+不能删除安全项配置，
+
+```
+xpack.security.enabled: true
+
+xpack.security.enrollment.enabled: true
+
+# Enable encryption for HTTP API client connections, such as Kibana, Logstash, and Agents
+xpack.security.http.ssl:
+  enabled: true
+  keystore.path: certs/http.p12
+
+# Enable encryption and mutual authentication between cluster nodes
+xpack.security.transport.ssl:
+  enabled: true
+  verification_mode: certificate
+  keystore.path: certs/transport.p12
+  truststore.path: certs/transport.p12
+```
 
 
 
+3. ERROR: Skipping security auto configuration because it appears that security is already configured
+
+   安装好之后配置了集群但是注册失败，具体原因还得继续排除
+
+4. java.security.cert.CertPathValidatorException: Path does not chain with any of the trust anchors
+
+   这种问题是开启了安全模式，各个节点没有配置证书的原因导致
+
+   
 
 ### 卸载
 
@@ -380,6 +479,8 @@ rpm -e --nodeps   elasticsearch-8.8.2-1.x86_64
  rm -rf /opt/software/elasticsearch;
 
 rm -rf /var/lib/elasticsearch /usr/share/elasticsearch
+
+
 
 
 
@@ -528,7 +629,7 @@ autorefresh=1
 type=rpm-md
 
 
-sudo yum install kibana -y
+ 	
 
 ```
 
@@ -608,4 +709,8 @@ server.host: "0.0.0.0"
 ##### kibana 使用
 
 https://www.elastic.co/guide/cn/kibana/current/connect-to-elasticsearch.html
+
+kibana https  配置
+
+https://www.elastic.co/guide/en/elasticsearch/reference/8.8/security-basic-setup-https.html#encrypt-kibana-http
 
