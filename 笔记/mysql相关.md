@@ -750,9 +750,7 @@ InnoDB的行级锁，按照功能来说，分为两种:
 #### 锁相关参数
 InnoDB所使用的行级锁定争用状态查看:
 ```
-
 show status  like  'innodb_row_lock%';
-
 ```
 Innodb_row_lock_current_waits:当前正在等待锁定的数量;
  Innodb_row_lock_time:从系统启动到现在锁定总时间长度;
