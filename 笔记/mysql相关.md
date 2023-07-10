@@ -145,6 +145,10 @@ vi /etc/my.cnf 去除only_full_group_by模式，文本最后一行添加sql_mode
 systemctl stop firewalld
 systemctl disable firewalld
 
+
+
+systemctl status firewalld
+
 确认时防火墙的问题 再去开放端口即可。
 
 关闭防火墙之后还是连不上可以重启

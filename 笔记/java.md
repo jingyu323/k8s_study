@@ -389,6 +389,16 @@ cat /proc/sys/fs/file-max
 cat /proc/sys/fs/file-nr
 ```
 
+### arthas 监控到JVM的实时运行状态
+
+https://github.com/alibaba/arthas/releases
+
+
+
+
+
+
+
 
 
 pstree -p 进程号，这个命令可以列出该进程的所有线程出来。
