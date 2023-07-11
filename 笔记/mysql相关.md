@@ -145,6 +145,10 @@ vi /etc/my.cnf 去除only_full_group_by模式，文本最后一行添加sql_mode
 systemctl stop firewalld
 systemctl disable firewalld
 
+
+
+systemctl status firewalld
+
 确认时防火墙的问题 再去开放端口即可。
 
 关闭防火墙之后还是连不上可以重启
@@ -746,9 +750,7 @@ InnoDB的行级锁，按照功能来说，分为两种:
 #### 锁相关参数
 InnoDB所使用的行级锁定争用状态查看:
 ```
-
 show status  like  'innodb_row_lock%';
-
 ```
 Innodb_row_lock_current_waits:当前正在等待锁定的数量;
  Innodb_row_lock_time:从系统启动到现在锁定总时间长度;
