@@ -439,8 +439,6 @@ netstat -anp | grep mongo
 
 mongosh --host 192.168.182.142  --port  27018  登录节点
 
-
-
 mongosh --host 192.168.182.142  --port   27011
 
 mongosh --host 192.168.182.142  --port   27012
