@@ -12,6 +12,7 @@
 
 
 
+
 ## 3.优点
 
 分布式，无需人工搭建集群（solr就需要人为配置，使用Zookeeper作为注册中心）
@@ -577,6 +578,10 @@ systemctl   start cerebro.service
 -  集群状态详情 https://blog.51cto.com/u_15812686/5739502
 
 ### 6.2 分片 配置
+
+
+
+
 
 ## 7.常见问题
 
