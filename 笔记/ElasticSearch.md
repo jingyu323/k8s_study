@@ -714,3 +714,31 @@ kibana https  配置
 
 https://www.elastic.co/guide/en/elasticsearch/reference/8.8/security-basic-setup-https.html#encrypt-kibana-http
 
+
+
+
+
+# java 连接
+
+8.+ 版本之后Java Transport Client (deprecated)  
+
+```
+<dependency>
+      <groupId>co.elastic.clients</groupId>
+      <artifactId>elasticsearch-java</artifactId>
+      <version>8.8.2</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+      <version>2.12.3</version>
+    </dependency>
+```
+
+
+
+
+
+
+
