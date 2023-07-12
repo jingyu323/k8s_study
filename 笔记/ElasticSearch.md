@@ -726,6 +726,8 @@ https://www.elastic.co/guide/en/elasticsearch/reference/8.8/security-basic-setup
 # java 连接
 
 8.+ 版本之后Java Transport Client (deprecated)  
+使用 Elasticsearch Java API Client
+https://www.elastic.co/guide/en/elasticsearch/client/java-api-client/current/index.html 
 
 ```
 <dependency>
