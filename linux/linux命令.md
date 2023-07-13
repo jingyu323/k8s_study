@@ -65,6 +65,22 @@ sudo vmhgfs-fuse .host:/ /mnt/code  -o allow_other  -o nonempty
 
 shell程序中，0表示真，非0表示假
 
+
+
+##### 拼接命令执行：
+
+```
+`echo "touch 11" `
+
+$(echo " touch 11222" )  
+```
+
+两种方式都可以直接执行字符串中的内容
+
+
+
+
+
 ## 查看磁盘空间
 
 ```
