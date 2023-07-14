@@ -12,6 +12,7 @@
 
 
 
+
 ## 3.优点
 
 分布式，无需人工搭建集群（solr就需要人为配置，使用Zookeeper作为注册中心）
@@ -496,6 +497,10 @@ systemctl   start cerebro.service
 
 1.分词设置
 
+
+
+
+
 2.语法
 
 3.集群信息
@@ -717,4 +722,38 @@ https://www.elastic.co/guide/cn/kibana/current/connect-to-elasticsearch.html
 kibana https  配置
 
 https://www.elastic.co/guide/en/elasticsearch/reference/8.8/security-basic-setup-https.html#encrypt-kibana-http
+
+
+
+
+
+# java 连接
+
+8.+ 版本之后Java Transport Client (deprecated)  
+
+指导文档
+
+https://www.elastic.co/guide/en/elasticsearch/client/java-api-client/current/getting-started-java.html
+
+
+
+API key再对接 kibana 之后再管理界面创建API key即可
+
+```
+<dependency>
+      <groupId>co.elastic.clients</groupId>
+      <artifactId>elasticsearch-java</artifactId>
+      <version>8.8.2</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+      <version>2.12.3</version>
+    </dependency>
+```
+
+
+
+
 
