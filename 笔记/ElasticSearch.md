@@ -729,6 +729,10 @@ https://www.elastic.co/guide/en/elasticsearch/reference/8.8/security-basic-setup
 使用 Elasticsearch Java API Client
 https://www.elastic.co/guide/en/elasticsearch/client/java-api-client/current/index.html 
 
+https://www.elastic.co/guide/en/elasticsearch/client/java-api-client/current/connecting.html
+
+java client connection 
+
 ```
 <dependency>
       <groupId>co.elastic.clients</groupId>
