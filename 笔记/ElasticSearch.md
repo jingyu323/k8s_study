@@ -497,6 +497,10 @@ systemctl   start cerebro.service
 
 1.分词设置
 
+
+
+
+
 2.语法
 
 3.集群信息
@@ -733,6 +737,14 @@ https://www.elastic.co/guide/en/elasticsearch/client/java-api-client/current/con
 
 java client connection 
 
+指导文档
+
+https://www.elastic.co/guide/en/elasticsearch/client/java-api-client/current/getting-started-java.html
+
+
+
+API key再对接 kibana 之后再管理界面创建API key即可
+
 ```
 <dependency>
       <groupId>co.elastic.clients</groupId>
@@ -746,8 +758,6 @@ java client connection
       <version>2.12.3</version>
     </dependency>
 ```
-
-
 
 
 
