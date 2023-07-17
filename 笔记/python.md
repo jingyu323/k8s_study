@@ -303,3 +303,7 @@ Charles 是一个网络抓包工具，相比Fiddler ，其功能更为强大， 
 ## 参考资料
 
 一些数据接口：http://doc.gopup.cn/#/data/info_data
+
+爬虫案例
+
+https://gitcode.net/hihell/python120/-/tree/master/NO50
