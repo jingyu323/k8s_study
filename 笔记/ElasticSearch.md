@@ -583,6 +583,15 @@ systemctl   start cerebro.service
 
 ### 6.2 分片 配置
 
+```
+在根目录下检索所有index
+GET /_search 
+在指定索引下检索所有文档
+https://192.168.99.118:9200/products/_search
+```
+
+
+
 
 
 
