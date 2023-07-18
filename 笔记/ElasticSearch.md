@@ -588,6 +588,17 @@ systemctl   start cerebro.service
 GET /_search 
 在指定索引下检索所有文档
 https://192.168.99.118:9200/products/_search
+
+PUT products/_doc/5
+
+{
+  "name" : "xiaoming",
+  "hobby" : "work",
+  "job" : "worker",
+  "age" : 11
+}
+
+postman 中选raw  json 
 ```
 
 
