@@ -599,6 +599,19 @@ PUT products/_doc/5
 }
 
 postman 中选raw  json 
+
+
+GET /search_index/_search?q=job:(java AND enginger)
+
+GET /search_index/_search?q=job:(java OR enginger)
+
+GET /search_index/_search?q=job:(NOT java  enginger)
+
+GET /search_index/_search?q=job:((NOT java  enginger) || (worker -teacher))
+
+
+
+Term Query将查询语句作为整个单词进行查询，即不对查询语句做分词处理
 ```
 
 
