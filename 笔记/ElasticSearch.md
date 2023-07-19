@@ -588,7 +588,7 @@ systemctl   start cerebro.service
 GET /_search 
 在指定索引下检索所有文档
 https://192.168.99.118:9200/products/_search
-
+添加数据
 PUT products/_doc/5
 
 {
@@ -599,6 +599,9 @@ PUT products/_doc/5
 }
 
 postman 中选raw  json 
+
+添加数据
+POST  /mynewindex/_doc
 
 
 GET /search_index/_search?q=job:(java AND enginger)
@@ -616,7 +619,13 @@ Term Query将查询语句作为整个单词进行查询，即不对查询语句�
 
 ### 6.3 映射
 
-映射类似于 SQL 数据库中的模式。它规定了我们的索引将摄取的文档的形式. 就是定义存储在索引中的数据格式和数据类型，如果不符合数据类型就会被丢弃。
+映射类似于 SQL 数据库中的模式。它规定了我们的索引将摄取的文档的形式. 就是定义存储在索引中的数据格式和数据类型，如果不符合数据类型该index数据插入失败。
+
+#### 6.4 查询
+
+
+
+
 
 
 
