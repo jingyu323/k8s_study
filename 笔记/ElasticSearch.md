@@ -669,7 +669,7 @@ https://github.com/medcl/elasticsearch-analysis-ik
 
 分词 添加时机：
 
-
+1. 添加完所以之后，创建mapping的时候
 
 
 
