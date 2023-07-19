@@ -665,6 +665,11 @@ https://github.com/medcl/elasticsearch-analysis-ik
 ./bin/elasticsearch-plugin installhttps://github.com/medcl/elasticsearch-analysis-ik/releases/download/v8.8.2/elasticsearch-analysis-ik-8.8.2.zip
 ```
 
+#### 什么时候分词
+
+- `创建索引`：当索引文档字符类型为`text`时，在建立索引时将会对该字段进行分词。
+- `搜索`：当对一个`text`类型的字段进行全文检索时，会对用户输入的文本进行分词。
+
 
 
 分词 添加时机：
@@ -673,7 +678,9 @@ https://github.com/medcl/elasticsearch-analysis-ik
 
 
 
-
+| ik_smart    | ik分词器中的简单分词器，支持自定义字典，远程字典 | 学如逆水行舟，不进则退 | [学如逆水行舟,不进则退]                                      |
+| ----------- | ------------------------------------------------ | ---------------------- | ------------------------------------------------------------ |
+| ik_max_word | ik_分词器的全量分词器，支持自定义字典，远程字典  | 学如逆水行舟，不进则退 | [学如逆水行舟,学如逆水,逆水行舟,逆水,行舟,不进则退,不进,则,退] |
 
 
 
