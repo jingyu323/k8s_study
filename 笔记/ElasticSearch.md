@@ -614,7 +614,9 @@ GET /search_index/_search?q=job:((NOT java  enginger) || (worker -teacher))
 Term Query将查询语句作为整个单词进行查询，即不对查询语句做分词处理
 ```
 
+### 6.3 映射
 
+映射类似于 SQL 数据库中的模式。它规定了我们的索引将摄取的文档的形式. 就是定义存储在索引中的数据格式和数据类型，如果不符合数据类型就会被丢弃。
 
 
 
