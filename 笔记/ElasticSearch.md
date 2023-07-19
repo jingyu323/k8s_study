@@ -653,6 +653,35 @@ Term Query将查询语句作为整个单词进行查询，即不对查询语句�
 
 ### 6.4 查询
 
+#### 模板查询：
+
+1.先创建模板
+
+```
+PUT _scripts/my-search-template
+{
+  "script": {
+    "lang": "mustache",
+    "source": {
+      "query": {
+        "match": {
+          "message": "{{query_string}}"
+        }
+      },
+      "from": "{{from}}",
+      "size": "{{size}}"
+    },
+    "params": {
+      "query_string": "My query string"
+    }
+  }
+}
+```
+
+
+
+
+
 ### 6.5 分词器
 
 分词器的主要作用将用户输入的一段文本，按照一定逻辑，分析成多个词语的一种工具
@@ -681,6 +710,8 @@ https://github.com/medcl/elasticsearch-analysis-ik
 | ik_smart    | ik分词器中的简单分词器，支持自定义字典，远程字典 | 学如逆水行舟，不进则退 | [学如逆水行舟,不进则退]                                      |
 | ----------- | ------------------------------------------------ | ---------------------- | ------------------------------------------------------------ |
 | ik_max_word | ik_分词器的全量分词器，支持自定义字典，远程字典  | 学如逆水行舟，不进则退 | [学如逆水行舟,学如逆水,逆水行舟,逆水,行舟,不进则退,不进,则,退] |
+
+
 
 
 
@@ -840,7 +871,9 @@ java client connection
 
 https://www.elastic.co/guide/en/elasticsearch/client/java-api-client/current/getting-started-java.html
 
- 
+example
+
+ https://github.com/elastic/elasticsearch-java/tree/8.8/java-client/src/test/java/co/elastic/clients/documentation
 
 API key再对接 kibana 之后再管理界面创建API key即可
 
