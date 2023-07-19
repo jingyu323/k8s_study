@@ -495,15 +495,38 @@ systemctl   start cerebro.service
 
 ## 6.使用
 
-1.分词设置
+1. 分词设置
 
 
 
 
 
-2.语法
+2. 语法
 
-3.集群信息
+
+
+
+
+3. 集群信息
+
+
+
+4. 数据类型：
+
+Text：
+会分词，然后进行索引
+支持模糊、精确查询
+不支持聚合
+keyword：
+不进行分词，直接索引
+支持模糊、精确查询
+支持聚合
+
+keyword类型不会被分词，常用于关键字搜索，比如姓名、email地址、主机名、状态码和标签等
+
+
+
+
 
 - 集群的健康状态，通过api获取：GET _cluster/health?pretty
 
@@ -603,6 +626,7 @@ postman 中选raw  json
 添加数据
 POST  /mynewindex/_doc
 
+指定id用put 不指定id用post
 
 GET /search_index/_search?q=job:(java AND enginger)
 
@@ -612,16 +636,40 @@ GET /search_index/_search?q=job:(NOT java  enginger)
 
 GET /search_index/_search?q=job:((NOT java  enginger) || (worker -teacher))
 
-
-
+删除数据
+ POST   /library/_delete_by_query  -d '{"query":{"term":{"name":"计算机基础"}}}'
+ DELETE  /library
 Term Query将查询语句作为整个单词进行查询，即不对查询语句做分词处理
+
+
+索引新增字段
+ PUT 127.0.0.1:9200/library/books/_mapping -d '{"properties": {"publisher": {"type": "keyword"}}}'
+
 ```
 
 ### 6.3 映射
 
 映射类似于 SQL 数据库中的模式。它规定了我们的索引将摄取的文档的形式. 就是定义存储在索引中的数据格式和数据类型，如果不符合数据类型该index数据插入失败。
 
-#### 6.4 查询
+### 6.4 查询
+
+### 6.5 分词器
+
+分词器的主要作用将用户输入的一段文本，按照一定逻辑，分析成多个词语的一种工具
+
+##### analysis-ik 
+
+https://github.com/medcl/elasticsearch-analysis-ik
+
+```
+./bin/elasticsearch-plugin installhttps://github.com/medcl/elasticsearch-analysis-ik/releases/download/v8.8.2/elasticsearch-analysis-ik-8.8.2.zip
+```
+
+
+
+分词 添加时机：
+
+
 
 
 
