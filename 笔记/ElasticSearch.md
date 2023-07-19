@@ -495,15 +495,38 @@ systemctl   start cerebro.service
 
 ## 6.使用
 
-1.分词设置
+1. 分词设置
 
 
 
 
 
-2.语法
+2. 语法
 
-3.集群信息
+
+
+
+
+3. 集群信息
+
+
+
+4. 数据类型：
+
+Text：
+会分词，然后进行索引
+支持模糊、精确查询
+不支持聚合
+keyword：
+不进行分词，直接索引
+支持模糊、精确查询
+支持聚合
+
+keyword类型不会被分词，常用于关键字搜索，比如姓名、email地址、主机名、状态码和标签等
+
+
+
+
 
 - 集群的健康状态，通过api获取：GET _cluster/health?pretty
 
@@ -582,6 +605,113 @@ systemctl   start cerebro.service
 -  集群状态详情 https://blog.51cto.com/u_15812686/5739502
 
 ### 6.2 分片 配置
+
+```
+在根目录下检索所有index
+GET /_search 
+在指定索引下检索所有文档
+https://192.168.99.118:9200/products/_search
+添加数据
+PUT products/_doc/5
+
+{
+  "name" : "xiaoming",
+  "hobby" : "work",
+  "job" : "worker",
+  "age" : 11
+}
+
+postman 中选raw  json 
+
+添加数据
+POST  /mynewindex/_doc
+
+指定id用put 不指定id用post
+
+GET /search_index/_search?q=job:(java AND enginger)
+
+GET /search_index/_search?q=job:(java OR enginger)
+
+GET /search_index/_search?q=job:(NOT java  enginger)
+
+GET /search_index/_search?q=job:((NOT java  enginger) || (worker -teacher))
+
+删除数据
+ POST   /library/_delete_by_query  -d '{"query":{"term":{"name":"计算机基础"}}}'
+ DELETE  /library
+Term Query将查询语句作为整个单词进行查询，即不对查询语句做分词处理
+
+
+索引新增字段
+ PUT 127.0.0.1:9200/library/books/_mapping -d '{"properties": {"publisher": {"type": "keyword"}}}'
+
+```
+
+### 6.3 映射
+
+映射类似于 SQL 数据库中的模式。它规定了我们的索引将摄取的文档的形式. 就是定义存储在索引中的数据格式和数据类型，如果不符合数据类型该index数据插入失败。
+
+### 6.4 查询
+
+#### 模板查询：
+
+1.先创建模板
+
+```
+PUT _scripts/my-search-template
+{
+  "script": {
+    "lang": "mustache",
+    "source": {
+      "query": {
+        "match": {
+          "message": "{{query_string}}"
+        }
+      },
+      "from": "{{from}}",
+      "size": "{{size}}"
+    },
+    "params": {
+      "query_string": "My query string"
+    }
+  }
+}
+```
+
+
+
+
+
+### 6.5 分词器
+
+分词器的主要作用将用户输入的一段文本，按照一定逻辑，分析成多个词语的一种工具
+
+##### analysis-ik 
+
+https://github.com/medcl/elasticsearch-analysis-ik
+
+```
+./bin/elasticsearch-plugin installhttps://github.com/medcl/elasticsearch-analysis-ik/releases/download/v8.8.2/elasticsearch-analysis-ik-8.8.2.zip
+```
+
+#### 什么时候分词
+
+- `创建索引`：当索引文档字符类型为`text`时，在建立索引时将会对该字段进行分词。
+- `搜索`：当对一个`text`类型的字段进行全文检索时，会对用户输入的文本进行分词。
+
+
+
+分词 添加时机：
+
+1. 添加完所以之后，创建mapping的时候
+
+
+
+| ik_smart    | ik分词器中的简单分词器，支持自定义字典，远程字典 | 学如逆水行舟，不进则退 | [学如逆水行舟,不进则退]                                      |
+| ----------- | ------------------------------------------------ | ---------------------- | ------------------------------------------------------------ |
+| ik_max_word | ik_分词器的全量分词器，支持自定义字典，远程字典  | 学如逆水行舟，不进则退 | [学如逆水行舟,学如逆水,逆水行舟,逆水,行舟,不进则退,不进,则,退] |
+
+
 
 
 
@@ -730,12 +860,20 @@ https://www.elastic.co/guide/en/elasticsearch/reference/8.8/security-basic-setup
 # java 连接
 
 8.+ 版本之后Java Transport Client (deprecated)  
+使用 Elasticsearch Java API Client
+https://www.elastic.co/guide/en/elasticsearch/client/java-api-client/current/index.html 
+
+https://www.elastic.co/guide/en/elasticsearch/client/java-api-client/current/connecting.html
+
+java client connection 
 
 指导文档
 
 https://www.elastic.co/guide/en/elasticsearch/client/java-api-client/current/getting-started-java.html
 
+example
 
+ https://github.com/elastic/elasticsearch-java/tree/8.8/java-client/src/test/java/co/elastic/clients/documentation
 
 API key再对接 kibana 之后再管理界面创建API key即可
 
