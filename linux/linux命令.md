@@ -744,9 +744,24 @@ if  [   $logfile_num -gt  $max_num   ];then
 
     info " log file  neet to clear, maxnum is:${max_num}"
     exced_num=$(expr $logfile_num - $max_num)
+    ## 默认降序排列，最新的在最上边，所以取最后的
     find $logpath -type f | xargs ls -alt  | tail -n -${exced_num} |  awk '{ print $9 }'  | xargs rm -rf
 fi
 
+```
+
+```
+按照使用率清理文件
+capacity=$((9*1024*1024/100*80))
+cur_usaged=$( du -sm  $location | awk  -F " " '{print $1}')
+echo  $cur_usaged
+while ((capacity <= cur_usaged))
+do
+  cur_usaged=$( du -sm  $location | awk  -F " " '{print $1}')
+  find $location -type f | xargs ls -alt  | tail   -n -10 |  awk '{ print $9 }'  | xargs rm -rf
+  echo "start delete file, $cur_usaged "
+  sleep 10
+done
 ```
 
 
