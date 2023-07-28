@@ -730,6 +730,25 @@ function error(){
 }
 ```
 
+超过指定天数删除文件
+
+```
+指定按照不同的日期创建文件名称
+cur_day=`date "+%Y-%m-%d"`
+logfile="${logpath}/pushfile_${cur_day}.log"
+
+logfile_num=$(ls -lt  "${logpath}"  | wc -l )
+max_num=30
+info "   logfile_num is:${logfile_num}"
+if  [   $logfile_num -gt  $max_num   ];then
+
+    info " log file  neet to clear, maxnum is:${max_num}"
+    exced_num=$(expr $logfile_num - $max_num)
+    find $logpath -type f | xargs ls -alt  | tail -n -${exced_num} |  awk '{ print $9 }'  | xargs rm -rf
+fi
+
+```
+
 
 
 
