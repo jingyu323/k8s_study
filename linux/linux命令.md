@@ -705,6 +705,35 @@ systemctl disable firewalld.service
 
 
 
+## shell 脚本打印日志：
+
+```
+function info(){
+    DATE_N=`date "+%Y-%m-%d %H:%M:%S.%N" | cut -b 1-23`
+    echo -e "$DATE_N|INFO|$@ "
+}
+ 
+function warning(){
+    DATE_N=`date "+%Y-%m-%d %H:%M:%S.%N" | cut -b 1-23`
+    echo -e "\033[33m$DATE_N|WARINIG|$@ \033[0m"
+}
+ 
+ 
+function success(){
+    DATE_N=`date "+%Y-%m-%d %H:%M:%S.%N" | cut -b 1-23`
+    echo -e "\033[32m$DATE_N|SUCCESS|$@ \033[0m"
+}
+ 
+function error(){
+    DATE_N=`date "+%Y-%m-%d %H:%M:%S.%N" | cut -b 1-23`
+    echo -e "\033[31m$DATE_N|ERROR|$@ \033[0m"
+}
+```
+
+
+
+
+
 
 
 ## 材料：
