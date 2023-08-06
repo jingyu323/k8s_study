@@ -678,6 +678,12 @@ sql_mode=STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_
 
 
 
+分区实现方式：
+
+
+
+
+
 ### 分片
 
 分表顾名思义，就是把一张超大的数据表，拆分为多个较小的表，得到有效的缓解。
@@ -686,6 +692,10 @@ sql_mode=STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_
 
 1. 单表数据量太大，会被频繁读写，加锁操作密集，导致性能降低。
 2. 单表数据量太大，对应的索引也会很大，查询效率降低，增删操作的性能也会降低。
+
+实现方式：
+
+
 
 ### 分表
 
