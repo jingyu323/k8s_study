@@ -769,6 +769,10 @@ HttpServletBean 调用init 初始化-》  initServletBean()-》initWebApplicatio
 
 ## 逃逸分析
 
+## Shiro  分析
+
+
+
 
 
 
