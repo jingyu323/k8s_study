@@ -1542,6 +1542,20 @@ SET 定义的**变量用户变量，作用范围是全局的**，如果在存储
 
 问题描述（windows mysql8）：重新安装之后，挪动data目录中的数据导致redologo 丢失，删除 Data\#innodb_redo 目录中的redo 日志数据， 重启成功
 
+### 从.ibd 文件恢复数据
+
+
+
+1. 创建对应的数据库
+2. 创建表结构 
+3.  剔除表空间 ALTER TABLE  table_name  DISCARD TABLESPACE;
+4. 复制原来的.ibd  文件
+5.  恢复数据 ALTER TABLE table_name   DISCARD TABLESPACE;
+
+
+
+
+
 
 
 ## 参考资料
