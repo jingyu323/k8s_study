@@ -1534,6 +1534,16 @@ SET 定义的**变量用户变量，作用范围是全局的**，如果在存储
 2. 查询条件需要添加组合索引
 3. <> 比 in 查询略（在只有一种排除条件下）
 
+
+
+## 故障恢复：
+
+### redo 日志丢失
+
+问题描述（windows mysql8）：重新安装之后，挪动data目录中的数据导致redologo 丢失，删除 Data\#innodb_redo 目录中的redo 日志数据， 重启成功
+
+
+
 ## 参考资料
 
 mysql8[集群搭建](https://www.cnblogs.com/ios9/p/14843778.html)
