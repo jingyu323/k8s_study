@@ -70,12 +70,47 @@ Python清空指定文件夹下所有文件的方法：
 import shutil  
 shutil.rmtree('要清空的文件夹名')  
 os.mkdir('要清空的文件夹名')  
-
+shutil.rmtree(os.path.join("test_delete", "test_1_delete"))
 
 import shutil
  
 # 移动文件
 shutil.move(r'C:\example\oldfile.txt', r'C:\example\newfile.txt')
+ 
+ 获取当前路径
+ os.getcwd()
+ 
+ 路径的拼接
+ os.path.join('output', 'pretext.xlsx')
+ 
+ 显示当前目录下所包含的所有文件
+ os.listdir('文件夹名称')
+ 
+ 
+ 复制文件
+ shutil.copy(os.path.join('test_dir', 'data.csv'), 'output')
+ 
+ # 压缩包
+ 创建一个压缩包
+ file_lists = list(glob(os.path.join('.', '*.xlsx')))
+with zipfile.ZipFile(r"我创建的压缩包.zip", "w") as zipobj:
+    for file in file_lists:
+        zipobj.write(file)
+
+ 读取压缩包当中的文件信息
+ with zipfile.ZipFile("我创建的压缩包.zip", "r") as zipobj:
+    print(zipobj.namelist())
+    
+ 将压缩包当中的单个文件，解压出来
+ dst = "output"
+with zipfile.ZipFile("我创建的压缩包.zip", "r") as zipobj:
+    zipobj.extract("Book1.xlsx",dst)
+    
+  将压缩包中的所有文件，都解压出来
+ dst = "output
+with zipfile.ZipFile("我创建的压缩包.zip", "r") as zipobj:
+    zipobj.extractall(dst)
+ 
  
 ```
 
