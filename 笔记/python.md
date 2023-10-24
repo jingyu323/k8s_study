@@ -2,13 +2,84 @@
 
 ## 1.介绍
 
-## 2.作用
+## 2.基础操作
 
-## 3.优点
+#### 2.1 文件操作
 
-## 4.实现原理
+读取文件列表：
 
-## 5.安装
+```
+#1
+import os
+
+# 当前目录
+dir_path = '/path/to/current/directory'
+
+# 获取当前目录下的所有文件
+files = [os.path.join(base_dir, file) for file in os.listdir(base_dir)]
+
+# 遍历文件列表，输出文件名
+for file in files:
+    print(file)
+
+
+# 2 glob模块中的glob()函数
+
+import os
+import glob
+
+# 获取当前目录
+directory = os.getcwd()
+
+# 获取所有文件
+files = glob.glob(directory + "/*")
+
+# 输出所有文件名
+for file in files:
+    print(file) 
+    
+# 3 subprocess 执行命令   
+    
+import os
+
+dir_path = '当前目录'
+files = os.listdir(dir_path)
+for file in files:
+    output = subprocess.check_output(['ls', '-l', '-a', dir_path, file])
+    print(file + ':' + output.decode('utf-8').strip()) 
+```
+
+判断文件是否存在：
+
+```
+os.path.exists("file1.txt")
+
+重命名
+os.rename("file1.txt", "myfile.txt")
+
+# 移除
+os.remove("aa.txt")
+os.removedirs() 方法用于递归删除目录
+
+os.rmdir() 方法用于删除指定路径的目录。仅当这文件夹是空的才可以, 否则, 抛出OSError。
+os.unlink() 方法用于删除文件,如果文件是一个目录则返回一个错误。
+
+Python清空指定文件夹下所有文件的方法： 
+这个需求很简单：需要在执行某些代码前清空指定的文件夹，如果直接用os.remove()，可能出现因文件夹中文件被占用而无法删除，解决方法也很简单，先强制删除文件夹，再重新建同名文件夹即可：
+
+import shutil  
+shutil.rmtree('要清空的文件夹名')  
+os.mkdir('要清空的文件夹名')  
+
+
+import shutil
+ 
+# 移动文件
+shutil.move(r'C:\example\oldfile.txt', r'C:\example\newfile.txt')
+ 
+```
+
+
 
 ## 6.使用
 
@@ -77,6 +148,26 @@ mycursor.execute("SHOW DATABASES")
 for x in mycursor:
   print(x)
 ```
+
+pymysql
+
+```
+import pymysql
+
+mydb =pymysql.connect(
+  host="192.168.90.90",
+  user="root",
+  password="xxx"
+)
+
+mycursor = mydb.cursor()
+
+mycursor.execute("CREATE DATABASE mydatabase")
+
+
+```
+
+
 
 
 
