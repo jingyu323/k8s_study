@@ -12,13 +12,13 @@
 
 ## 6.使用
 
-6.1 正则
+#### 6.1 正则
 
 ```
 字符串中间尽量使用非贪婪匹配，也就是用.*?叫来代替.* ,如果匹配的结果在字符串结尾，.*?就有可能匹配不到任何内容
 ```
 
-6.2 闭包
+#### 6.2 闭包
 
 调用和引用的区别
 调用：会直接从内存中去取出相应的对象执行，代码会直接执行
@@ -27,7 +27,7 @@
 
 提醒：如果在没有返回值return的情况下调用闭包函数时，只会调用外层函数，不会调用内层函数
 
-6.3 方法参数传递和使用
+#### 6.3 方法参数传递和使用
 
 方法参数不需要指定类型，上一个方法的返回值，直接当作参数传递进去，不像java 需要指定类型。
 
@@ -55,6 +55,27 @@ def insert_data( conn):
 使用 
     conn = get_pymysql_conn()
     insert_data(conn)
+```
+
+#### 6.4 数据库连接
+
+```
+import mysql.connector
+
+mydb = mysql.connector.connect(
+ host="localhost",
+ user="yourusername",
+ password="yourpassword"
+)
+
+mycursor = mydb.cursor()
+
+mycursor.execute("CREATE DATABASE mydatabase")
+
+# 检查数据库是否已创建
+mycursor.execute("SHOW DATABASES")
+for x in mycursor:
+  print(x)
 ```
 
 

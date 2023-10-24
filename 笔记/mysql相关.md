@@ -1550,7 +1550,7 @@ SET 定义的**变量用户变量，作用范围是全局的**，如果在存储
 2. 创建表结构 
 3.  剔除表空间 ALTER TABLE  table_name  DISCARD TABLESPACE;
 4. 复制原来的.ibd  文件
-5.  恢复数据 ALTER TABLE table_name   DISCARD TABLESPACE;
+5.  恢复数据  ALTER TABLE table_name   IMPORT TABLESPACE;
 
 
 
