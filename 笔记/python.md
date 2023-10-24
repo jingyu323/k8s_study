@@ -52,6 +52,43 @@ for file in files:
 判断文件是否存在：
 
 ```
+创建文件
+file = open("filename.txt", "w")
+file.close()
+
+写入文件
+file = open("filename.txt", "w")
+file.write("Hello, World!")
+file.close()
+
+读取文件
+file = open("filename.txt", "r")
+content = file.read() # 读取整个文件内容
+lines = file.readlines() # 逐行读取文件内容 返回一个数组
+file.close()
+
+
+迭代器方式逐行读取
+with open('file.txt', 'r') as f:
+    for line in f:
+        print(line)
+换行符的转换
+
+如果在读取文件时需要将换行符进行转换，可以使用strip方法将换行符删除，并使用replace方法将不同操作系统上的换行符转换为统一的"\n"：
+with open('file.txt', 'r') as f:
+    lines = [line.strip().replace('\r\n', '\n').replace('\r', '\n') for line in f]
+strip方法用于删除行末的换行符，replace方法用于将不同的换行符转换为统一的"\n"。最终得到的lines列表中的每一个元素都是一行文件的内容。
+
+追加内容
+
+file = open("filename.txt", "a")
+
+file.write("New content")
+
+file.close()
+
+
+判断文件是否存在
 os.path.exists("file1.txt")
 
 重命名
