@@ -678,7 +678,15 @@ sql_mode=STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_
 
 
 
-分区实现方式：
+#### 分区实现方式：
+
+1. ##### 直接创建分区表
+
+
+
+​	
+
+2. ##### 已有数据库改造
 
 
 
