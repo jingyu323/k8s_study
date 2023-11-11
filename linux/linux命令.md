@@ -766,7 +766,19 @@ done
 
 
 
+## 虚拟机：
 
+1. ```bash
+   开机
+   vmrun start vmware/Test_Development_Environment/ttzo_CentOS_Stream_8_Test/ttzo_CentOS_Stream_8_Test.vmx nogui
+   ```
+
+2. ```bash
+   关机
+   vmrun stop vmware/Test_Development_Environment/ttzo_CentOS_Stream_8_Test/ttzo_CentOS_Stream_8_Test.vmx soft
+   ```
+
+3.  vmrun list  正在运行的服务器列表
 
 
 

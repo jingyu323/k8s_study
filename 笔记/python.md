@@ -2,23 +2,166 @@
 
 ## 1.介绍
 
-## 2.作用
+## 2.基础操作
 
-## 3.优点
+#### 2.1 文件操作
 
-## 4.实现原理
+读取文件列表：
 
-## 5.安装
+```
+#1
+import os
+
+# 当前目录
+dir_path = '/path/to/current/directory'
+
+# 获取当前目录下的所有文件
+files = [os.path.join(base_dir, file) for file in os.listdir(base_dir)]
+
+# 遍历文件列表，输出文件名
+for file in files:
+    print(file)
+
+
+# 2 glob模块中的glob()函数
+
+import os
+import glob
+
+# 获取当前目录
+directory = os.getcwd()
+
+# 获取所有文件
+files = glob.glob(directory + "/*")
+
+# 输出所有文件名
+for file in files:
+    print(file) 
+    
+# 3 subprocess 执行命令   
+    
+import os
+
+dir_path = '当前目录'
+files = os.listdir(dir_path)
+for file in files:
+    output = subprocess.check_output(['ls', '-l', '-a', dir_path, file])
+    print(file + ':' + output.decode('utf-8').strip()) 
+```
+
+判断文件是否存在：
+
+```
+创建文件
+file = open("filename.txt", "w")
+file.close()
+
+写入文件
+file = open("filename.txt", "w")
+file.write("Hello, World!")
+file.close()
+
+读取文件
+file = open("filename.txt", "r")
+content = file.read() # 读取整个文件内容
+lines = file.readlines() # 逐行读取文件内容 返回一个数组
+file.close()
+
+
+迭代器方式逐行读取
+with open('file.txt', 'r') as f:
+    for line in f:
+        print(line)
+换行符的转换
+
+如果在读取文件时需要将换行符进行转换，可以使用strip方法将换行符删除，并使用replace方法将不同操作系统上的换行符转换为统一的"\n"：
+with open('file.txt', 'r') as f:
+    lines = [line.strip().replace('\r\n', '\n').replace('\r', '\n') for line in f]
+strip方法用于删除行末的换行符，replace方法用于将不同的换行符转换为统一的"\n"。最终得到的lines列表中的每一个元素都是一行文件的内容。
+
+追加内容
+
+file = open("filename.txt", "a")
+
+file.write("New content")
+
+file.close()
+
+
+判断文件是否存在
+os.path.exists("file1.txt")
+
+重命名
+os.rename("file1.txt", "myfile.txt")
+
+# 移除
+os.remove("aa.txt")
+os.removedirs() 方法用于递归删除目录
+
+os.rmdir() 方法用于删除指定路径的目录。仅当这文件夹是空的才可以, 否则, 抛出OSError。
+os.unlink() 方法用于删除文件,如果文件是一个目录则返回一个错误。
+
+Python清空指定文件夹下所有文件的方法： 
+这个需求很简单：需要在执行某些代码前清空指定的文件夹，如果直接用os.remove()，可能出现因文件夹中文件被占用而无法删除，解决方法也很简单，先强制删除文件夹，再重新建同名文件夹即可：
+
+import shutil  
+shutil.rmtree('要清空的文件夹名')  
+os.mkdir('要清空的文件夹名')  
+shutil.rmtree(os.path.join("test_delete", "test_1_delete"))
+
+import shutil
+ 
+# 移动文件
+shutil.move(r'C:\example\oldfile.txt', r'C:\example\newfile.txt')
+ 
+ 获取当前路径
+ os.getcwd()
+ 
+ 路径的拼接
+ os.path.join('output', 'pretext.xlsx')
+ 
+ 显示当前目录下所包含的所有文件
+ os.listdir('文件夹名称')
+ 
+ 
+ 复制文件
+ shutil.copy(os.path.join('test_dir', 'data.csv'), 'output')
+ 
+ # 压缩包
+ 创建一个压缩包
+ file_lists = list(glob(os.path.join('.', '*.xlsx')))
+with zipfile.ZipFile(r"我创建的压缩包.zip", "w") as zipobj:
+    for file in file_lists:
+        zipobj.write(file)
+
+ 读取压缩包当中的文件信息
+ with zipfile.ZipFile("我创建的压缩包.zip", "r") as zipobj:
+    print(zipobj.namelist())
+    
+ 将压缩包当中的单个文件，解压出来
+ dst = "output"
+with zipfile.ZipFile("我创建的压缩包.zip", "r") as zipobj:
+    zipobj.extract("Book1.xlsx",dst)
+    
+  将压缩包中的所有文件，都解压出来
+ dst = "output
+with zipfile.ZipFile("我创建的压缩包.zip", "r") as zipobj:
+    zipobj.extractall(dst)
+ 
+ 
+```
+
+
 
 ## 6.使用
 
-6.1 正则
+#### 6.1 正则
 
 ```
 字符串中间尽量使用非贪婪匹配，也就是用.*?叫来代替.* ,如果匹配的结果在字符串结尾，.*?就有可能匹配不到任何内容
 ```
 
-6.2 闭包
+#### 6.2 闭包
 
 调用和引用的区别
 调用：会直接从内存中去取出相应的对象执行，代码会直接执行
@@ -27,7 +170,7 @@
 
 提醒：如果在没有返回值return的情况下调用闭包函数时，只会调用外层函数，不会调用内层函数
 
-6.3 方法参数传递和使用
+#### 6.3 方法参数传递和使用
 
 方法参数不需要指定类型，上一个方法的返回值，直接当作参数传递进去，不像java 需要指定类型。
 
@@ -56,6 +199,47 @@ def insert_data( conn):
     conn = get_pymysql_conn()
     insert_data(conn)
 ```
+
+#### 6.4 数据库连接
+
+```
+import mysql.connector
+
+mydb = mysql.connector.connect(
+ host="localhost",
+ user="yourusername",
+ password="yourpassword"
+)
+
+mycursor = mydb.cursor()
+
+mycursor.execute("CREATE DATABASE mydatabase")
+
+# 检查数据库是否已创建
+mycursor.execute("SHOW DATABASES")
+for x in mycursor:
+  print(x)
+```
+
+pymysql
+
+```
+import pymysql
+
+mydb =pymysql.connect(
+  host="192.168.90.90",
+  user="root",
+  password="xxx"
+)
+
+mycursor = mydb.cursor()
+
+mycursor.execute("CREATE DATABASE mydatabase")
+
+
+```
+
+
 
 
 

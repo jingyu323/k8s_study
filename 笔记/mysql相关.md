@@ -678,7 +678,15 @@ sql_mode=STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_
 
 
 
-分区实现方式：
+#### 分区实现方式：
+
+1. ##### 直接创建分区表
+
+
+
+​	
+
+2. ##### 已有数据库改造
 
 
 
@@ -1528,7 +1536,35 @@ END
 DECLARE 定义的变量的作用范围**是BEGIN … END块内，只能在块中使用**。
 SET 定义的**变量用户变量，作用范围是全局的**，如果在存储过程中定义了用户变量，在存储过程之外的sql也是可以调用的。
 
-​	
+### 	3 .索引
+
+1. 排序字段需要添加索引
+2. 查询条件需要添加组合索引
+3. <> 比 in 查询略（在只有一种排除条件下）
+
+
+
+## 故障恢复：
+
+### redo 日志丢失
+
+问题描述（windows mysql8）：重新安装之后，挪动data目录中的数据导致redologo 丢失，删除 Data\#innodb_redo 目录中的redo 日志数据， 重启成功
+
+### 从.ibd 文件恢复数据
+
+
+
+1. 创建对应的数据库
+2. 创建表结构 
+3.  剔除表空间 ALTER TABLE  table_name  DISCARD TABLESPACE;
+4. 复制原来的.ibd  文件
+5.  恢复数据  ALTER TABLE table_name   IMPORT TABLESPACE;
+
+
+
+
+
+
 
 ## 参考资料
 
