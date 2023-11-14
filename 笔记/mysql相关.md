@@ -1601,6 +1601,8 @@ CREATE EVENT e_partition
 
 
 
+
+
 游标的handler 一定要设置，也一定要设置到游标声明之后。就是因为没有设置游标的handler 导致嵌套只能打印一条外层的，不在继续遍历。
 
 DECLARE continue handler for not found set v_done = 1;
