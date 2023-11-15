@@ -1664,7 +1664,9 @@ SET 定义的**变量用户变量，作用范围是全局的**，如果在存储
 
 
 
+问题总结：
 
+ MySQL instance at 'node1:3306' currently has the super_read_only system variable set to protect it from inadvertent updates from application
 
 
 
