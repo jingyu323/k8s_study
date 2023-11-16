@@ -361,7 +361,31 @@ server-uuid=b33057ff-bec6-11eb-ad94-000c29af6856
 5、重启服务
 
 service mysqld restart
+
+
+
+
 ```
+
+#### 集群故障：
+
+##### MySQL 取消 super read only
+
+直接关闭read only  模式
+
+SET GLOBAL super_read_only = OFF;
+
+##### 集群故障恢复：
+
+rebootClusterFromCompleteOutage: Conflicting transaction sets between node1:3306 and node2:3306
+
+
+
+[GCS] Error on opening a connection to peer node node3:3306 when joining a group. My local port is: 3306
+
+
+
+
 
 
 
