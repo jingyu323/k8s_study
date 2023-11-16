@@ -482,6 +482,10 @@ binlog_format=mixed
 binlog-ignore-db=mysql
 binlog_expire_logs_seconds=604800
 
+#只保留7天的二进制日志，以防磁盘被日志占满(可选)
+
+expire-logs-days = 7
+
 node3
 server-id=33306
 slave-skip-errors=all
