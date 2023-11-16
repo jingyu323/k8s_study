@@ -519,7 +519,6 @@ reset slave;
 
 change master to master_host='node1',master_user='copy',master_port=3306,master_password='Copy@123456',master_log_file='mysql-bin.000001',master_log_pos=155,master_connect_retry=30;
 
-
 启动 启动所有从节点的slave
 start slave; 
 
@@ -529,7 +528,6 @@ start slave;
 				
 
 				没有配置hosts IP映射，配置之后就好了
-
 
 执行了一段时间添加
 Last_IO_Error: Got fatal error 1236 from master when reading data from binary log: 'binlog truncated in the middle of event; consider out of disk space on master; the first event 'mysql-bin.000001' at 157, the last event read from './mysql-bin.000001' at 124, the last byte read from './mysql-bin.000001' at 574.'
@@ -543,6 +541,37 @@ show slave status \G
      状态都为yes  表明配置成功
        Slave_IO_Running: Yes
        Slave_SQL_Running: Yes
+
+log: 'Could not find first log file name in binary log index file', Error_code: MY-013114	
+
+```
+
+flush logs;
+
+show master status;
+
+可以查看当前的binlog 文件是那个
+
+
+因为刷新日志file的位置会+1，即File变成为:mysqld-bin.000011
+
+马上到slave执行
+
+CHANGE MASTER TO MASTER_LOG_FILE='mysql-bin.000002',MASTER_LOG_POS=157;
+  start  slave; 
+  show slave status;
+  
+   状态都为yes  表明配置成功
+   Slave_IO_Running: Yes
+   Slave_SQL_Running: Yes
+```
+
+
+
+
+
+
+
 
 
 登陆主节点 创建测试数据库
