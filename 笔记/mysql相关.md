@@ -542,38 +542,6 @@ show slave status \G
        Slave_IO_Running: Yes
        Slave_SQL_Running: Yes
 
-log: 'Could not find first log file name in binary log index file', Error_code: MY-013114	
-
-```
-
-flush logs;
-
-show master status;
-
-可以查看当前的binlog 文件是那个
-
-
-因为刷新日志file的位置会+1，即File变成为:mysqld-bin.000011
-
-马上到slave执行
-
-CHANGE MASTER TO MASTER_LOG_FILE='mysql-bin.000002',MASTER_LOG_POS=157;
-  start  slave; 
-  show slave status;
-  
-   状态都为yes  表明配置成功
-   Slave_IO_Running: Yes
-   Slave_SQL_Running: Yes
-```
-
-
-
-
-
-
-
-
-
 登陆主节点 创建测试数据库
 
  create database test_sync;
@@ -596,6 +564,94 @@ show processlist;
 
 如果遇到：when reading data from binary log: 'Could not find first log file name in binary log index file
 flush logs;
+
+这种都是 配置文件名称不正确导致
+
+log: 'Could not find first log file name in binary log index file', Error_code: MY-013114	
+
+```
+flush logs;
+
+show master status;
+
+可以查看当前的binlog 文件是那个
+
+
+因为刷新日志file的位置会+1，即File变成为:mysqld-bin.000011
+
+马上到slave执行
+
+CHANGE MASTER TO MASTER_LOG_FILE='mysql-bin.000002',MASTER_LOG_POS=157;
+  start  slave; 
+  show slave status;
+  
+   状态都为yes  表明配置成功
+   Slave_IO_Running: Yes
+   Slave_SQL_Running: Yes
+```
+
+
+
+#### 2.双主复制
+
+双主相对于主备复制多了一个从备复制到主的配置
+
+
+
+1.保证两台数据库能够互相访问
+在内网中保证两台服务器分别能访问对方的数据库信息：
+
+```
+my.cnf 配置
+[mysqld]
+log-bin=mysql-bin
+binlog_format=mixed
+binlog-ignore-db=mysql
+innodb_force_recovery = 0
+binlog_cache_size=1M
+slave-skip-errors=all
+
+# 只设置默认的忽略的就可以同步所有新创建的数据库和表
+replicate-ignore-db = mysql,information_schema,performance_schema
+log-slave-updates=on
+auto_increment_offset=1 
+auto_increment_increment=2
+
+
+
+
+A服务器上设置B数据库权限：
+
+CREATE USER 'copy'@'%' IDENTIFIED BY 'Copy@123456';
+alter user 'copy'@'%' identified with mysql_native_password by 'Copy@123456';
+grant all privileges on *.* to 'copy'@'%' with grant option;
+
+flush privileges;
+ 
+B服务器上设置A数据库权限
+
+CREATE USER 'copy'@'%' IDENTIFIED BY 'Copy@123456';
+alter user 'copy'@'%' identified with mysql_native_password by 'Copy@123456';
+grant all privileges on *.* to 'copy'@'%' with grant option;
+
+flush privileges;
+
+使用同一个账户就行
+
+
+
+change master to master_host='192.168.99.127',master_user='copy',master_port=3306,master_password='Copy@123456',master_log_file='mysql-bin.000001',master_log_pos=157;
+
+start slave;
+
+show slave status
+```
+
+
+
+
+
+
 
 ### MHA环境搭建：
 
