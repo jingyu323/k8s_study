@@ -369,6 +369,10 @@ service mysqld restart
 
 #### 集群故障：
 
+
+
+https://www.jianshu.com/p/ddefce4951fc
+
 ##### MySQL 取消 super read only
 
 直接关闭read only  模式
