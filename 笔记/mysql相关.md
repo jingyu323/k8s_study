@@ -383,9 +383,35 @@ SET GLOBAL super_read_only = OFF;
 
 rebootClusterFromCompleteOutage: Conflicting transaction sets between node1:3306 and node2:3306
 
-
-
 [GCS] Error on opening a connection to peer node node3:3306 when joining a group. My local port is: 3306
+
+No default schema selected; type \use <schema> to set one
+
+
+
+等问题： 都是自动创建集群失败的问题
+
+重新创建集群
+
+var cluster = dba.createCluster('testCluster')
+
+
+
+ cluster.addInstance('root@node2:3306');
+
+WARNING: A GTID set check of the MySQL instance at 'node2:3306' determined that it contains transactions that do not originate from the cluster, which must be discarded before it can join the cluster.
+
+node2:3306 has the following errant GTIDs that do not exist in the cluster:
+45fc6a70-48a9-11ed-adfc-000c29325d80:1
+
+选择C clone  没有的gts 数据
+
+集群操作命令：
+
+```
+查看集群
+var cluster = dba.getCluster();
+```
 
 
 
