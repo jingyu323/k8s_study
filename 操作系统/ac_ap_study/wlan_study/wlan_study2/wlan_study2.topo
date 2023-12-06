@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UNICODE" ?>
+<topo version="1.3.00.100">
+    <devices>
+        <dev id="88EEB8BD-C94C-4159-9E1F-DDBDE9940540" name="STA1" poe="0" model="STA" settings=" -simsta_ip 0.0.0.0  -simsta_mask 0.0.0.0  -simsta_gateway 0.0.0.0  -simsta_mac 54-89-98-5C-68-85  -simsta_check 0 " system_mac="54-89-98-5C-68-85" com_port="0" bootmode="0" cx="176.000000" cy="644.000000" edit_left="203" edit_top="698">
+            <slot number="slot17" isMainBoard="1" />
+        </dev>
+        <dev id="637E2225-8411-4b29-BEEB-D9F8BD02FD02" name="AP1" poe="0" model="AP6050" settings=" -apMac 00-E0-FC-3C-74-30 -apSN 210235448310D1163940" system_mac="00-E0-FC-3C-74-30" com_port="2001" bootmode="0" cx="195.000000" cy="548.000000" edit_left="222" edit_top="602">
+            <slot number="slot17" isMainBoard="1">
+                <interface sztype="Ethernet" interfacename="GE" count="2" />
+            </slot>
+        </dev>
+        <dev id="6CEACBCE-8EC9-44e2-A1DC-74E49CD0F864" name="CE1" poe="0" model="CE6800" settings="" system_mac="70-7B-E8-95-47-01" com_port="2003" bootmode="0" cx="378.000000" cy="425.000000" edit_left="405" edit_top="479">
+            <slot id="1">
+                <interface category="Ethernet" type="GE" slotIndex="1" cardIndex="0" interfaceIndex="0" />
+                <interface category="Ethernet" type="GE" slotIndex="1" cardIndex="0" interfaceIndex="1" />
+                <interface category="Ethernet" type="GE" slotIndex="1" cardIndex="0" interfaceIndex="2" />
+                <interface category="Ethernet" type="GE" slotIndex="1" cardIndex="0" interfaceIndex="3" />
+                <interface category="Ethernet" type="GE" slotIndex="1" cardIndex="0" interfaceIndex="4" />
+                <interface category="Ethernet" type="GE" slotIndex="1" cardIndex="0" interfaceIndex="5" />
+                <interface category="Ethernet" type="GE" slotIndex="1" cardIndex="0" interfaceIndex="6" />
+                <interface category="Ethernet" type="GE" slotIndex="1" cardIndex="0" interfaceIndex="7" />
+                <interface category="Ethernet" type="GE" slotIndex="1" cardIndex="0" interfaceIndex="8" />
+                <interface category="Ethernet" type="GE" slotIndex="1" cardIndex="0" interfaceIndex="9" />
+                <interface category="Ethernet" type="GE" slotIndex="1" cardIndex="0" interfaceIndex="10" />
+                <interface category="Ethernet" type="GE" slotIndex="1" cardIndex="0" interfaceIndex="11" />
+                <interface category="Ethernet" type="GE" slotIndex="1" cardIndex="0" interfaceIndex="12" />
+                <interface category="Ethernet" type="GE" slotIndex="1" cardIndex="0" interfaceIndex="13" />
+                <interface category="Ethernet" type="GE" slotIndex="1" cardIndex="0" interfaceIndex="14" />
+                <interface category="Ethernet" type="GE" slotIndex="1" cardIndex="0" interfaceIndex="15" />
+                <interface category="Ethernet" type="GE" slotIndex="1" cardIndex="0" interfaceIndex="16" />
+                <interface category="Ethernet" type="GE" slotIndex="1" cardIndex="0" interfaceIndex="17" />
+                <interface category="Ethernet" type="GE" slotIndex="1" cardIndex="0" interfaceIndex="18" />
+                <interface category="Ethernet" type="GE" slotIndex="1" cardIndex="0" interfaceIndex="19" />
+            </slot>
+        </dev>
+        <dev id="4924F3EE-B021-4227-A33E-8ADCD39003AE" name="LSW1" poe="0" model="S5700" settings="" system_mac="4C-1F-CC-FF-2F-EA" com_port="2004" bootmode="0" cx="375.000000" cy="274.000000" edit_left="402" edit_top="328">
+            <slot number="slot17" isMainBoard="1">
+                <interface sztype="Ethernet" interfacename="GE" count="24" />
+            </slot>
+        </dev>
+        <dev id="89C9328D-863E-437c-A749-FDA2588AA390" name="AR1" poe="0" model="AR3260" settings="" system_mac="00-E0-FC-93-20-88" com_port="2005" bootmode="0" cx="372.000000" cy="137.000000" edit_left="399" edit_top="191">
+            <slot number="slot17" isMainBoard="1">
+                <interface sztype="Ethernet" interfacename="GE" count="1" />
+                <interface sztype="Ethernet" interfacename="GE" count="2" />
+            </slot>
+        </dev>
+        <dev id="69475E15-A69A-4d8a-AA6C-76051BE36730" name="AC1" poe="0" model="AC6005" settings="" system_mac="00-E0-FC-A2-01-0F" com_port="2000" bootmode="0" cx="216.000000" cy="277.000000" edit_left="243" edit_top="331">
+            <slot number="slot17" isMainBoard="1">
+                <interface sztype="Ethernet" interfacename="GE" count="8" />
+            </slot>
+        </dev>
+        <dev id="41DDA50F-D54E-42ea-BD60-8E8B3FE07721" name="STA2" poe="0" model="STA" settings=" -simsta_ip 0.0.0.0  -simsta_mask 0.0.0.0  -simsta_gateway 0.0.0.0  -simsta_mac 54-89-98-AD-77-1B  -simsta_check 0 " system_mac="54-89-98-AD-77-1B" com_port="0" bootmode="0" cx="878.000000" cy="689.000000" edit_left="905" edit_top="743">
+            <slot number="slot17" isMainBoard="1" />
+        </dev>
+        <dev id="789698BB-B566-49ca-9787-C591F59B6D3D" name="AP2" poe="0" model="AP6050" settings=" -apMac 00-E0-FC-91-62-90 -apSN 2102354483108B5E9120" system_mac="00-E0-FC-91-62-90" com_port="2002" bootmode="0" cx="815.000000" cy="576.000000" edit_left="842" edit_top="630">
+            <slot number="slot17" isMainBoard="1">
+                <interface sztype="Ethernet" interfacename="GE" count="2" />
+            </slot>
+        </dev>
+    </devices>
+    <lines>
+        <line srcDeviceID="637E2225-8411-4b29-BEEB-D9F8BD02FD02" destDeviceID="6CEACBCE-8EC9-44e2-A1DC-74E49CD0F864">
+            <interfacePair lineName="Copper" srcIndex="0" srcBoundRectIsMoved="0" srcBoundRect_X="257.840424" srcBoundRect_Y="550.910522" srcOffset_X="0.000000" srcOffset_Y="0.000000" tarIndex="0" tarBoundRectIsMoved="1" tarBoundRect_X="369.159576" tarBoundRect_Y="476.089447" tarOffset_X="-39.000000" tarOffset_Y="2.000000" />
+        </line>
+        <line srcDeviceID="6CEACBCE-8EC9-44e2-A1DC-74E49CD0F864" destDeviceID="789698BB-B566-49ca-9787-C591F59B6D3D">
+            <interfacePair lineName="Copper" srcIndex="1" srcBoundRectIsMoved="0" srcBoundRect_X="445.815826" srcBoundRect_Y="466.103394" srcOffset_X="0.000000" srcOffset_Y="0.000000" tarIndex="0" tarBoundRectIsMoved="0" tarBoundRect_X="801.184204" tarBoundRect_Y="588.896606" tarOffset_X="0.000000" tarOffset_Y="0.000000" />
+        </line>
+        <line srcDeviceID="4924F3EE-B021-4227-A33E-8ADCD39003AE" destDeviceID="6CEACBCE-8EC9-44e2-A1DC-74E49CD0F864">
+            <interfacePair lineName="Copper" srcIndex="0" srcBoundRectIsMoved="1" srcBoundRect_X="402.857788" srcBoundRect_Y="344.175232" srcOffset_X="0.000000" srcOffset_Y="0.000000" tarIndex="2" tarBoundRectIsMoved="0" tarBoundRect_X="404.142212" tarBoundRect_Y="408.824768" tarOffset_X="0.000000" tarOffset_Y="0.000000" />
+        </line>
+        <line srcDeviceID="69475E15-A69A-4d8a-AA6C-76051BE36730" destDeviceID="4924F3EE-B021-4227-A33E-8ADCD39003AE">
+            <interfacePair lineName="Copper" srcIndex="0" srcBoundRectIsMoved="0" srcBoundRect_X="286.176086" srcBoundRect_Y="303.185364" srcOffset_X="0.000000" srcOffset_Y="0.000000" tarIndex="1" tarBoundRectIsMoved="1" tarBoundRect_X="358.823914" tarBoundRect_Y="301.814636" tarOffset_X="0.000000" tarOffset_Y="0.000000" />
+        </line>
+        <line srcDeviceID="89C9328D-863E-437c-A749-FDA2588AA390" destDeviceID="4924F3EE-B021-4227-A33E-8ADCD39003AE">
+            <interfacePair lineName="Copper" srcIndex="0" srcBoundRectIsMoved="0" srcBoundRect_X="399.945404" srcBoundRect_Y="207.173416" srcOffset_X="0.000000" srcOffset_Y="0.000000" tarIndex="2" tarBoundRectIsMoved="0" tarBoundRect_X="401.054596" tarBoundRect_Y="257.826569" tarOffset_X="0.000000" tarOffset_Y="0.000000" />
+        </line>
+    </lines>
+    <shapes />
+    <txttips>
+        <txttip left="112" top="293" right="214" bottom="325" content="20.0.0.20/24&#x0D;&#x0A;vlan 20" fontname="Consolas" fontstyle="0" editsize="100" txtcolor="-16777216" txtbkcolor="-7278960" charset="1" />
+        <txttip left="243" top="149" right="330" bottom="181" content="10.0.0.1/24&#x0D;&#x0A;" fontname="Consolas" fontstyle="0" editsize="100" txtcolor="-16777216" txtbkcolor="-7278960" charset="1" />
+        <txttip left="510" top="291" right="771" bottom="401" content="intterface vlanif 10 10.0.0.10/24&#x0D;&#x0A;&#x0D;&#x0A;intterface vlanif 20 20.0.0.1/24&#x0D;&#x0A;&#x0D;&#x0A;intterface vlanif 30 1.1.1.1/24&#x0D;&#x0A;&#x0D;&#x0A;intterface vlanif 40 2.2.2.1/24" fontname="Consolas" fontstyle="0" editsize="100" txtcolor="-16777216" txtbkcolor="-7278960" charset="1" />
+        <txttip left="145" top="490" right="232" bottom="538" content="1.1.1.0/24&#x0D;&#x0A;&#x0D;&#x0A;vlan 30" fontname="Consolas" fontstyle="0" editsize="100" txtcolor="-16777216" txtbkcolor="-7278960" charset="1" />
+        <txttip left="614" top="548" right="693" bottom="596" content="1.1.1.0/24&#x0D;&#x0A;&#x0D;&#x0A;vlan 30" fontname="Consolas" fontstyle="0" editsize="100" txtcolor="-16777216" txtbkcolor="-7278960" charset="1" />
+        <txttip left="159" top="740" right="397" bottom="757" content="intterface vlanif 40 2.2.2.0/24" fontname="Consolas" fontstyle="0" editsize="100" txtcolor="-16777216" txtbkcolor="-7278960" charset="1" />
+        <txttip left="551" top="714" right="789" bottom="731" content="intterface vlanif 40 2.2.2.0/24" fontname="Consolas" fontstyle="0" editsize="100" txtcolor="-16777216" txtbkcolor="-7278960" charset="1" />
+        <txttip left="65" top="597" right="144" bottom="629" content="wifi 密码&#x0D;&#x0A;123456789" fontname="Consolas" fontstyle="0" editsize="100" txtcolor="-16777216" txtbkcolor="-7278960" charset="1" />
+    </txttips>
+</topo>
