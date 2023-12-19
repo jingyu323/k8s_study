@@ -1166,7 +1166,6 @@ alter table htgw_sync_group convert to character set utf8 collate utf8mb3_unicod
 当出现死锁以后，有两种策略：一种策略是，直接进入等待，直到超时。这个超时时间可以通过参数 innodb_lock_wait_timeout 来设置。
 另一种策略是，发起死锁检测，发现死锁后，主动回滚死锁链条中的某一个事务，让其他事务得以继续执行。将参数 innodb_deadlock_detect 设置为 on，表示开启这个逻辑。
 
-
 查看db状态
 show engine innodb status\G
 
@@ -1198,8 +1197,28 @@ FROM
 2.分析锁定范围
 SELECT ENGINE,ENGINE_TRANSACTION_ID,THREAD_ID,EVENT_ID,OBJECT_SCHEMA,OBJECT_NAME,INDEX_NAME,LOCK_TYPE, LOCK_MODE,LOCK_STATUS,LOCK_DATA FROM performance_schema.data_locks;
 
+
+查询正在运行的SQL事务情况：
+SELECT * FROM information_schema.INNODB_TRX\G;
+
+-- 查看MySQL设置的最大连接数
+SHOW VARIABLES LIKE '%max_connections%';
+
+-- 查看MySQL当前总连接数信息，Threads_connected 为当前正在运行的连接数
+SHOW STATUS LIKE 'Threads%';
+
+-- 查看持有MySQL连接的host 和user 信息
+SELECT user,substring_index(host, ':',1) AS host_name,state,count(*) FROM information_schema.processlist GROUP BY state,host_name;
+
 ```
+## 大数据表数据变更注意事项
+
+
+
+
+
 ## 事务
+
 ### 事务并发问题
 
 - 脏读 ： 一个事务读到了另一个事务未提交的数据
@@ -1811,7 +1830,9 @@ SET 定义的**变量用户变量，作用范围是全局的**，如果在存储
 
  MySQL instance at 'node1:3306' currently has the super_read_only system variable set to protect it from inadvertent updates from application
 
+日期格式化
 
+select count(*), DATE_FORMAT(start_time, '%Y-%m-%d')  as 'st'  from   htgw_sync_main  GROUP BY  st  ORDER BY st desc; 
 
 ## 参考资料
 
