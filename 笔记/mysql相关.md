@@ -1166,7 +1166,6 @@ alter table htgw_sync_group convert to character set utf8 collate utf8mb3_unicod
 当出现死锁以后，有两种策略：一种策略是，直接进入等待，直到超时。这个超时时间可以通过参数 innodb_lock_wait_timeout 来设置。
 另一种策略是，发起死锁检测，发现死锁后，主动回滚死锁链条中的某一个事务，让其他事务得以继续执行。将参数 innodb_deadlock_detect 设置为 on，表示开启这个逻辑。
 
-
 查看db状态
 show engine innodb status\G
 
@@ -1198,8 +1197,28 @@ FROM
 2.分析锁定范围
 SELECT ENGINE,ENGINE_TRANSACTION_ID,THREAD_ID,EVENT_ID,OBJECT_SCHEMA,OBJECT_NAME,INDEX_NAME,LOCK_TYPE, LOCK_MODE,LOCK_STATUS,LOCK_DATA FROM performance_schema.data_locks;
 
+
+查询正在运行的SQL事务情况：
+SELECT * FROM information_schema.INNODB_TRX\G;
+
+-- 查看MySQL设置的最大连接数
+SHOW VARIABLES LIKE '%max_connections%';
+
+-- 查看MySQL当前总连接数信息，Threads_connected 为当前正在运行的连接数
+SHOW STATUS LIKE 'Threads%';
+
+-- 查看持有MySQL连接的host 和user 信息
+SELECT user,substring_index(host, ':',1) AS host_name,state,count(*) FROM information_schema.processlist GROUP BY state,host_name;
+
 ```
+## 大数据表数据变更注意事项
+
+
+
+
+
 ## 事务
+
 ### 事务并发问题
 
 - 脏读 ： 一个事务读到了另一个事务未提交的数据
@@ -1789,6 +1808,28 @@ SET 定义的**变量用户变量，作用范围是全局的**，如果在存储
 
 
 
+
+
+### 4.锁问题排查
+
+SHOW PROCESSLIST ;
+
+ 来查看当前所运行的所有事务，通过查询表，发现有一条事务记录一直处于RUNNING的状态
+
+SELECT * FROM information_schema.INNODB_TRX;
+
+
+
+SELECT * FROM information_schema.`PROCESSLIST` WHERE id = "422012972833952"; 
+
+
+
+再次通过sql：SELECT * FROM information_schema.`PROCESSLIST` WHERE id = "trx_mysql_thread_id"，”trx_mysql_thread_id“为 INNODB_TRX 表中的字段，通过PROCESSLIST来查找被锁的语句，PROCESSLIST这张表保存了MySql服务器所有数据库的信息，如数据库名，数据库的表，表栏的数据类型与访问权限等。
+
+ 排查出问题所在后，即可在数据库控制台通过 KILL ID  命令杀死这条事务线程，应用就能恢复正常，ID 为 PROCESSLIST 表中的ID字段 
+
+出现这种情况的原因：手动开启事务后未提交，发生异常时未回滚，就会导致事务一直处于RUNNING状态，其他事务无法获取锁而等待超时。
+
 ## 故障恢复：
 
 ### redo 日志丢失
@@ -1811,7 +1852,9 @@ SET 定义的**变量用户变量，作用范围是全局的**，如果在存储
 
  MySQL instance at 'node1:3306' currently has the super_read_only system variable set to protect it from inadvertent updates from application
 
+日期格式化
 
+select count(*), DATE_FORMAT(start_time, '%Y-%m-%d')  as 'st'  from   htgw_sync_main  GROUP BY  st  ORDER BY st desc; 
 
 ## 参考资料
 
