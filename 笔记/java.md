@@ -969,3 +969,9 @@ ulimit -a
 发现系统默认的是open files (-n) 1024，问题就出现在这里。
 4.然后执行：ulimit -n 4096
 将open files (-n) 1024 设置成open files (-n) 4096
+
+## Java OOM优化
+
+
+
+ top -H -p pid 

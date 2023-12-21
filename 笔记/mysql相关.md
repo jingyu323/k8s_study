@@ -1808,6 +1808,28 @@ SET 定义的**变量用户变量，作用范围是全局的**，如果在存储
 
 
 
+
+
+### 4.锁问题排查
+
+SHOW PROCESSLIST ;
+
+ 来查看当前所运行的所有事务，通过查询表，发现有一条事务记录一直处于RUNNING的状态
+
+SELECT * FROM information_schema.INNODB_TRX;
+
+
+
+SELECT * FROM information_schema.`PROCESSLIST` WHERE id = "422012972833952"; 
+
+
+
+再次通过sql：SELECT * FROM information_schema.`PROCESSLIST` WHERE id = "trx_mysql_thread_id"，”trx_mysql_thread_id“为 INNODB_TRX 表中的字段，通过PROCESSLIST来查找被锁的语句，PROCESSLIST这张表保存了MySql服务器所有数据库的信息，如数据库名，数据库的表，表栏的数据类型与访问权限等。
+
+ 排查出问题所在后，即可在数据库控制台通过 KILL ID  命令杀死这条事务线程，应用就能恢复正常，ID 为 PROCESSLIST 表中的ID字段 
+
+出现这种情况的原因：手动开启事务后未提交，发生异常时未回滚，就会导致事务一直处于RUNNING状态，其他事务无法获取锁而等待超时。
+
 ## 故障恢复：
 
 ### redo 日志丢失
