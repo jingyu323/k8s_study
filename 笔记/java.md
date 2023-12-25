@@ -975,3 +975,66 @@ ulimit -a
 
 
  top -H -p pid 
+
+
+
+1. Java.lang.OutOfMemoryError: **GC overhead limit exceeded**
+
+   这种问题一般都是 
+
+该*java.lang.OutOfMemoryError：GC开销超过极限*误差信号，你的应用程序花费太多的时间做垃圾收集太少的结果JVM的方式。默认情况下，如果 JVM 花费超过**98% 的总时间进行 GC 并且在 GC 之后仅回收不到 2% 的堆，则**JVM 被配置为抛出此错误。
+
+ 
+
+加载了过多的资源，jvm清理不及时导致
+
+
+
+2.java.lang.OutOfMemoryError:java heap space   ====JVM Heap(堆)溢出
+
+如果不是代码问题可以手动设置堆大小
+
+OutOfMemoryError： PermGen space
+
+如果使用默认值需要可以根据实际情况，调整永久代大小
+
+老年代溢出 一般都是 创建大对象未及时释放
+
+解决方法：手动设置MaxPermSize大小
+
+OutOfMemoryError： unable to create new native thread
+
+可能原因
+
+1. 系统内存耗尽，无法为新线程分配内存
+2. 创建线程数超过了操作系统的限制
+
+
+
+
+
+3.java.long.StackOverflowError  =======栈溢出
+
+栈溢出了，JVM依然是采用栈时的虚拟机，这个和C和Pascal都是一样的。函数的调用过程都体现在堆栈和退栈上了。
+
+　　　　调用构造函数的 "层" 太多了，以至于把栈区溢出了。
+
+　　　　通常来讲，一般栈区远远小于堆区的，因为函数调用过程往往不会多余上千层，而即使每个函数调用需要1K的空间
+
+　　　　（这个大约相当于C函数内声明了256个int类型的变量，那么栈区也不过需要1MB的空间。通常栈的大小 1-2MB的。
+
+　　　　通常递归也不要递归层次过多，很容易溢出。
+
+　　　　解决方法：修改程序。
+
+
+
+java -XX:+PrintFlagsFinal -version | grep ThreadStackSize
+
+
+
+查看是否有系统有因为内存溢出杀掉进程
+
+egrep -i -r 'Out Of' /var/log
+
+​	
