@@ -427,6 +427,26 @@ https://blog.csdn.net/lufei0920/article/details/115196146
 
 
 
+### JVM调优
+
+为什么要做JVM调优？
+
+一、防止出现OOM
+
+即在系统部署之前，根据一些关键数据进行预估不同内存区域需要给多少内存合适
+
+二、解决OOM
+
+即线上出现了OOM，应该如何调优以保证程序能正常运行
+
+二、减少full gc出现的频率
+
+这个主要是堆区，如果设置的不合理就会频繁full gc，导致系统运行一阵暂停一阵，导致体验下降
+
+
+
+
+
 
 
 ## maven 打包
@@ -1038,3 +1058,6 @@ java -XX:+PrintFlagsFinal -version | grep ThreadStackSize
 egrep -i -r 'Out Of' /var/log
 
 ​	
+
+
+

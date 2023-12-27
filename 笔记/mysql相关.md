@@ -761,6 +761,24 @@ type字段的结果值，从好到坏依次是：system > const > eq_ref > ref >
 
 
 
+查看慢查询是否开启
+
+ show variables like 'slow_query_log';
+
+set global slow_query_log = 1;
+
+show variables like 'long_query_time';
+
+修改慢查询时长
+
+set session long_query_time = 3;
+
+
+
+
+
+
+
 
 
 ## 分库分表
@@ -927,10 +945,22 @@ Innodb_row_lock_current_waits:当前正在等待锁定的数量;
 
 
 
-
 ## 数据库数据同步方案
 
+
+
 ## 索引
+
+
+
+执行索引会锁住表，数据量越大的表越锁的时间长
+
+
+
+每一行记录都要判断自己是否对这个会话可见，因此对于count(*)请求来说，InnoDB只好把数据一行一行地读出依次判断，可见的行才能够用于计算“基于这个查询”的表的总行数
+
+
+
 ### 哈希
 散列表（也称哈希表）是根据关键码值(Key value)而直接进行访问的数据结构，它让码值经过哈希函数的转换映射到散列表对应的位置上，查找效率非常高。哈希索引就是基于散列表实现的，假设我们对名字建立了哈希索引，则查找过程如下图所示：
 
