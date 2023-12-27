@@ -775,9 +775,15 @@ set session long_query_time = 3;
 
 
 
+检查系统中有多少条慢查询记录
+
+show global status like '%Slow_queries%';
 
 
 
+UPDATE htgw_sync_main  set start_time = '2023-12-02',end_time = '2023-12-03'  where  sync_id <  14124153;
+受影响的行: 14124152
+时间: 1878.215s
 
 
 
