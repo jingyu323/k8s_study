@@ -454,6 +454,18 @@ https://blog.csdn.net/lufei0920/article/details/115196146
 
 ```
 
+设置垃圾回收
+
+```
+#年轻代、老年代均使用并行收集器，初始堆内存64M，最大堆内存512M
+JAVA_OPTS="-XX:+UseParallelGC -XX:+UseParallelOldGC -Xms64m -Xmx512m -XX:+PrintGCDetails -XX:+PrintGCTimeStamps -XX:+PrintGCDateStamps -XX:+PrintHeapAtGC -Xloggc:../logs/gc.log"
+
+将初始堆大小设置为128m，最大为1024m，初始年轻代大小64m，年轻代最大256m
+JAVA_OPTS="-XX:+UseParallelGC -XX:+UseParallelOldGC -Xms128m -Xmx1024m -XX:NewSize=64m -XX:MaxNewSize=256m -XX:+PrintGCDetails -XX:+PrintGCTimeStamps -XX:+PrintGCDateStamps -XX:+PrintHeapAtGC -Xloggc:../logs/gc.log"
+
+
+```
+
 
 
 
