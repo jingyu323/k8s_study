@@ -445,6 +445,19 @@ https://blog.csdn.net/lufei0920/article/details/115196146
 
 
 
+默认连接200，可以通过调整**maxThreads**  改变默认值
+
+```
+<Connector executor="tomcatThreadPool" port="8080" 						                            protocol="org.apache.coyote.http11.Http11Nio2Protocol" 
+           connectionTimeout="20000" redirectPort="8443" 
+           enableLookups="false" maxPostSize="10485760" URIEncoding="UTF-8"  acceptCount="100" acceptorThreadCount="2" disableUploadTimeout="true"                    maxConnections="10000" SSLEnabled="false"/>
+
+```
+
+
+
+
+
 
 
 
