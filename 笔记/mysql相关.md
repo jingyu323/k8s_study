@@ -787,6 +787,10 @@ UPDATE htgw_sync_main  set start_time = '2023-12-02',end_time = '2023-12-03'  wh
 
 
 
+总结时间比较
+
+
+
 ## 分库分表
 
 ### 分库
