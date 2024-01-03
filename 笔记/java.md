@@ -748,6 +748,18 @@ CountDownLacth
 CountDownLacth 不能reset
 工作线程之间彼此不关心
 
+## 连接池：
+
+- **C3P0** 是一个开源组织提供的一个数据库连接池，**速度相对较慢，稳定性还可以。**hibernate官方推荐使用
+
+- **Druid** 是阿里提供的数据库连接池，据说是集DBCP 、C3P0 、Proxool 优点于一身的数据库连接池，但是速度不确定是否有BoneCP快
+
+  连接池对比
+
+https://blog.csdn.net/HSH205572/article/details/86608332
+
+
+
 ## 垃圾回收
 
 
