@@ -762,11 +762,56 @@ https://blog.csdn.net/HSH205572/article/details/86608332
 
 ## 垃圾回收
 
+-XX:PrintHeapAtGC: 打印GC前后的详细堆栈信息。
 
+**-XX:+PrintGCDetails：**输出形式：[GC [DefNew: 8614K->781K(9088K), 0.0123035 secs] 118250K->113543K(130112K), 0.0124633 secs] [GC [DefNew: 8614K->8614K(9088K), 0.0000665 secs][Tenured: 112761K->10414K(121024K), 0.0433488 secs] 121376K->10414K(130112K), 0.0436268 secs]
+
+**-XX:+PrintGCTimeStamps** -XX:+PrintGC：PrintGCTimeStamps可与上面两个混合使用
+输出形式：11.851: [GC 98328K->93620K(130112K), 0.0082960 secs]
+
+**-XX:+PrintGCApplicationConcurrentTime：**打印每次垃圾回收前，程序未中断的执行时间。可与上面混合使用。输出形式：Application time: 0.5291524
+
+**seconds**
+
+-XX:+PrintGCApplicationStoppedTime：打印垃圾回收期间程序暂停的时间。可与上面混合使用。输出形式：Total time for which application threads were stopped: 0.0468229 seconds
 
 1.垃圾回收的对象位于哪里？
 
 主要是堆区，
+
+
+
+### 垃圾回收器的适用范围和功能：
+
+
+
+**收集器设置**
+
+**-XX:+UseSerialGC:**设置串行收集器
+
+**-XX:+UseParallelGC:**设置并行收集器
+
+**-XX:+UseParalledlOldGC:**设置并行年老代收集器
+
+**-XX:+UseConcMarkSweepGC:**设置并发收集器
+
+**垃圾回收统计信息**
+
+**-XX:+PrintGC**
+
+**-XX:+PrintGCDetails**
+
+**-XX:+PrintGCTimeStamps**
+
+**-Xloggc:filename**
+
+#### 年轻代
+
+
+
+#### 老年代
+
+
 
 ## springMVC初始化流程（二）
 
