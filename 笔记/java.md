@@ -805,11 +805,19 @@ https://blog.csdn.net/HSH205572/article/details/86608332
 
 **-Xloggc:filename**
 
-#### 年轻代
+#### 年轻代 复制算法 
+
+   所有新生成的对象首先都是放在年轻代的。年轻代的目标就是尽可能快速的收集掉那些生命周期短的对象
+
+#### 老年代 标记-清除或标记-整理算法
+
+   在年轻代中经历了N次垃圾回收后仍然存活的对象，就会被放到年老代中。因此，可以认为年老代中存放的都是一些生命周期较长的对象
 
 
 
-#### 老年代
+年轻代 老年代 均属于堆区
+
+
 
 
 
@@ -1074,11 +1082,41 @@ ulimit -a
 
 ## Java OOM优化
 
-
+先看资源使用情况
 
  top -H -p pid 
 
+查看内存使用情况，主要看堆使用情况
 
+jmap -heap PID
+
+
+
+jstat -gc  22876
+
+ jstat -gc  22876   1000 100   表示 一秒钟打一次 总共打100次 
+
+用来查询当前进程下，各区已使用的内存占比情况 总垃圾回收统计
+
+jstat -gcutil 22876  1000 100 
+
+jstat -gcnew与jstat -gcold是用来排查年轻代和年老代的内存占用情况
+
+
+
+类加载统计 jstat -class pid
+
+编译统计jstat -compiler pid
+
+堆内存统计 jstat -gccapacity pid
+
+jstat -gccause 垃圾回收器分析统计
+
+ jstat -gcmetacapacity 18750 1000  元数据内存空间统计
+
+jstat -gcnewcapacity 18750 新生代内存空间统计
+
+ jstat -gcold 18750 老年代垃圾回收统计
 
 1. Java.lang.OutOfMemoryError: **GC overhead limit exceeded**
 
