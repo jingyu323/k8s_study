@@ -344,6 +344,16 @@ fi
 
 ## jvm相关
 
+### 内存模型：
+
+
+
+
+
+
+
+
+
 ### 1.tomcat 相关
 
 ##### 查看tomcat进程启动了多少个线程
@@ -468,7 +478,64 @@ JAVA_OPTS="-XX:+UseParallelGC -XX:+UseParallelOldGC -Xms128m -Xmx1024m -XX:NewSi
 
 
 
+### 垃圾回收
 
+https://blog.csdn.net/qq_43842093/article/details/129105466
+
+Minor GC/Young GC、Major GC/Old GC、Mixed GC、Full GC都是什么意思？
+部分收集（Partial GC）：指目标不是完整收集整个Java堆的垃圾收集，其中又分为：
+
+新生代收集（Minor GC/Young GC）：指目标只是新生代的垃圾收集。
+
+新创建的对象优先在新生代Eden区进行分配，如果Eden区没有足够的空间时，就会触发Young GC来清理新生代。
+
+老年代收集（Major GC/Old GC）：指目标只是老年代的垃圾收集。目前只有CMS收集器会有单独收集老年代的行为。
+混合收集（Mixed GC）：指目标是收集整个新生代以及部分老年代的垃圾收集。目前只有G1收集器会有这种行为。
+整堆收集（Full GC）：收集整个Java堆和方法区的垃圾收集。 
+
+
+
+#### 什么时候触发full GC：
+
+![图片](images/fullgc.png)
+
+Young GC之前检查老年代：在要进行 Young GC 的时候，发现老年代可用的连续内存空间 < 新生代历次Young GC后升入老年代的对象总和的平均大小，说明本次Young GC后可能升入老年代的对象大小，可能超过了老年代当前可用内存空间,那就会触发 Full GC。
+Young GC之后老年代空间不足：执行Young GC之后有一批对象需要放入老年代，此时老年代就是没有足够的内存空间存放这些对象了，此时必须立即触发一次Full GC
+老年代空间不足，老年代内存使用率过高，达到一定比例，也会触发Full GC。
+空间分配担保失败（ Promotion Failure），新生代的 To 区放不下从 Eden 和 From 拷贝过来对象，或者新生代对象 GC 年龄到达阈值需要晋升这两种情况，老年代如果放不下的话都会触发 Full GC。
+方法区内存空间不足：如果方法区由永久代实现，永久代空间不足 Full GC。
+System.gc()等命令触发：System.gc()、jmap -dump 等命令会触发 full gc。
+
+
+
+#### 对象什么时候会进入老年代？
+
+![图片](images/ob2oldgen.png)
+
+##### 长期存活的对象将进入老年代
+
+在对象的对象头信息中存储着对象的迭代年龄,迭代年龄会在每次YoungGC之后对象的移区操作中增加,每一次移区年龄加一.当这个年龄达到15(默认)之后,这个对象将会被移入老年代。
+
+可以通过这个参数设置这个年龄值。
+
+- XX:MaxTenuringThreshold 
+
+##### 大对象直接进入老年代
+
+有一些占用大量连续内存空间的对象在被加载就会直接进入老年代.这样的大对象一般是一些数组,长字符串之类的对。
+
+HotSpot虚拟机提供了这个参数来设置。
+
+-XX：PretenureSizeThreshold
+
+##### 动态对象年龄判定
+
+为了能更好地适应不同程序的内存状况，HotSpot虚拟机并不是永远要求对象的年龄必须达到- XX：MaxTenuringThreshold才能晋升老年代，如果在Survivor空间中相同年龄所有对象大小的总和大于Survivor空间的一半，年龄大于或等于该年龄的对象就可以直接进入老年代。
+
+##### 空间分配担保
+
+假如在Young GC之后，新生代仍然有大量对象存活，就需要老年代进行分配担保，把Survivor无法容纳的对象直接送入老年代。
+ 
 
 
 
