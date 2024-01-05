@@ -543,6 +543,34 @@ HotSpot虚拟机提供了这个参数来设置。
 
 ![图片](images/gc_collect.png)
 
+##### Serial收集器(最初级 单线程 )
+
+Serial收集器是最基础、历史最悠久的收集器。
+
+如同它的名字（串行），它是一个单线程工作的收集器，使用一个处理器或一条收集线程去完成垃圾收集工作。并且进行垃圾收集时，必须暂停其他所有工作线程，直到垃圾收集结束——这就是所谓的“Stop The World”。
+
+Serial/Serial Old 分别收集新生代和老年代
+
+##### ParNew (多线程 多线程收集新生代)
+
+ParNew收集器实质上是Serial收集器的多线程并行版本，使用多条线程进行垃圾收集。
+
+![图片](images/gc_ParNew.png)
+
+##### Parallel Scavenge（新生代收集器）
+
+Parallel Scavenge收集器是一款新生代收集器，基于标记-复制算法实现，也能够并行收集。和ParNew有些类似，但Parallel Scavenge主要关注的是垃圾收集的吞吐量——所谓吞吐量，就是CPU用于运行用户代码的时间和总消耗时间的比值，比值越大，说明垃圾收集的占比越小。 
+
+- Parallel Old
+
+Parallel Old是Parallel Scavenge收集器的老年代版本，支持多线程并发收集，基于标记-整理算法实现。
+
+##### CMS收集器（老年代的收集器）
+
+CMS（Concurrent Mark Sweep）收集器是一种以获取最短回收停顿时间为目标的收集器，同样是老年代的收集器，采用标记-清除算法。
+
+##### Garbage First收集器
+
 
 
 
