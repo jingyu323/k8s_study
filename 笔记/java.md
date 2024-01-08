@@ -599,6 +599,15 @@ G1收集器的运行过程大致可划分为以下四个步骤：
 
 ![图片](images/gc_g1.png)
 
+
+
+最重要的是MaxGCPauseMillis，可以通过它设定G1的目标停顿时间，它会尽量的去达成这个目标。G1HeapRegionSize可以设置小堆区的大小，一般是2的次幂。
+InitiatingHeapOccupancyPercent，启动并发GC时的堆内存占用百分比。G1用它来触发并发GC周期，基于整个堆的使用率，而不只是某一代内存的使用比例，默认是45%
+
+
+
+
+
 ##### ZGC
 
 ZGC（Z Garbage Collector）是Java HotSpot虚拟机中的一种新型垃圾收集器，它旨在提供更高效的内存回收性能，同时满足低延迟和一致性要求。ZGC采用了并发的、可扩展的、多线程的收集策略，可以在不进行全局停顿的情况下完成内存回收。
@@ -765,6 +774,18 @@ Dumping heap to /root/dump ...
 Heap dump file created
 
 ```
+
+#### MinorGC，MajorGC、FullGC都什么时候发生
+
+MinorGC在年轻代空间不足的时候发生，MajorGC指的是老年代的GC，出现MajorGC一般经常伴有MinorGC。
+
+FullGC有三种情况。
+
+1. 当老年代无法再分配内存的时候
+2. 元空间不足的时候
+3. 显示调用System.gc的时候。另外，像CMS一类的垃圾回收器，在MinorGC出现promotion failure的时候也会发生FullGC
+
+
 
 ### 虚拟机执行
 
@@ -1130,6 +1151,10 @@ https://blog.csdn.net/HSH205572/article/details/86608332
 
 
 
+元空间：逻辑上存在，物理上不存在 ，因为：存储在本地磁盘内,不占用虚拟机内存
+
+
+
 
 
 ## springMVC初始化流程（二）
@@ -1348,7 +1373,14 @@ https://www.cnblogs.com/powerwu/articles/16686555.html
 # 问题排查 
 
 ## 1. tomcat 打开文件太多问题排查
- 查看 系统文件限制
+```
+#添加垃圾回收参数
+JAVA_OPTS="-server -Djava.awt.headless=true  -XX:+PrintGCDetails -XX:+PrintGCTimeStamps -XX:+PrintGCDateStamps -Xloggc:gc-%t.log -XX:+HeapDumpOnOutOfMemoryError  -XX:HeapDumpPath=oom.dump"
+```
+
+ 
+
+查看 系统文件限制
 ulimit -a 
 
 针对所有用户的设置，在/etc/security/limits.conf文件，其是可以对系统用户、组进行cpu、文件数等限制的，通过它可以针对某个用户或全部进行限制。但不能超越系统的限制；
@@ -1435,7 +1467,9 @@ jstat -gcnewcapacity 18750 新生代内存空间统计
 
 该*java.lang.OutOfMemoryError：GC开销超过极限*误差信号，你的应用程序花费太多的时间做垃圾收集太少的结果JVM的方式。默认情况下，如果 JVM 花费超过**98% 的总时间进行 GC 并且在 GC 之后仅回收不到 2% 的堆，则**JVM 被配置为抛出此错误。
 
- 
+#####  查看服务器默认的垃圾回收器
+
+-XX:+PrintCommandLineFlags 
 
 加载了过多的资源，jvm清理不及时导致
 
@@ -1492,3 +1526,8 @@ egrep -i -r 'Out Of' /var/log
 
 
 
+## JVM 面试系列
+
+1. 38个JVM精选问答
+
+   https://juejin.cn/post/6936390496122044423
