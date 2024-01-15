@@ -77,9 +77,13 @@ $(echo " touch 11222" )
 
 两种方式都可以直接执行字符串中的内容
 
+强制安装
 
+```
+rpm -ivh *python* --nodeps --force
+rpm -ivh *yum* --nodeps --force
 
-
+```
 
 ## 查看磁盘空间
 

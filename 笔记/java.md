@@ -493,6 +493,24 @@ Full gc 次数0 或 avg pause interval >= 24小时 ;
 找到最合适的参数，将这些参数应用到所有服务器，并进行后续跟踪。
 以上操作步骤中，某些步骤是需要多次不断迭代完成的。一般是从满足程序的内存使用需求开始的，之后是时间延迟的要求，最后才是吞吐量的要求，要基于这个步骤来不断优化，每一个步骤都是进行下一步的基础，不可逆行。 
 
+CPU多核，关注用户停顿时间，JDK1.8及以上，JVM可用内存6G以上，那么选择G1。
+
+参数配置：
+
+```text
+ //设置Serial垃圾收集器（新生代）
+ 开启：-XX:+UseSerialGC
+ 
+ //设置PS+PO,新生代使用功能Parallel Scavenge 老年代将会使用Parallel Old收集器
+ 开启 -XX:+UseParallelOldGC
+ 
+ //CMS垃圾收集器（老年代）
+ 开启 -XX:+UseConcMarkSweepGC
+ 
+ //设置G1垃圾收集器
+ 开启 -XX:+UseG1GC
+```
+
 
 
 默认连接200，可以通过调整**maxThreads**  改变默认值
