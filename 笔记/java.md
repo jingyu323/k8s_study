@@ -1636,7 +1636,9 @@ ulimit -a
 
 jmap -heap PID
 
+jmap pid  共享对象的起始地址、映射大小、共享对象路径的全程。
 
+jmap -histo pid：查看堆中对象数量和大小
 
 jstat -gc  22876
 
