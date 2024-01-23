@@ -1099,6 +1099,16 @@ synchronized 与Lock都是可重入锁，同一个线程再次进入同步代码
 
 
 
+### 乐观锁 VS 悲观锁
+
+乐观锁在Java中是通过使用无锁编程来实现，最常采用的是CAS算法，Java原子类中的递增操作就通过CAS自旋实现的
+
+悲观锁：synchronized关键字和Lock的实现。
+
+
+
+
+
 
 #### ThreadLocal
 1. ThreadLocal是什么
