@@ -693,7 +693,7 @@ HotSpot虚拟机提供了这个参数来设置。
 ##### 空间分配担保
 
 假如在Young GC之后，新生代仍然有大量对象存活，就需要老年代进行分配担保，把Survivor无法容纳的对象直接送入老年代。
- 
+
 
 #### 垃圾收集器：
 
@@ -975,7 +975,7 @@ FullGC有三种情况。
 答案是为了保证应用程序的稳定有序。
 
 例如类java.lang.Object，它存放在rt.jar之中，通过双亲委派机制，保证最终都是委派给处于模型最顶端的启动类加载器进行加载，保证Object的一致。反之，都由各个类加载器自行去加载的话，如果用户自己也编写了一个名为java.lang.Object的类，并放在程序的 ClassPath中，那系统中就会出现多个不同的Object类。
- 
+
 
 
 
@@ -1736,3 +1736,9 @@ egrep -i -r 'Out Of' /var/log
 1. 38个JVM精选问答
 
    https://juejin.cn/post/6936390496122044423
+
+
+
+## 参考文档：
+
+https://returnac.cn/pages/JAVA/%E5%9F%BA%E7%A1%80/%E4%B8%8D%E5%8F%AF%E4%B8%8D%E8%AF%B4%E7%9A%84Java-%E9%94%81%E4%BA%8B.html#%E5%89%8D%E8%A8%80
