@@ -1127,7 +1127,7 @@ ReentrantLock(可重入锁)
 ReentrantReadWriteLock.ReadLock(可重入读写锁的读锁)
 ReentrantReadWriteLock.WriteLock(可重入读写锁的写锁)
 
-####  voilate
+####  volatile
 
 在对声明了**volatile**的变量进行写操作的时候，**JVM**就会向处理器发送一条**Lock前缀**的指令，这个指令会做两件事：
 
@@ -1135,6 +1135,8 @@ ReentrantReadWriteLock.WriteLock(可重入读写锁的写锁)
 - **这个写会内存的操作会使其他CPU里缓存了该内存地址的数据无效**
 
 
+
+volatile
 
 ### Synchronized和ReentrantLock对比
 #### 相同之处
