@@ -34,4 +34,14 @@ make PREFIX=/usr/local/redis install
 
 ## 7.常见问题
 
+1.redis 只有单线程吗？
+
+redis是单线程的，主要是io线程，redis持久化、集群同步邓操作则是由另外的线程来执行的
+
+2.redis 单线程为什么还这么快
+
+redis大部分操作都是在内存中完成的，单线程模型避免了多线程之间的线程竞争，redis 采用I/O多路复用机制处理大量的socket 请求
+
+
+
 ## 参考资料
