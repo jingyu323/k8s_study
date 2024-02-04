@@ -961,6 +961,40 @@ Innodb_row_lock_current_waits:当前正在等待锁定的数量;
 
 ## 索引
 
+##### 适用索引的条件：
+
+1.字段唯一性限制
+
+2.经常用于where之后的字段
+
+3.经常用于group by和order by的字段
+
+##### 什么时候不要创建索引：
+
+1.where group by order by 里用不到的字段
+
+2.字段里大量重复数据
+
+3.表数据太少的时候不需要创建索引
+
+4.经常更新的字段不需要索引
+
+##### 什么情况下索引失效：
+
+1.索引进行了表达式计算
+
+2.表达式使用了函数
+
+3.当使用like的时候后面不能是%
+
+4.使用联合索引的时候需要注意最左原则
+
+5.为了更好的利用索引，索引列要设置为not null 约束
+
+
+
+
+
 
 
 执行索引会锁住表，数据量越大的表越锁的时间长
@@ -1895,6 +1929,14 @@ SELECT * FROM information_schema.`PROCESSLIST` WHERE id = "422012972833952";
 日期格式化
 
 select count(*), DATE_FORMAT(start_time, '%Y-%m-%d')  as 'st'  from   htgw_sync_main  GROUP BY  st  ORDER BY st desc; 
+
+## MySQL 问题：
+
+1.主从复制延迟
+
+
+
+
 
 ## 参考资料
 
