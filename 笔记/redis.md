@@ -2,6 +2,22 @@
 
 ## 1.介绍
 
+
+
+集群模式：
+
+
+
+主从模式：
+
+
+
+哨兵模式：
+
+
+
+
+
 ## 2.配置
 
 ```
@@ -211,6 +227,41 @@ Boolean ifAbsent = valueOperations.setIfAbsent(key, value, 30, TimeUnit.SECONDS)
 
 
 
+
+
+### Redisson
+
+#### 公平锁
+
+RLock fairLock = redissonClient.getFairLock("fairLock_" + goodsId);
+
+fairLock.lock();
+
+fairLock.unlock();
+
+
+
+#### 红锁
+
+可以使用红锁来解决主从架构锁失效问题：就是说在主从架构系统中，线程A从master中获取到分布式锁，数据还未同步到slave中时master就挂掉了，slave成为新的master，其它线程从新的master获取锁也成功了，就会出现并发安全问题
+
+
+
+#### 联锁 
+
+ 联锁（RedissonMultiLock）对象可以将多个RLock对象关联为一个联锁，实现加锁和解锁功能。每个RLock对象实例可以来自于不同的Redisson实例。
+
+RLock one = redissonClient.getLock("one_" + id);
+		RLock two = redissonClient.getLock("two_" + id);
+		RLock three = redissonClient.getLock("three_" + id);
+		RedissonMultiLock multiLock = new RedissonMultiLock(one, two, three);  
+
+
+
+
+
+
+
 ## 7.常见问题
 
 1.redis 只有单线程吗？
@@ -253,6 +304,14 @@ redis大部分操作都是在内存中完成的，单线程模型避免了多线
 
 
 缓存
+
+
+
+ 
+
+#### Redis数据一致性问题的三种解决方案：
+
+
 
 
 
