@@ -20,6 +20,12 @@ Restful风格，一切API都遵循Rest原则，容易上手近实时搜索，数
 
 ## 4.实现原理
 
+### 4.1分片：
+
+
+
+
+
 ## 5.安装
 
 不能使用root用户来启动
@@ -768,7 +774,7 @@ autorefresh=1
 type=rpm-md
 
 
- 	
+yum install kibana
 
 ```
 
