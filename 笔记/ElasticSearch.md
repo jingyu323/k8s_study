@@ -806,6 +806,7 @@ You can then generate an enrollment token for Kibana with the [`elasticsearch-cr
 
 ```sh
 生成token
+/usr/share/elasticsearch/
 bin/elasticsearch-create-enrollment-token -s kibana
 
 
@@ -882,6 +883,8 @@ example
  https://github.com/elastic/elasticsearch-java/tree/8.8/java-client/src/test/java/co/elastic/clients/documentation
 
 API key再对接 kibana 之后再管理界面创建API key即可
+
+You can generate an API key on the **Management** page under Security.
 
 ```
 <dependency>
