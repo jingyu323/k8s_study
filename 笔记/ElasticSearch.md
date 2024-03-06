@@ -18,6 +18,14 @@
 分布式，无需人工搭建集群（solr就需要人为配置，使用Zookeeper作为注册中心）
 Restful风格，一切API都遵循Rest原则，容易上手近实时搜索，数据更新在Elasticsearch中几乎是完全同步的
 
+
+
+index 状态：
+
+
+
+
+
 ## 4.实现原理
 
 ### 4.1分片：
@@ -862,6 +870,49 @@ https://www.elastic.co/guide/en/elasticsearch/reference/8.8/security-basic-setup
 
 
 
+### metricbeat 配置
+
+metricbeat setup
+Exiting: couldn't connect to any of the configured Elasticsearch hosts. Errors: [error connecting to Elasticsearch at https://localhost:9200: Get "https://localhost:9200": x509: certificate signed by unknown authority]
+
+
+
+解决方法： output.elasticsearch: 增加如下配置
+
+output.elasticsearch:
+
+ 	ssl.verification_mode: none
+
+```
+setup.kibana:
+
+  # Kibana Host
+  # Scheme and port can be left out and will be set to the default (http and 5601)
+  # In case you specify and additional path, the scheme is required: http://localhost:5601/path
+  # IPv6 addresses should always be defined as: https://[2001:db8::1]:5601
+  host: "localhost:5601"
+  username: "elastic"
+  password: "BzevJY1OL-kEBnw*ZJBu"
+
+  # Kibana Space ID
+  # ID of the Kibana Space into which the dashboards should be loaded. By default,
+  # the Default Space will be used.
+  #space.id:
+# ---------------------------- Elasticsearch Output ----------------------------
+output.elasticsearch:
+  # Array of hosts to connect to.
+  hosts: ["localhost:9200"]
+
+  # Performance preset - one of "balanced", "throughput", "scale",
+  # "latency", or "custom".
+  preset: balanced
+
+  # Protocol - either `http` (default) or `https`.
+  protocol: "https"
+  ssl.verification_mode: none
+
+```
+
 
 
 # java 连接
@@ -901,6 +952,8 @@ You can generate an API key on the **Management** page under Security.
 ```
 
 
+
+需要找es  /etc/elasticsearch/certs/http_ca.crt  和 账户和密码
 
 
 
