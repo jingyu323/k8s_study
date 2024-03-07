@@ -915,6 +915,23 @@ output.elasticsearch:
 
 
 
+```sh
+systemctl status metricbeat
+启用模块
+metricbeat modules enable elasticsearch-xpack
+禁止模块
+metricbeat modules disable system
+
+测试配置结果
+metricbeat test output
+
+systemctl restart metricbeat
+```
+
+
+
+
+
 # java 连接
 
 8.+ 版本之后Java Transport Client (deprecated)  
