@@ -700,18 +700,24 @@ PUT _scripts/my-search-template
 
 分词器的主要作用将用户输入的一段文本，按照一定逻辑，分析成多个词语的一种工具
 
-##### analysis-ik 
+分词器下载地址
 
-https://github.com/medcl/elasticsearch-analysis-ik
+analysis-ik 
+
+https://github.com/infinilabs/analysis-ik/releases
 
 ```
-./bin/elasticsearch-plugin installhttps://github.com/medcl/elasticsearch-analysis-ik/releases/download/v8.8.2/elasticsearch-analysis-ik-8.8.2.zip
+./bin/elasticsearch-plugin install https://github.com/medcl/elasticsearch-analysis-ik/releases/download/v8.12.2/elasticsearch-analysis-ik-8.12.2.zip
 ```
 
 #### 什么时候分词
 
 - `创建索引`：当索引文档字符类型为`text`时，在建立索引时将会对该字段进行分词。
 - `搜索`：当对一个`text`类型的字段进行全文检索时，会对用户输入的文本进行分词。
+
+```
+curl -X GET -H "Content-Type: application/json"  "http://localhost:9200/_analyze?pretty=true" -d'{"text":"我就是全村人的希望","analyzer": "ik_smart"}'
+```
 
 
 
@@ -928,9 +934,9 @@ metricbeat test output
 systemctl restart metricbeat
 ```
 
+## Logstash 配置
 
-
-
+https://blog.csdn.net/u011197085/article/details/130469341
 
 # java 连接
 
