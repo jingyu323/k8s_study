@@ -507,6 +507,12 @@ systemctl   start cerebro.service
 
 
 
+### 证书配置
+
+Elasticsearch基础3——密钥库工具、证书生成工具及四种生成模式、https请求步骤流程
+
+
+
 ## 6.使用
 
 1. 分词设置
