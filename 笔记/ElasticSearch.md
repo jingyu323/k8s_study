@@ -944,6 +944,54 @@ systemctl restart metricbeat
 
 https://blog.csdn.net/u011197085/article/details/130469341
 
+
+
+elaticSearch 8.12   htttps: 访问配置
+
+```
+input {
+  jdbc {
+    jdbc_driver_library => "/usr/share/logstash/logstash-core/lib/jars/mysql-connector-java-8.0.16.jar"
+    jdbc_driver_class => "com.mysql.cj.jdbc.Driver"
+    jdbc_connection_string => "jdbc:mysql://localhost:3306/es_test"
+    jdbc_user => "root"
+    jdbc_password => "root"
+    statement => "SELECT * FROM mytable"
+  }
+}
+
+output {
+  elasticsearch {
+    hosts => ["https://localhost:9200"]
+    index => "myindex"
+    document_id => "%{id}"
+    user => "elastic"
+    password => "BzevJY1OL-kEBnw*ZJBu"
+    cacert => '/etc/elasticsearch/certs/http_ca.crt'
+  }
+}
+```
+
+/usr/share/logstash/bin/logstash -f /usr/share/logstash/conf/mysql.conf
+
+
+
+
+
+配置参数如下：证书在这个目录 /etc/elasticsearch/certs
+
+```
+    ssl_certificate_verification => true
+    truststore => "/home/elastic/elasticsearch-8.4.3/config/certs/http.p12"
+    truststore_password => "EDkicmcvTIaby_aFALRl3w"
+```
+
+./bin/elasticsearch-keystore list  可以查看有那些密码
+
+./bin/elasticsearch-keystore show xpack.security.http.ssl.keystore.secure_password   显示对应key的密码
+
+
+
 # java 连接
 
 8.+ 版本之后Java Transport Client (deprecated)  
