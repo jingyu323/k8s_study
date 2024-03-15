@@ -992,6 +992,12 @@ output {
 
 
 
+logstach https 配置
+
+https://blog.csdn.net/UbuntuTouch/article/details/126868040
+
+https://www.elastic.co/guide/en/elasticsearch/reference/8.12/configuring-stack-security.html#stack-security-certificates
+
 # java 连接
 
 8.+ 版本之后Java Transport Client (deprecated)  
