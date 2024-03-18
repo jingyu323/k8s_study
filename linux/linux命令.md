@@ -686,6 +686,11 @@ Linux为我们提供了一个简便的查询方式，那就是 +n 和 -n。下�
 find /home/testfile  -mtime +2 -name "*.dat" -type f -exec rm {} \;
 ```
 
+### Rsync
+
+1. `rsync -a source_dir destination_dir`：以归档模式同步目录，保留文件属性和权限。
+2. `rsync -v source_dir destination_dir`：输出详细的同步过程信息。
+
 
 
 
