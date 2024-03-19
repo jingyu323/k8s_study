@@ -872,7 +872,7 @@ server.host: "0.0.0.0"
 
 
 
-##### kibana 使用
+### kibana 使用
 
 https://www.elastic.co/guide/cn/kibana/current/connect-to-elasticsearch.html
 
@@ -922,6 +922,10 @@ output.elasticsearch:
   # Protocol - either `http` (default) or `https`.
   protocol: "https"
   ssl.verification_mode: none
+  
+   ssl:
+    enabled: true
+    ca_trusted_fingerprint: "C51513EFAA86B5E078095211814D969ECE2FA26031FBA70311BC8F119AD7D108"
 
 ```
 
@@ -940,7 +944,7 @@ metricbeat test output
 systemctl restart metricbeat
 ```
 
-## Logstash 配置
+### Logstash 配置
 
 https://blog.csdn.net/u011197085/article/details/130469341
 
@@ -990,6 +994,71 @@ output {
 
 ./bin/elasticsearch-keystore show xpack.security.http.ssl.keystore.secure_password   显示对应key的密码
 
+不同的服务区分
+
+```
+input {
+  tcp {
+    mode => "server"
+    host => "0.0.0.0"  # 允许任意主机发送日志
+    port => 5044       #监听的端口号
+    codec => json_lines    # 数据格式
+    type => consumer
+  }
+}
+input{
+	tcp{
+	 mode => "server"
+	 host => "0.0.0.0"
+	 port => 5045
+	  codec => json_lines    # 数据格式
+    type => product
+	}
+}
+
+filter {
+  	grok {
+    	match => {
+      		"message" => '%{IPORHOST:clientip} %{USER:ident} %{USER:auth} \[%{HTTPDATE:timestamp}\] "%{WORD:verb} %{DATA:request} HTTP/%{NUMBER:httpversion}" %{NUMBER:response:int} (?:-|%{NUMBER:bytes:int}) %{QS:referrer} %{QS:agent}'
+    	}
+  	}
+ 
+	if[type] == "consumer" {
+		mutate {
+	  		add_tag => ["consumer"]
+	  	}
+	}
+ 
+	if [type] == "product" {
+		mutate {
+			add_tag => ["product"]
+		}
+	} 
+}
+
+
+output {
+if "consumer" in [tags] {
+  elasticsearch {
+      hosts  => ["http://10.211.55.3:9200"]   # ElasticSearch 的地址和端口
+      index  => "consumer-%{+YYYY.MM.dd}"         # 指定索引名,可以根据自己的需求指定命名
+      codec  => "json"
+  }
+  }
+  if "product" in [tags] {
+  elasticsearch {
+      hosts  => ["http://10.211.55.3:9200"]   # ElasticSearch 的地址和端口
+      index  => "product-%{+YYYY.MM.dd}"         # 指定索引名,可以根据自己的需求指定命名
+      codec  => "json"
+  }
+  }
+  stdout {
+    codec => rubydebug
+  }
+}
+
+```
+
 
 
 logstach https 配置
@@ -997,6 +1066,82 @@ logstach https 配置
 https://blog.csdn.net/UbuntuTouch/article/details/126868040
 
 https://www.elastic.co/guide/en/elasticsearch/reference/8.12/configuring-stack-security.html#stack-security-certificates
+
+### filebeat
+
+
+
+```sh
+
+
+获取 ca_trusted_fingerprint
+openssl x509 -fingerprint -sha256 -in /etc/elasticsearch/certs/http_ca.crt
+
+
+ ssl:
+    enabled: true
+    ca_trusted_fingerprint: "C51513EFAA86B5E078095211814D969ECE2FA26031FBA70311BC8F119AD7D108"
+
+```
+
+
+
+```sh
+filebeat setup -e  设置filebeat
+```
+
+
+
+需要启用gcp
+
+filebeat  modules  enable gcp
+
+```
+# Module: gcp
+# Docs: https://www.elastic.co/guide/en/beats/filebeat/8.12/filebeat-module-gcp.html
+
+- module: gcp
+  vpcflow:
+    enabled: true
+    var.project_id: my-gcp-project-id
+    var.topic: gcp-vpc-flowlogs
+    var.subscription_name: filebeat-gcp-vpc-flowlogs-sub
+    var.credentials_file: ${path.config}/gcp-service-account-xyz.json
+
+    var.keep_original_message: false
+
+  firewall:
+    enabled: true
+    var.project_id: my-gcp-project-id
+
+    var.topic: gcp-vpc-firewall
+
+    var.subscription_name: filebeat-gcp-firewall-sub
+
+    var.credentials_file: ${path.config}/gcp-service-account-xyz.json
+
+   var.keep_original_message: false
+  audit:
+    enabled: true
+    var.project_id: my-gcp-project-id
+    var.topic: gcp-vpc-audit
+    var.subscription_name: filebeat-gcp-audit
+    var.credentials_file: ${path.config}/gcp-service-account-xyz.json
+    var.keep_original_message: false
+
+```
+
+systemctl restart filebeat.service
+
+
+
+
+
+systemctl status filebeat.service
+
+
+
+
 
 # java 连接
 
