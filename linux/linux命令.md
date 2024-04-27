@@ -39,6 +39,17 @@ sed 's/司机室/SJS/g'
 
 rar 压缩文件
  rar a  -r   -idq "${sub_dir}"  "${sub_dir}/*"
+ 
+
+linux删除超过三天文件
+
+find /path/to/directory -type f -mtime +3 -exec rm {} \;
+
+find /path/to/directory -type f -mtime +3 -delete
+
+
+find /HighCache/videoPlay/0401/司机室1摄像头1  -type f -mtime +90  -delete
+ 
 ```
 
 
