@@ -23,7 +23,7 @@ usermod -s /usr/bin/passwd test //用户telnet后将直接进入改密界面
 
 例如：chmod 777 filename 最高权限，当然你也可以改755 等
 
-
+修改 ftp 用户的家目录 在/etc/passwd 中修改指定的目录就行 需要重启服务
 
 添加用户：useradd -d /home/video -s /sbin/nologin ftpuser
 
