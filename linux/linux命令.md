@@ -200,6 +200,21 @@ ulimit -n 102400
 
 最大值为655350
 
+
+
+删除指定大小的文件
+
+```
+du -h     | grep 6.0G | awk '{print $2}' |  while read   folder_path; do
+echo "$folder_path"
+rm -rf  "$folder_path"
+done
+
+
+```
+
+
+
 ## RAR
 
 ```
