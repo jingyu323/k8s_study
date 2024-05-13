@@ -830,9 +830,119 @@ done
 
 3.  vmrun list  正在运行的服务器列表
 
+```
+ scp [option] /path/to/source/file user@server-ip:/path/to/destination/directory
+-C - 这会在复制过程中压缩文件或目录。
+
+-P - 如果默认 SSH 端口不是 22，则使用此选项指定 SSH 端口。
+
+-r - 此选项递归复制目录及其内容。
+
+-p - 保留文件的访问和修改时间。
+
+```
+
+```
+强制mount
+
+
+
+umount /data/disk16 -f
+umount: /data/disk16: target is busy.
+        (In some cases useful info about processes that use
+         the device is found by lsof(8) or fuser(1)) 
+         
+     这个时候我们要找出是哪个进程正在占用这个目录
+
+fuser -mv /data/disk12
+                     USER        PID ACCESS COMMAND
+/data/disk12:        root     kernel mount /data/disk12
+                     hdfs      44545 F.... java 
+                     
+ 关闭并卸载kill -9 44545
+
+fuser -m /data/disk12
+
+umount /data/disk12
+出现另外一种情况，我们也无法看到是什么程序正在占用磁盘
+umount -l /data/disk20 加给-l参数强制卸载
+
+
+```
+
+#### mount: unknown filesystem type LVM2_member 解决方法
+
+```
+查看逻辑卷：lvdisplay
+sudo lvdisplay
+
+--- Logical volume ---
+   LV Name             /dev/VolGroup00/LogVol03
+   VG Name             VolGroup00
+   LV UUID             YhG8Fu-ZGPk-qt8D-AxgC-DzOU-dg1F-z71feI
+   LV Write Access        read/write
+  LV Status              unenable # 状态非可用状态
+   # open                 1
+   LV Size             245.97 GB
+   Current LE          7871
+   Segments             1
+   Allocation          inherit
+   Read ahead sectors     auto
+   - currently set to     256
+   Block device           253:2
+
+执行卷组激活
+
+sudo vgchange -ay /dev/VolGroup00
+sudo lvdisplay
+重新查看
+LV Status              available
+重新挂载
+sudo mount   /dev/VolGroup00/LogVol03   /home/lvm
+ 
+```
+
+
+
+
+
 
 
 ## 材料：
 
 1. Linux基础介绍 https://www.junmajinlong.com/linux/index/#systemd
+
+```
+
+
+[Unit]
+Description=My Service
+After=network.target
+
+[Service]
+ExecStart=bash /usr/local/bin/start_net_storage.sh
+Restart=always
+User=root
+
+[Install]
+WantedBy=multi-user.target
+
+
+安装服务
+
+cp ./*.service /usr/lib/systemd/system
+添加开机启动
+systemctl enable /usr/lib/systemd/system/test.service
+
+
+systemctl start test.service
+
+systemctl status test.service	
+
+```
+
+```
+route -n
+
+```
 
