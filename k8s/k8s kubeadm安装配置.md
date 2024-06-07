@@ -438,6 +438,10 @@ ONBOOT=yes
 重启网卡
  nmcli c reload
 
+
+
+nmcli con reload/nmcli c reload
+
 拉镜像
 ctr -n k8s.io images import <your tar file>
 

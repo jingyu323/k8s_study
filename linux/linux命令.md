@@ -816,6 +816,37 @@ done
 
 
 
+### Ubntu 网络配置
+
+
+
+/etc/netplan/目录下的01-***.[yaml](https://so.csdn.net/so/search?q=yaml&spm=1001.2101.3001.7020)类似命名的文件
+
+sudo netplan apply 以启动新的网络配置文件
+
+
+
+ssh 配置：
+
+```
+sudo apt update
+sudo apt install openssh-server
+
+sudo systemctl status ssh
+sudo systemctl start ssh
+
+路由
+sudo route add default gw 192.168.1.1
+sudo route del default gw 192.168.1.1
+
+```
+
+
+
+
+
+
+
 ## 虚拟机：
 
 1. ```bash

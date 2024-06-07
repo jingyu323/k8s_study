@@ -222,5 +222,12 @@ CREATE DATABASE test;
 CREATE TABLE test.messages (message VARCHAR(250));
 INSERT INTO test.messages VALUES ('hello');
 EOF
+
+清理binlog
+
+purge binary logs before '2024-05-23 23:59:59';
+设置binlog 大小
+expire_logs_days=7
+max_binlog_size=1024M
 ```
 
