@@ -151,9 +151,56 @@ with zipfile.ZipFile("我创建的压缩包.zip", "r") as zipobj:
  
 ```
 
+## 3.游戏 
+
+ 
 
 
-## 6.使用
+
+
+
+### 素材
+
+####  1. 音乐素材    https://www.aigei.com/music/class/
+
+
+
+## 4. 面向对象
+
+`__dict__`类变量查看对象的实例变量
+
+```
+student = Student('a', 10)
+print(student.__dict__)
+查看类变量
+print(Student.__dict__)
+```
+
+#### 4.1 类函数(类方法)
+
+定义类方法, 使用`@classmethod`装饰器
+
+- 类方法关联类变量
+
+- 实例方法关联实例变量
+-  调用：实例对象和类对象都可以调用。
+
+#### 4.2 静态方法
+
+静态方法第一个参数不代表类本身, 而是一个参数
+
+#####  使用
+
+-   调用：实例对象和类对象都可以调用。
+- 静态方法可以使用类变量
+
+#### 4.3多态
+
+
+
+
+
+
 
 #### 6.1 正则
 
@@ -239,7 +286,13 @@ mycursor.execute("CREATE DATABASE mydatabase")
 
 ```
 
+#### 6.5 转换为json 
 
+```
+print(json.dumps(brick.__dict__))
+
+
+```
 
 
 
