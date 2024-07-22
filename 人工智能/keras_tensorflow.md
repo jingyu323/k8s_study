@@ -67,7 +67,26 @@ Reshape((3,3), input_length=(16, ))
 
 
 ```
-Conv2D(filters, kernel_size, strides=(1, 1), padding=’valid’)
+# CNN在Keras上的API
+tf.keras.layers.Conv2D(
+    filters, # 卷积核的个数
+    kernel_size, # 卷积核的大小，常用的是（3，3）
+    strides=(1, 1), # 核移动步幅
+    padding='valid', # 是否需要边界填充
+    data_format=None,
+    dilation_rate=(1, 1), 
+    activation=None, # 激活函数
+    use_bias=True,
+    kernel_initializer='glorot_uniform',
+    bias_initializer='zeros',
+    kernel_regularizer=None, 
+    bias_regularizer=None, 
+    activity_regularizer=None,
+    kernel_constraint=None, 
+    bias_constraint=None, 
+    **kwargs
+)
+
 
 参数说明：
 filters：卷积核的个数。
@@ -89,6 +108,17 @@ pool_size：长度为2的整数tuple，表示在横向和纵向的下采样样�
 
 padding：和卷积层的padding一样
 ```
+
+
+
+最大池化层MaxPooling
+最大池化层通常使用2*2的窗口，步幅为2进行特征下采样
+作用有二：
+1、减少需要处理的特征图的元素个数
+2、增加卷积层的观察窗口（即窗口覆盖原始输入的比例越来越大）
+一个张量输入(28, 28, 32)，经过(2, 2)的MaxPooling处理，输出张量(14, 14, 32)，其过程直观的可以理解为取相邻(2, 2)矩阵里面的最大值。当然也有其他的处理方法，比如取平均值。 
+
+
 
 #### 1.8 循环层：
 
