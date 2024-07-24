@@ -92,7 +92,9 @@ tf.keras.layers.Conv2D(
 filters：卷积核的个数。
 kernel_size：卷积核的大小。
 strdes：步长，二维中默认为(1, 1)，一维默认为1。
-Padding：补“0”策略，’valid‘指卷积后的大小与原来的大小可以不同，’same‘则卷积后大小与原来大小一致。
+Padding：补“0”策略，’valid‘指卷积后的大小与原来的大小可以不同，’same‘则卷积后大小与原来大小一致
+
+generator产生的训练数据不够用，少于所要求的steps_per_epoch * epochs 个batch数。
 ```
 
 #### 1.7 池化层：
@@ -226,6 +228,32 @@ validation_split：0-1的浮点数，切割输入数据的一定比例作为验�
 
 
 ## 四   优化 
+
+
+
+#### 基准调优，数据增强
+
+```
+# 将 train_datagen = ImageDataGenerator(rescale=1./255)
+# 修改为 
+train_augmented_datagen = ImageDataGenerator(
+    rescale=1./255,
+    rotation_range=40, # 随机旋转的角度范围
+    width_shift_range=0.2, # 在水平方向上平移的范围
+    height_shift_range=0.2, # 在垂直方向上平移的范围
+    shear_range=0.2, # 随机错切变换的角度
+    zoom_range=0.2, # 随机缩放的范围
+    horizontal_flip=True,)# 随机将一半图像水平翻转
+
+# Note that the validation data should not be augmented!
+train_augmented_generator = train_augmented_datagen.flow_from_directory(
+        train_dir,
+        target_size=(150, 150),
+        batch_size=32,
+        class_mode='binary')
+```
+
+
 
 
 
