@@ -132,6 +132,145 @@ Recurrent(return_sequences=False)
 return_sequences：控制返回的类型，“False”返回输出序列的最后一个输出，“True”则返回整个序列。当我们要搭建多层神经网络（如深层LSTM）时，若不是最后一层，则需要将该参数设为True。
 ```
 
+##### RNN
+
+区别于传统的网络结构，增加了一个状态（state），每次处理的时候输入为本次输入+当前状态
+
+
+
+SimpleRNN上一层的输出直接作为下一层的状态输入，状态输入+本层输入得到本层输出
+
+```
+# demo，表示需要返回每个时间步连续输出的完整序列
+from keras.models import Sequential
+from keras.layers import Embedding, SimpleRNN
+
+model = Sequential()
+model.add(Embedding(10000, 32))
+model.add(SimpleRNN(32, return_sequences=True))
+model.add(SimpleRNN(32, return_sequences=True))
+model.add(SimpleRNN(32))  # This last layer only returns the last outputs.
+model.summary()
+
+```
+
+
+
+##### LSTM
+
+随着层数的增加容易出现**梯度消失**，增加网络层数将变得无法训练，继而就有了长短期记忆（LSTM，long short-term memory)
+LSTM增加了一种携带信息跨越多个时间步的方法 —— Ct
+
+
+
+LSTM单元的作用 —— 允许过去的信息稍后重新进入，从而解决梯度消失问题
+
+
+
+```
+model = Sequential()
+model.add(Embedding(max_features, 32))
+model.add(LSTM(32))
+model.add(Dense(1, activation='sigmoid'))
+
+model.compile(optimizer='rmsprop',
+              loss='binary_crossentropy',
+              metrics=['acc'])
+history = model.fit(input_train, y_train,
+                    epochs=10,
+                    batch_size=128,
+                    validation_split=0.2) 
+```
+
+
+
+##### GRU
+
+门控循环单元（GRU，gated recurrent unit）层的工作原理与 LSTM相同，但它做了一些简化，运行的计算代价更低，效果可能不如LSTM
+
+```
+model.add(layers.GRU(32, input_shape=(None, float_data.shape[-1])))
+```
+
+
+
+##### 高级用法：
+
+- #### 循环dropout 
+
+  使用循环dropout(recurrent dropout) 将某一层的输入单元随机设为0，其目的是打破该层训练数据中的偶然相关性，降低网络的过拟合。
+  为了对GRU、LSTM等循环层得到的表示做正则化，应该将不随时间变化的dropout掩码应用于层的内部循环激活。
+  使用相同的dropout掩码，可以让网络沿着时间正确地传播其学习误差，而随时间随机变化的dropout掩码则会破坏这个误差信号，并且不利于学习过程。
+
+  **recurrent_dropout=0.2**  
+
+```
+model = Sequential()
+model.add(layers.GRU(32,
+                     dropout=0.2,
+                     recurrent_dropout=0.2,
+                     input_shape=(None, float_data.shape[-1])))
+model.add(layers.Dense(1))
+
+model.compile(optimizer=RMSprop(), loss='mae')
+model.summary() 
+```
+
+- #### 堆叠循环层
+
+  堆叠循环层(stacking recurrent layers) 可以提高网路表达能力。
+  增加网络容量的通常做法是 —— 增加每层单元数或增加层数。
+  在过拟合不是很严重的时候，可以放心地增大每层的大小、层数，但这么做的计算成本很高。
+
+```
+model = Sequential()
+model.add(layers.GRU(32,
+                     dropout=0.1,
+                     recurrent_dropout=0.5,
+                     return_sequences=True,
+                     input_shape=(None, float_data.shape[-1])))
+# 堆叠➕一层
+model.add(layers.GRU(64, activation='relu',
+                     dropout=0.1, 
+                     recurrent_dropout=0.5))
+model.add(layers.Dense(1))
+
+model.compile(optimizer=RMSprop(), loss='mae')
+model.summary() 
+```
+
+- #### 双向循环层
+
+  双向循环层 (directional recurrent layer) 是一种常见的RNN变体，在某些任务上的性能比普通RNN更好，常用**于自然语言处理，可谓深度学习对自然语言处理的瑞士军刀。**
+  双向循环层包含两个普通RNN，每个RNN分别沿一个方向对输入序列进行处理（时间正序和时间逆序），然后将它们的表示合并在一起，通过沿这两个方向处理序列，双向RNN能够捕捉到可能被单向RNN忽略的模式 
+
+​	
+
+```
+from keras.models import Sequential
+from keras import layers
+from keras.optimizers import RMSprop
+
+model = Sequential()
+model.add(layers.Bidirectional(
+    layers.GRU(32), input_shape=(None, float_data.shape[-1])))
+model.add(layers.Dense(1))
+
+model.compile(optimizer=RMSprop(), loss='mae')
+history = model.fit_generator(train_gen,
+                              steps_per_epoch=500,
+                              epochs=40,
+                              validation_data=val_gen,
+                              validation_steps=val_steps)
+
+```
+
+
+
+
+
+
+
 #### 1.9 嵌入层：
 
 该层只能用在模型的第一层，是将所有索引标号的稀疏矩阵映射到致密的低维矩阵。如我们对文本数据进行处理时，我们对每个词编号后，我们希望将词编号变成词向量就可以使用嵌入层。
@@ -234,8 +373,8 @@ validation_split：0-1的浮点数，切割输入数据的一定比例作为验�
 #### 基准调优，数据增强
 
 ```
-# 将 train_datagen = ImageDataGenerator(rescale=1./255)
-# 修改为 
+将 train_datagen = ImageDataGenerator(rescale=1./255)
+修改为 
 train_augmented_datagen = ImageDataGenerator(
     rescale=1./255,
     rotation_range=40, # 随机旋转的角度范围
