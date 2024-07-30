@@ -156,6 +156,12 @@ model.summary()
 
 
 
+**BRNN**
+
+BRNN模型需要使用wrappers包的Bidirecitional模块实现双向RNN模型，并且要将return_sequences参数设置为True，因为如上文所述需要将前、后向的重要信息拼接起来，所以需要将整个序列返回，而不是只返回最后一个预测词。
+
+
+
 ##### LSTM
 
 随着层数的增加容易出现**梯度消失**，增加网络层数将变得无法训练，继而就有了长短期记忆（LSTM，long short-term memory)
