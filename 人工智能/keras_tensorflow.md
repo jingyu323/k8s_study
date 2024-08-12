@@ -328,6 +328,22 @@ Embedding(100, 64, input_length=32)
 
 
 
+
+
+### 3. 手动搭建VGG-16模型
+
+**VGG-16结构说明：**
+
+- 13个卷积层（Convolutional Layer），分别用`blockX_convX`表示;
+
+- 3个全连接层（Fully connected Layer），用`classifier`表示;
+
+- 5个池化层（Pool layer）
+
+  **`VGG-16`包含了16个隐藏层（13个卷积层和3个全连接层），故称为`VGG-16`**
+
+## 
+
 ## 三   训练
 
  
@@ -459,6 +475,14 @@ input_dim: 当使用该层为模型首层时，应指定该值
 input_length: 当输入序列的长度固定时，该参数为输入序列的长度。当需要在该层后连接Flatten层，然后又要连接Dense层时，需要指定该参数
 
  
+
+ 
+
+
+
+
+
+
 
 ## 七 一些网站
 
