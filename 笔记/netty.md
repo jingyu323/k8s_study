@@ -61,7 +61,8 @@ ChannelOption.SO_KEEPALIVE
 Socket参数，连接保活，默认值为False。启用该功能时，TCP会主动探测空闲连接的有效性。可以将此功能视为TCP的心跳机制，需要注意的是：默认的心跳间隔是7200s即2小时。Netty默认关闭该功能
 
 
-
+需要添加至 childOption
+.option(ChannelOption.RCVBUF_ALLOCATOR, new FixedRecvByteBufAllocator(65535))
 
 
 ```
