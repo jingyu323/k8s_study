@@ -124,6 +124,10 @@ padding：和卷积层的padding一样
 
 #### 1.8 循环层：
 
+##### CNN  图像识别
+
+
+
 循环神经网络中的RNN、LSTM和GRU都继承本层，所以该父类的参数同样使用于对应的子类SimpleRNN、LSTM和GRU。
 
 ```
@@ -158,7 +162,7 @@ model.summary()
 
 梯度消失： 近距离的权重
 
-
+##### 
 
 
 
