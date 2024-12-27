@@ -17,6 +17,15 @@ Dense（units, activation=’relu’, use_bias=True）
 units: 全连接层输出的维度，即下一层神经元的个数。
 activation：激活函数，默认使用Relu。
 use_bias：是否使用bias偏置项。
+
+2.0
+tf.keras.layers.Dense( 神经元个数,
+						activation=”激活函数”,
+						kernel_regularizer=”正则化方式”)
+
+activation：字符串给出，可选'relu'、'softmax'、'sigmoid'、'tanh'等。
+kernel_regularizer：可选tf.keras.regularizers.l1()、tf.keras.regularizers.l2()
+
 ```
 
 #### 1.2  激活层： 
@@ -44,6 +53,8 @@ rate：失活的比例，0-1的浮点数。
 #### 1.4   Flatten层：
 
  将一个维度大于或等于3的高维矩阵，“压扁”为一个二维矩阵。即保留第一个维度（如：batch的个数），然后将剩下维度的值相乘作为“压扁”矩阵的第二个维度。
+
+拉直层可以变换张量的尺寸，把输入特征拉直为一维数组，是不含计算参数的层。
 
 Flatten()
 
@@ -95,6 +106,15 @@ strdes：步长，二维中默认为(1, 1)，一维默认为1。
 Padding：补“0”策略，’valid‘指卷积后的大小与原来的大小可以不同，’same‘则卷积后大小与原来大小一致
 
 generator产生的训练数据不够用，少于所要求的steps_per_epoch * epochs 个batch数。
+
+
+
+tf.keras.layers.Conv2D( filter = 卷积核个数,
+						kernel_size = 卷积核尺寸,
+						strides = 卷积步长,
+						padding = “valid” or “same”)
+
+
 ```
 
 #### 1.7 池化层：
