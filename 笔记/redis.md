@@ -377,6 +377,14 @@ redis大部分操作都是在内存中完成的，单线程模型避免了多线
 
 订阅数据库变更日志，当数据库发生变更时，我们可以拿到具体操作的数据，然后再去根据具体的数据，去删除对应的缓存。
 
+##### 4.MISCONF Redis isat ora.redisson.client ,handler,CommandDecoder ,decode lCommandDecoder . iava:371)at org.redisson.client,handler 
+
+一般要检查数据文件所在目录权限，权限不足导致文件合并失败
+
+redis.log报如下错误
+
+Error moving temp DB file temp-3420.rdb on the final destination dump.rdb (in server root dir D:\home\htkj\Redis-x64-3.2.100): Input/output error
+
 
 
 ## 参考资料
