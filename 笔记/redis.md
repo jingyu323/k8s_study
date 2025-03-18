@@ -75,6 +75,114 @@ redis.timeBetweenEvictionRunsMillis=60000
 
 ## 4.实现原理
 
+redis 持久化方式：AOF  RDB
+
+### 4.1    RDB
+
+1. 技术原理
+RDB持久化是通过将Redis在内存中的数据库记录定时dump到磁盘上的二进制文件中，实现数据的持久化。这个过程可以理解为对Redis内存数据的快照。当Redis需要持久化数据时，它会fork一个子进程，子进程负责将内存中的数据写入到临时文件中，写入成功后，再用这个临时文件替换上次的快照文件。由于这个过程是在子进程中完成的，所以主进程可以继续处理客户端的请求，不会受到持久化操作的影响。
+
+2. 触发机制
+RDB持久化有三种触发机制：
+
+​		save命令：这是一个同步操作，会阻塞当前Redis服务器，直到RDB完成为止。因此，线上环境一般禁止使用。
+​		bgsave命令：这是Redis内部默认的持久化方式，它是一个异步操作。当执行bgsave命令时，Redis会fork一个子进程来完成RDB的过程，主进程可以继续处		理客户端请求。
+​		自动触发：可以在redis.conf配置文件中设置自动触发的条件，比如“save 900 1”表示在900秒内，如果至少有1个key发生变化，则自动触发bgsave命令 
+
+3. 优点
+  RDB文件紧凑，全量备份，非常适合用于进行备份和灾难恢复。
+  对于大规模数据的恢复，且对于数据恢复的完整性不是非常敏感的场景，RDB的恢复速度要比AOF方式更加的高效。
+  生成RDB文件的时候，redis主进程会fork()一个子进程来处理所有保存工作，主进程不需要进行任何磁盘IO操作。
+4. 缺点
+  fork的时候，内存中的数据被克隆了一份，大致2倍的膨胀性需要考虑。
+  当进行快照持久化时，会开启一个子进程专门负责快照持久化，子进程会拥有父进程的内存数据，父进程修改内存子进程不会反应出来，所以在快照持久化期间修改的数据不会被保存，可能丢失数据。
+  在一定间隔时间做一次备份，所以如果redis意外down掉的话，就会丢失最后一次快照后的所有修改。
+5. 示例
+假设Redis的配置文件中设置了以下自动触发条件：
+
+​	save 900 1
+​	save 300 10
+​	save 60 10000
+​	1
+​	2
+​	3
+这意味着在以下三种情况下，会自动触发bgsave命令进行持久化：
+
+在900秒内，如果至少有1个key发生变化。
+在300秒内，如果至少有10个key发生变化。
+在60秒内，如果至少有10000个key发生变化 
+
+### 4.2 AOF（追加文件持久化）
+
+###### 1. 技术原理
+
+AOF持久化是通过将Redis执行过的每个写操作以日志的形式记录下来，当服务器重启时会重新执行这些命令来恢复数据。AOF文件以追加的方式写入，即新的写操作会追加到文件的末尾，而不是覆盖之前的内容。这种方式可以确保数据的完整性和一致性。
+
+2. 触发机制
+AOF持久化是异步操作的，Redis会在后台线程中执行fsync操作，将AOF文件的内容同步到磁盘上。用户可以通过配置appendfsync参数来控制fsync操作的频率：
+
+appendfsync always：每次有数据修改发生时都会写入AOF文件，这样会严重降低Redis的速度。
+appendfsync everysec：每秒钟同步一次，这是AOF的缺省策略，它可以在性能和数据安全性之间取得一个平衡。
+appendfsync no：从不主动同步，而是让操作系统决定何时进行同步，这种方式性能最好，但数据安全性最差。
+3. 优点
+AOF可以更好的保护数据不丢失，一般AOF会每隔1秒，通过一个后台线程执行一次fsync操作，最多丢失1秒钟的数据。
+AOF只是追加写日志文件，对服务器性能影响较小，速度比RDB要快，消耗的内存较少。
+AOF日志文件即使过大的时候，出现后台重写操作，也不会影响客户端的读写。
+AOF日志文件的命令通过非常可读的方式进行记录，这个特性非常适合做灾难性的误删除的紧急恢复。
+4. 缺点
+AOF文件会越来越大，需要定期进行AOF重写来压缩文件大小。
+在数据恢复时，AOF需要执行所有的写操作命令，这可能比RDB的全量加载要慢一些
+
+###### 5. 示例
+
+Redis的配置文件中设置以下参数来启用AOF持久化：
+
+ `appendonly yes
+appendfsync everysec`
+
+这意味着Redis会启用AOF持久化，并且每秒钟将AOF文件的内容同步到磁盘上。当Redis执行写操作时，这些操作会被追加到AOF文件的末尾。例如，如果执行了以下命令：
+
+SET mykey "hello"
+INCR mycounter
+1
+2
+那么AOF文件中会记录这些命令：
+
+*2\r\n$3\r\nSET\r\n$5\r\nmykey\r\n$5\r\nhello\r\n*2\r\n$4\r\nINCR\r\n$9\r\nmycounter\r\n
+1
+当Redis服务器重启时，它会重新执行AOF文件中的这些命令来恢复数据。
+
+<table><thead><tr><th></th><th>RDB</th><th>AOF</th></tr></thead><tbody><tr><td><strong>技术原理</strong></td><td>将内存中的数据库记录定时dump到磁盘上的二进制文件中</td><td>将Redis执行过的每个写操作以日志的形式记录下来</td></tr><tr><td><strong>触发机制</strong></td><td>save、bgsave、自动触发</td><td>appendfsync控制同步频率</td></tr><tr><td><strong>性能影响</strong></td><td>fork时会有短暂的阻塞，但主进程可以继续处理请求</td><td>异步操作，对性能影响较小</td></tr><tr><td><strong>文件大小</strong></td><td>紧凑，全量备份</td><td>会逐渐增大，需要定期重写</td></tr><tr><td><strong>数据恢复速度</strong></td><td>较快，适合大规模数据的恢复</td><td>较慢，需要执行所有的写操作命令</td></tr><tr><td><strong>数据安全性</strong></td><td>可能丢失最后一次快照后的所有修改</td><td>最多丢失1秒钟的数据</td></tr><tr><td><strong>适用场景</strong></td><td>对数据恢复完整性不是非常敏感的场景</td><td>对数据安全性要求较高的场景</td></tr></tbody></table>
+
+
+
+Redis的RDB和AOF两种持久化方式各有优缺点，适用于不同的场景。RDB适用于大规模数据的备份和灾难恢复，恢复速度较快，但可能丢失最后一次快照后的所有修改。AOF则更适合对数据安全性要求较高的场景，可以最大程度地保护数据不丢失，但恢复速度较慢，且AOF文件会逐渐增大，需要定期重写。在实际应用中，可以根据具体需求和性能要求进行权衡和选择，甚至可以同时使用两种持久化方式来确保数据的安全性和可靠性。
+ 
+
+#### 同时使用 RDB 和 AOF
+
+当同时启用 RDB 和 AOF 时，Redis 在重启时会优先使用 AOF 文件来恢复数据，因为 AOF 通常更为完整。如果 AOF 被禁用或配置为 no，则使用 RDB 文件恢复数据。
+
+**配置 RDB**:
+
+`save 900 1
+save 300 10
+save 60 10000`
+
+**配置 AOF**:
+
+```
+appendonly yes
+# 设置 AOF 同步策略
+# always: 每次操作后都同步，最安全但性能最低
+# everysec: 每秒同步一次，折中方案
+# no: 不主动 fsync，依赖于操作系统的调度
+appendfsync everysec
+
+```
+
+这样，Redis 就会同时使用 RDB 和 AOF 来确保数据的安全性和完整性。如果发生崩溃，Redis 会尝试从 AOF 文件中恢复尽可能多的数据；如果 AOF 文件不可用或损坏，它会回退到最近的 RDB 快照。这种组合提供了更好的容错性，但也增加了存储需求和潜在的恢复时间。
+
 ## 5.安装
 
 解压安装包 
@@ -377,6 +485,16 @@ redis大部分操作都是在内存中完成的，单线程模型避免了多线
 
 订阅数据库变更日志，当数据库发生变更时，我们可以拿到具体操作的数据，然后再去根据具体的数据，去删除对应的缓存。
 
+##### 4.MISCONF Redis isat ora.redisson.client ,handler,CommandDecoder ,decode lCommandDecoder . iava:371)at org.redisson.client,handler 
 
+一般要检查数据文件所在目录权限，权限不足导致文件合并失败
+
+redis.log报如下错误
+
+Error moving temp DB file temp-3420.rdb on the final destination dump.rdb (in server root dir D:\home\htkj\Redis-x64-3.2.100): Input/output error
+
+##### 5.AOF破损文件的修复
+
+     如果redis在append数据到AOF文件时，机器宕机了，可能会导致AOF文件破损用redis-check-aof --fix命令来修复破损的AOF文件。
 
 ## 参考资料

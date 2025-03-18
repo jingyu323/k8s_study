@@ -531,6 +531,30 @@ Charles 是一个网络抓包工具，相比Fiddler ，其功能更为强大， 
 
 
 
+## 9 python 常用的包的使用方法
+
+### 9.1 Numpy
+
+#### np.reshape()
+
+```
+# 使用-1作为占位符来转换数组形状
+# 这里-1意味着Numpy会自动计算该维度的大小，保持总元素数不变
+arr_2d_with_minus_one = np.reshape(arr_1d, (-1, 2))
+
+np.ravel()和np.flatten()都会返回一维数组，但它们在处理内存时有所不同。np.ravel()返回的是原数组的视图（view），而np.flatten()返回的是原数组的副本（copy）。
+np.ndarray.resize()会直接改变原数组的形状和大小，而不是返回一个新数组 
+```
+
+
+
+
+
+
+
+np.ravel()和np.flatten()都会返回一维数组，但它们在处理内存时有所不同。np.ravel()返回的是原数组的视图（view），而np.flatten()返回的是原数组的副本（copy）。
+np.ndarray.resize()会直接改变原数组的形状和大小，而不是返回一个新数组。
+
 
 
 ### 抓包工具

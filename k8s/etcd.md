@@ -772,11 +772,11 @@ The majority side becomes the available cluster and the minority side is unavail
 
 以网络分区导致脑裂为例，一开始有5个节点, Node 5 为 Leader
 
-![img](https://vermouth-blog-image.oss-cn-hongkong.aliyuncs.com/monitor/3944b217-12ba-48b3-8e7b-f3ff12d5d40b.jpg?x-oss-process=style/watermark)
+![](.\3944b217-12ba-48b3-8e7b-f3ff12d5d40b.png)
 
 由于出现网络故障，124 成为一个分区，35 成为一个分区， Node 5 的 leader 任期还没结束的一段时间内，仍然认为自己是当前leader，但是此时另外一边的分区，因为124无法连接 5，于是选出了新的leader 1，网络分区形成。
 
-![img](https://vermouth-blog-image.oss-cn-hongkong.aliyuncs.com/monitor/e52364d2-45e8-47b8-80d4-db2608fe6ec1.jpg?x-oss-process=style/watermark)
+![img](.\e52364d2-45e8-47b8-80d4-db2608fe6ec1.png)
 
 35分区是否可用？如果写入了1而读取了 5，是否会读取旧数据(stale read)?
 
