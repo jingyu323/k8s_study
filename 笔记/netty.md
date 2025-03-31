@@ -67,7 +67,10 @@ Socket参数，连接保活，默认值为False。启用该功能时，TCP会主
 
 ```
 
+```
+future.channel().closeFuture().sync()	;“防止代码运行完服务就被关闭了，并且这里会一直阻塞着，防止进程结束。
 
+```
 
 
 
