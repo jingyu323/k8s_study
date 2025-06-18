@@ -5,3 +5,13 @@
 linux 密码暴力破解
 
 hydra 
+
+
+
+
+
+## metasploit 渗透工具
+
+window  打开远程桌面
+
+run getgui -e 

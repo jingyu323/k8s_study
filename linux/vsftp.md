@@ -108,6 +108,141 @@ Mon Nov 20 12:50:07 2023 1 ::ffff:192.168.99.127 92602368 /xab a _ i r ftpuser f
 
 
 
+# Ubuntu vsftpd自动重启设置方法
+
+1. **检查 `vsftpd` 服务状态**：
+
+   ```
+   sudo systemctl status vsftpd
+   ```
+
+   复制代码
+
+   如果服务未运行，可以使用以下命令启动它：
+
+   ```
+   sudo systemctl start vsftpd
+   ```
+
+   复制代码
+
+2. **设置 `vsftpd` 服务开机自启动**：
+
+   ```
+   sudo systemctl enable vsftpd
+   ```
+
+   复制代码
+
+3. **重启 `vsftpd` 服务**：
+
+   ```
+   sudo systemctl restart vsftpd
+   ```
+
+
+
+当 vsftpd 返回 `Connection refused: too many sessions for this address` 时，表示‌**同一 IP 地址发起的 FTP 会话数超过服务端限制**‌，具体原因可能包括：
+
+1. ‌**配置限制**‌
+   vsftpd 默认未限制单 IP 的连接数，但若手动配置了 `max_per_ip` 或 `max_clients` 参数且数值过低，会触发此错误14。
+2. ‌**资源耗尽**‌
+   服务器 TCP 连接数或系统资源（如文件描述符）达到上限，导致新连接被拒绝34。
+3. ‌**客户端行为异常**‌
+   客户端工具（如 FileZilla）并发上传/下载过多文件，导致连接数激增36
+
+
+
+### 二、解决方案步骤
+
+#### 1. 调整 vsftpd 配置
+
+编辑配置文件 `/etc/vsftpd.conf`，修改以下参数：
+
+```
+iniCopy Code# 限制每个 IP 的最大并发连接数（示例值为 5）
+max_per_ip=5
+# 全局最大并发连接数（示例值为 100）
+max_clients=100
+```
+
+保存后重启服务生效：
+
+```
+bashCopy Code
+
+
+
+systemctl restart vsftpd  # 或 service vsftpd restart
+```
+
+#### 2. 优化系统资源
+
+- ‌**增加 TCP 连接数限制**‌
+  修改 `/etc/sysctl.conf`，添加：
+
+  ```
+  iniCopy Codenet.core.somaxconn = 1024
+  net.ipv4.tcp_max_syn_backlog = 2048
+  ```
+
+  执行 `sysctl -p` 生效46。
+
+- ‌**扩大文件描述符限制**‌
+  修改 `/etc/security/limits.conf`：
+
+  ```
+  iniCopy Code* soft nofile 65535
+  * hard nofile 65535
+  ```
+
+#### 3. 客户端行为调整
+
+- 减少并发传输线程数（如 FileZilla 中设置「传输 > 最大同时传输数」）3。
+- 分批处理大文件，避免一次性提交过多任务36。
+
+#### 4. 排查防火墙与日志
+
+- ‌**检查防火墙规则**‌
+  确保未通过 iptables 或云服务商安全组限制 FTP 端口（默认 21）的连接数4。
+
+- ‌**分析日志定位问题**‌
+  查看 vsftpd 日志 `/var/log/vsftpd.log`，确认具体拒绝连接的 IP 及频率：
+
+  ```
+  bashCopy Code
+  
+  
+  
+  grep "too many sessions" /var/log/vsftpd.log
+  ```
+
+
+
+### 三、配置验证示例
+
+1. ‌**测试单 IP 连接限制**‌
+   使用 `ftp` 命令多次连接服务器，观察是否在第 6 次连接时被拒绝（若 `max_per_ip=5`）：
+
+   ```
+   bashCopy Code
+   
+   
+   
+   ftp your-server-ip
+   ```
+
+2. ‌**监控实时连接数**‌
+   通过 `netstat` 统计当前 FTP 连接：
+
+   ```
+   bashCopy Code
+   
+   
+   
+   netstat -an | grep :21 | awk '{print $5}' | cut -d: -f1 | sort | uniq -c
+   ```
+
 
 
 ## 参数
