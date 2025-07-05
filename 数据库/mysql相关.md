@@ -1936,6 +1936,52 @@ select count(*), DATE_FORMAT(start_time, '%Y-%m-%d')  as 'st'  from   htgw_sync_
 
 
 
+查询缓存池
+
+SELECT @@innodb_buffer_pool_size as pool_size,
+@@innodb_buffer_pool_instances as pool_instances,
+@@innodb_buffer_pool_chunk_size as chunk_size;
+
+SHOW VARIABLES LIKE 'innodb_buffer_pool_instances';
+
+
+
+
+
+[mysqld]
+pid-file	= /var/run/mysqld/mysqld.pid
+socket		= /var/run/mysqld/mysqld.sock
+datadir		= /var/lib/mysql
+log-error	= /var/log/mysql/error.log
+
+character_set_server=utf8mb4
+max_connections=1000
+default-time_zone='+8:00'
+log_timestamps=system
+log-bin=mysql-bin
+binlog-format=ROW
+binlog_expire_logs_seconds=604800
+binlog-ignore-db=mysql
+sync_binlog=1000
+innodb_flush_log_at_trx_commit=2
+gtid_mode=on
+enforce-gtid-consistency=1
+log-slave-updates=1
+server_id=11
+bulk_insert_buffer_size=100M
+sql_mode =STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION
+
+# 配置缓冲池 
+
+innodb_buffer_pool_size = 20G
+innodb_buffer_pool_instances = 8  
+
+
+
+重启
+
+systemctl restart mysql
+
 
 
 ## 参考资料
