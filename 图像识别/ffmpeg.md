@@ -16,10 +16,10 @@ P帧：
 
 ## ffmpeg  超快视频编码器
 
-
+ffmpeg -buildconf 
 
 
 
 ffplay 简单视频播放器
 
-ffprobe 简单流媒体播放器
+ffprobe 简单流媒体分析器
