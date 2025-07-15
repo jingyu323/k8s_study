@@ -105,3 +105,25 @@ ffmpeg –i test.mp4 –t 5 –s 640x360 –r 15 frame%03d.jpg
 ■ 图片转换为视频
 
 ffmpeg –f image2 –i frame%03d.jpg –r 25 video.mp4
+
+
+
+## 录制视频
+
+**录制声音（默认参数）**
+
+**系统声音：**ffmpeg -f dshow -i audio="virtual-audio-capturer" a-out.aac
+
+**系统****+****麦克风声音：**ffmpeg -f dshow -i audio="麦克风 (Realtek Audio)" -f dshow
+
+-i audio="virtual-audio-capturer" -filter_complex
+
+amix=inputs=2:duration=first:dropout_transition=2 a-out2.aac
+
+◼ **同时录制声音和视频（默认参数）**
+
+ffmpeg -f dshow -i audio="麦克风 (Realtek Audio)" -f dshow -i audio="virtual
+
+audio-capturer" -filter_complex amix=inputs=2:duration=first:dropout_transition=2 -f 
+
+dshow -i video="screen-capture-recorder" -y av-out.flv
