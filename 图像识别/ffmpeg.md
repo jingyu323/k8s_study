@@ -129,3 +129,20 @@ ffmpeg -f dshow -i audio="麦克风 (Realtek Audio)" -f dshow -i audio="virtual
 audio-capturer" -filter_complex amix=inputs=2:duration=first:dropout_transition=2 -f 
 
 dshow -i video="screen-capture-recorder" -y av-out.flv
+
+
+
+## ffmpeg 代码介绍
+
+
+
+### 内存模型：
+
+
+
+AVpacket  数据包
+
+多个AVPack共享一个缓存空间，FFmpeg使用引用计数器机制
+
+AVFram 数据帧 也是用引用计数器机制
+
